@@ -1,0 +1,101 @@
+.hrx-page .page-title img {
+    vertical-align: middle;
+    margin-right: 10px;
+}
+.hrx-page .custom-cb {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.hrx-page .custom-cb input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+.hrx-page .custom-cb .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 15px;
+    width: 15px;
+    border: 1px solid rgba(0, 115, 170, 0.5);
+    border-radius: 50%;
+}
+.hrx-page .custom-cb .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 4px;
+    top: 2px;
+    width: 4px;
+    height: 7px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+.hrx-page .custom-cb:hover input ~ .checkmark {
+    background-color: rgba(0, 115, 170, 0.1);
+}
+.hrx-page .custom-cb input:checked ~ .checkmark {
+    background-color: rgba(0, 115, 170, 0.7);
+}
+.hrx-page .custom-cb input:checked ~ .checkmark:after {
+    display: block;
+}
+.hrx-page .mass-container {
+    padding: 10px 0;
+    text-align: right;
+}
+.hrx-page .mass-container > div {
+    display: inline-block;
+}
+.hrx-page .mass-container button {
+    margin-right: 3px;
+}
+.hrx-page .mass-container button:last-child {
+    margin-right: 0;
+}
+.hrx-page .order-status {
+    display: inline-flex;
+    line-height: 2.5em;
+    color: #777;
+    background: #e5e5e5;
+    border-radius: 4px;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+    margin: -0.25em 0;
+    white-space: nowrap;
+    max-width: 100%;
+}
+.hrx-page .order-status.status-completed {
+    background: #c8d7e1;
+    color: #2e4453;
+}
+.hrx-page .order-status.status-on-hold {
+    background: #f8dda7;
+    color: #94660c;
+}
+.hrx-page .order-status.status-failed {
+    background: #eba3a3;
+    color: #761919;
+}
+.hrx-page .order-status.status-processing {
+    background: #c6e1c6;
+    color: #5b841b;
+}
+.hrx-page .order-status.status-trash {
+    background: #eba3a3;
+    color: #761919;
+}
+.hrx-page .order-status > span {
+    margin: 0 1em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

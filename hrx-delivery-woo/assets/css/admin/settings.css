@@ -1,0 +1,218 @@
+.woocommerce table.hrx-settings .section_title {
+    padding-left: 0;
+}
+.woocommerce table.hrx-settings .section_title hr.have_title {
+    margin-bottom: 0;
+}
+.woocommerce table.hrx-settings .section_title span {
+    font-size: 12px;
+    line-height: 12px;
+    color: #999;
+}
+.woocommerce table.hrx-settings .row-disabled > th,
+.woocommerce table.hrx-settings .row-disabled > td {
+    position: relative;
+    -webkit-filter: blur(3px);
+    filter: blur(3px);
+}
+.woocommerce table.hrx-settings .row-disabled > th:before,
+.woocommerce table.hrx-settings .row-disabled > td:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: #ccc;
+    opacity: 0.3;
+    z-index: 20;
+}
+.woocommerce table.hrx-settings .row-no-title > th,
+.woocommerce table.hrx-settings .row-no-title > td {
+    padding-top: 0;
+}
+.woocommerce table.hrx-settings .button-action button,
+.woocommerce table.hrx-settings .button-action span {
+    vertical-align: middle;
+}
+.woocommerce table.hrx-settings .button-action button {
+    margin-right: 10px;
+}
+.woocommerce table.hrx-settings .button-action button.hrx-loading {
+
+}
+.woocommerce table.hrx-settings .button-action button.hrx-loading:after {
+    top: 5px;
+    right: calc(50% - 10px);
+}
+.woocommerce table.hrx-settings .button-action .action-txt-value {
+    color: green;
+}
+.woocommerce table.hrx-settings .button-action .action-txt-value.value-empty {
+    color: red;
+}
+.woocommerce table.hrx-settings .button-action .action-txt-value.value-old {
+    color: orange;
+}
+.woocommerce table.hrx-settings tr textarea.textarea-static {
+    width: 400px;
+    resize: none;
+}
+.woocommerce table.hrx-settings .field-dimensions table th,
+.woocommerce table.hrx-settings .field-dimensions table td {
+    padding: 0;
+    width: auto;
+}
+.woocommerce table.hrx-settings .field-dimensions table th.dim-weight,
+.woocommerce table.hrx-settings .field-dimensions table td.dim-weight {
+    padding-left: 30px;
+}
+.woocommerce table.hrx-settings .field-dimensions table td input {
+    width: 90px;
+    vertical-align: middle;
+}
+.woocommerce table.hrx-settings .field-price input.regular-input {
+    width: 90px;
+    vertical-align: middle;
+}
+.woocommerce table.hrx-settings .field-countries_prices {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.woocommerce table.hrx-settings .field-countries_prices .country_box {
+    background: #fff;
+    padding: 10px;
+    box-shadow: 0px 0px 2px 0px #666;
+    margin: 0 0 10px;
+    flex: 0 0 30%;
+}
+.woocommerce table.hrx-settings .field-countries_prices .box-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+.woocommerce table.hrx-settings .field-countries_prices .box-header * {
+    vertical-align: middle;
+}
+.woocommerce table.hrx-settings .field-countries_prices .box-header .title img {
+    width: 15px;
+    height: 15px;
+    font-size: 12px;
+}
+.woocommerce table.hrx-settings .field-countries_prices .box-header .title span {
+    font-weight: bold;
+}
+.woocommerce table.hrx-settings .field-countries_prices .hrx-switcher .label {
+    font-size: 0.9em;
+    color: #999;
+}
+.woocommerce table.hrx-settings .field-countries_prices .hrx-switcher .switch {
+    margin: 0 !important;
+}
+.woocommerce table.hrx-settings .field-countries_prices .box-content {
+    position: relative;
+}
+.woocommerce table.hrx-settings .field-countries_prices .box-content.off:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: #ccc;
+    opacity: 0.3;
+    margin: 0 -10px -10px;
+    z-index: 9;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range {
+    border-top: 1px solid #ccc;
+    padding: 3px 0;
+    position: relative;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range.first {
+    border-top: none;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range.removing:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: #f00;
+    opacity: 0.1;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range table {
+    table-layout: fixed;
+    width: 100%;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range table th,
+.woocommerce table.hrx-settings .field-countries_prices .prices_range table td {
+    padding: 5px 3px;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .range-col-title {
+    width: 25%;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .range-col-value {
+    width: 68%;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .range-col-value * {
+    max-width: 100%;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .range-col-value .fields_holder {
+    display: flex;
+    justify-content: space-between;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .range-row-price input {
+    width: 100%;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .range-row-weight_range input {
+    width: 90px;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .range-col-unit {
+    width: 7%;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .range-range_separate {
+    line-height: 2;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range button {
+    padding: 0 5px;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range button span {
+    vertical-align: middle;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .hrx-btn-add {
+    flex: auto;
+    margin-right: 5px;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .hrx-btn-add .btn-title {
+    margin-left: 3px;
+}
+.woocommerce table.hrx-settings .field-countries_prices .prices_range .hrx-btn-remove {
+    margin-left: auto;
+}
+.woocommerce table.hrx-settings .debug-plugin .debug-table-main {
+    padding: 10px;
+    background: #fff;
+    box-shadow: 0 0 1px 1px #ccc;
+}
+.woocommerce table.hrx-settings .debug-plugin .debug-table-main th,
+.woocommerce table.hrx-settings .debug-plugin .debug-table-main td {
+    padding: 0;
+    border-bottom: 1px solid #ddd;
+}
+.woocommerce table.hrx-settings .debug-plugin .debug-table-array th,
+.woocommerce table.hrx-settings .debug-plugin .debug-table-array td {
+    border-bottom: none;
+}
+.woocommerce table.hrx-settings .debug-plugin .debug-status-good {
+    color: green;
+}
+.woocommerce table.hrx-settings .debug-plugin .debug-status-notice {
+    color: orange;
+}
+.woocommerce table.hrx-settings .debug-plugin .debug-status-fail {
+    color: red;
+}

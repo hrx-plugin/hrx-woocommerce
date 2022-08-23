@@ -1,0 +1,165 @@
+:root {
+    --main-color: #e82c2a;
+    --main-font-color: #fff;
+    --second-color: #fff;
+    --second-font-color: #333;
+    --placeholder-color: #999;
+    --field-border-color: #ddd;
+    --font-size: 15px;
+    --line-height: 20px;
+    --list-font-size: 13px;
+    --border-radius: 5px;
+}
+.hrx-terminal-container {
+    margin-bottom: 10px;
+}
+.hrx-terminal-container select {
+    max-width: 500px;
+}
+.hrx-map {
+    padding: 5px;
+    border: 1px solid #aaa;
+    border-radius: var(--border-radius);
+}
+.hrx-map h2 {
+    font-size: 20px;
+    font-weight: bold;
+    padding-bottom: 10px;
+    margin: 0;
+}
+.hrx-map h3 {
+    font-size: 18px;
+    font-weight: bold;
+    padding-bottom: 10px;
+    margin: 0;
+}
+.hrx-map input:focus {
+   outline: none !important;
+}
+.hrx-map input::placeholder {
+    opacity: 1;
+    color: var(--placeholder-color);
+}
+.hrx-map input:-ms-input-placeholder {
+    color: var(--placeholder-color);
+}
+.hrx-map input::-ms-input-placeholder {
+    color: var(--placeholder-color);
+}
+.hrx-map .tmjs-selected-terminal {
+    font-weight: unset;
+    padding-bottom: 5px;
+    font-size: var(--font-size);
+    line-height: var(--line-height);
+}
+.hrx-map .tmjs-open-modal-btn {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    font-size: var(--font-size);
+    line-height: var(--line-height);
+    background-color: var(--main-color);
+    color: var(--main-font-color);
+    border-radius: var(--border-radius);
+}
+.hrx-map .tmjs-open-modal-btn:hover,
+.hrx-map .tmjs-open-modal-btn:focus {
+    background-color: var(--second-color);
+    color: var(--second-font-color);
+}
+.hrx-map .tmjs-close-modal-btn {
+    height: 26px;
+    top: 30px;
+}
+.hrx-map .tmjs-pt-2 {
+    padding: 0;
+    font-size: 15px;
+    display: none;
+}
+.hrx-map .tmjs-search-input {
+    border: 1px solid var(--field-border-color);
+    margin: 0;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+    border-right: none;
+}
+.hrx-map .tmjs-search-btn {
+    background-color: var(--main-color);
+    border: 1px solid var(--main-color);
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+.hrx-map .tmjs-search-btn:hover,
+.hrx-map .tmjs-search-btn:focus {
+    background-color: var(--second-color);
+    border-color: var(--main-color);
+}
+.hrx-map .tmjs-search-btn img {
+    vertical-align: baseline;
+}
+.hrx-map .tmjs-search-btn:hover img,
+.hrx-map .tmjs-search-btn:focus img {
+    filter: invert(35%) sepia(69%) saturate(2607%) hue-rotate(337deg) brightness(85%) contrast(116%);
+}
+.hrx-map .tmjs-geolocation-btn {
+    font-weight: normal;
+    color: #999;
+}
+.hrx-map .tmjs-geolocation-btn:hover,
+.hrx-map .tmjs-geolocation-btn:focus {
+    color: var(--main-color);
+}
+.hrx-map .tmjs-geolocation-btn img {
+    margin-right: 3px;
+}
+.hrx-map .tmjs-terminal-block {
+    background: none;
+    border: none;
+    padding: 0;
+}
+.hrx-map .tmjs-terminal-block h3 {
+    text-align: inherit;
+}
+.hrx-map .tmjs-terminal-list {
+    margin: 0;
+    background: #f6f6f6;
+    padding: 10px 10px 2em;
+    border-radius: var(--border-radius);
+}
+.hrx-map .tmjs-terminal-list {
+    font-size: var(--list-font-size);
+}
+.hrx-map .tmjs-city:not(:first-of-type) {
+    margin: 0;
+}
+.hrx-map .tmjs-terminal.tmjs-active {
+    margin: 0;
+    padding: 10px;
+    text-align: inherit;
+    background-color: var(--second-color) !important;
+    color: var(--second-font-color);
+    border-radius: var(--border-radius);
+}
+.hrx-map .tmjs-active .tmjs-terminal-name {
+    font-weight: normal;
+    font-size: var(--list-font-size);
+}
+.hrx-map .tmjs-terminal-comment {
+    padding: 5px 0;
+    text-align: inherit;
+    color: #999;
+    font-size: 12px;
+}
+.hrx-map .tmjs-terminal-list .tmjs-select-btn {
+    background-color: var(--main-color);
+    color: var(--main-font-color);
+    border: 1px solid var(--main-color);
+    border-radius: var(--border-radius);
+    display: inline-block;
+    width: auto;
+    font-weight: normal;
+    font-size: var(--list-font-size);
+}
+.hrx-map .tmjs-terminal-list .tmjs-select-btn:hover,
+.hrx-map .tmjs-terminal-list .tmjs-select-btn:focus {
+    background-color: var(--second-color);
+    color: var(--second-font-color);
+}

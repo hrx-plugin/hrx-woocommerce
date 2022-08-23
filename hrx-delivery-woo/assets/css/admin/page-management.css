@@ -1,0 +1,131 @@
+.nav {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+.nav-link {
+    display: block;
+    padding: 0.5rem 1rem;
+}
+.nav-link:hover, .nav-link:focus {
+    text-decoration: none;
+}
+.nav-link.disabled {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: default;
+}
+.nav-tabs {
+    border-bottom: 1px solid #dee2e6;
+}
+.nav-tabs .nav-item {
+    margin-bottom: -1px;
+    font-size: 1em;
+}
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    text-decoration: none;
+}
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+    border-color: #dee2e6 #dee2e6 #dee2e6;
+}
+.nav-tabs .nav-link.disabled {
+    color: #6c757d;
+    background-color: transparent;
+    border-color: transparent;
+}
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+    color: #495057;
+    background: linear-gradient(#fff, #f1f1f1);
+    border-color: #dee2e6 #dee2e6 #f1f1f1;
+}
+.nav-tabs .dropdown-menu {
+    margin-top: -1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+.hrx-page .hrx-table-filter {
+    background-color: rgba(0, 115, 170, 0.5);
+}
+.hrx-page .hrx-table-filter td {
+    padding: 20px 10px;
+}
+.hrx-page .hrx-table-filter td input[type="checkbox"] {
+    vertical-align: unset;
+}
+.hrx-page .hrx-table-filter td input[type="text"] {
+    width: 100%;
+    margin: 0;
+    padding: 0 5px;
+    vertical-align: unset;
+}
+.hrx-page .hrx-table-filter td select {
+    width: 100%;
+    margin: 0;
+    padding: 0 21px 0 5px;
+}
+.hrx-page .hrx-table-filter td .filter-actions {
+    display: flex;
+    justify-content: space-between;
+}
+.hrx-page .hrx-table-filter td button {
+}
+.hrx-page .table-container tr.empty-table {
+    text-align: center;
+}
+.hrx-page .table-container tr.empty-table td {
+    padding: 20px 10px;
+}
+.hrx-page .table-container td.column-order_id {
+    width: 85px;
+}
+.hrx-page .table-container td.column-order_status {
+    width: 130px;
+}
+.hrx-page .table-container td.column-order_date {
+    width: 120px;
+}
+.hrx-page .table-container td.column-warehouse_id {
+    width: 250px;
+}
+.hrx-page .table-container td.column-zip {
+    width: 100px;
+}
+.hrx-page .table-container td.column-selected {
+    width: 130px;
+}
+.hrx-page .table-container td.column-hrx_order_status p {
+    margin: 0 0 3px;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-error {
+    color: #e10000;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-ready {
+    color: #008000;
+}
+.hrx-page .table-container tr.data-row td.column-actions button {
+    display: block;
+    width: 100%;
+    margin-bottom: 5px;
+    position: relative;
+}
+.hrx-page .table-container tr.data-row td.column-actions button:last-child {
+    margin-bottom: 0;
+}
+.hrx-page .table-container tr.data-row td.column-actions button.hrx-loading:after {
+    top: 5px;
+    right: 5px;
+}
+.hrx-page .mass-buttons button.hrx-loading:after {
+    top: 5px;
+    left: 0;
+    right: 0;
+    margin: auto;
+}

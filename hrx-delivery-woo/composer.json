@@ -1,0 +1,26 @@
+{
+    "name": "hrx/hrx-delivery-woo",
+    "type": "wordpress-module",
+    "autoload": {
+        "psr-4": {
+            "HrxDeliveryWoo\\": "classes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mijora",
+            "email": "info@mijora.lt"
+        }
+    ],
+    "require": {
+        "hrx/api-lib": "^1.0.2",
+        "setasign/fpdf": "^1.8",
+        "setasign/fpdi": "^2.3"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/mijora/hrx-api"
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "hrx/api-lib",
+  "description": "Library for HRX Api",
+  "type": "library",
+  "version": "1.0.2",
+  "authors": [
+    {
+      "name": "UAB Mijora",
+      "email": "support@mijora.lt"
+    }
+  ],
+  "license": "#",
+  "minimum-stability": "stable",
+  "require": {
+    "ext-curl": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "HrxApi\\": "src/"
+    }
+  }
+}
