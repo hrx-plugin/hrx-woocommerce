@@ -1,8 +1,8 @@
 # HRX delivery module for WP WooCommerce
 
-## Minimum requirements
-**PHP** 7.2
-**Wordpress** 6.0.1
+### Minimum requirements
+**PHP** 7.2  
+**Wordpress** 6.0.1  
 **WooCommerce** 5.0.0
 
 ## Installation
