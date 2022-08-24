@@ -108,11 +108,15 @@ if ( $page_current_tab == 'warehouses' ) {
 
     if ( $page_current_tab == 'new_orders' ) {
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending');
-        $args['not_' . $this->core->meta_keys->order_ready] = 1;
+        $args['not_' . $this->core->meta_keys->order_status] = array('ready', 'cancelled');
     }
     if ( $page_current_tab == 'send_orders' ) {
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending');
-        $args[$this->core->meta_keys->order_ready] = array(1);
+        $args[$this->core->meta_keys->order_status] = array('ready', 'in_delivery', 'delivered', 'in_return');
+    }
+    if ( $page_current_tab == 'cancelled_orders' ) {
+        $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending', 'wc-completed');
+        $args[$this->core->meta_keys->order_status] = array('cancelled');
     }
     if ( $page_current_tab == 'completed_orders' ) {
         $args['status'] = array('wc-completed');
@@ -134,9 +138,9 @@ if ( $page_current_tab == 'warehouses' ) {
     }
 
     foreach ( $orders as $order ) {
-        $hrx_order_ready = $order->get_meta($this->core->meta_keys->order_ready);
-        if ( ($page_current_tab == 'new_orders' && ! empty($hrx_order_ready))
-            || ($page_current_tab == 'send_orders' && empty($hrx_order_ready)) ) {
+        $hrx_order_status = $this->get_hrx_order_status($order);
+        if ( ($page_current_tab == 'new_orders' && $hrx_order_status == 'ready')
+            || ($page_current_tab == 'send_orders' && $hrx_order_status != 'ready') ) {
             continue;
         }
 
@@ -168,7 +172,7 @@ if ( $page_current_tab == 'warehouses' ) {
 
         $selected_values['actions'][$order->get_id()] = array(
             'hrx_order_id' => $order->get_meta($this->core->meta_keys->order_id),
-            'hrx_order_ready' => $order->get_meta($this->core->meta_keys->order_ready),
+            'hrx_order_status' => $hrx_order_status,
         );
     }
 

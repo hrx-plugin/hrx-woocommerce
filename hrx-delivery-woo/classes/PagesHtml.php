@@ -126,13 +126,13 @@ class PagesHtml
         return $html;
     }
 
-    public static function build_info_row( $key, $title, $value )
+    public static function build_info_row( $key, $title, $value, $value_class = '' )
     {
         $output = '<p class="info-' . $key . '">';
         if ( ! empty($title) ) {
-            $output .= '<b>' . $title . ':</b><br>';
+            $output .= '<b>' . $title . ':</b> ';
         }
-        $output .= $value . '</p>';
+        $output .= '<span class="status-value ' . esc_html($value_class) . '">' . $value . '</span></p>';
 
         return $output;
     }
@@ -251,19 +251,20 @@ class PagesHtml
                         <?php elseif ( $col_id == 'actions' ) : ?>
                             <td class="<?php echo $classes; ?>">
                                 <?php
-                                $order_registered = (! empty($data_selected[$col_id][$row_id]['hrx_order_id'])) ? true : false;
-                                $order_ready = (! empty($data_selected[$col_id][$row_id]['hrx_order_ready'])) ? true : false;
-                                $hide_btn = ($order_ready) ? 'display:none;' : '';
+                                $order_data = $data_selected[$col_id][$row_id];
+                                $order_registered = (! empty($order_data['hrx_order_id'])) ? true : false;
+                                $order_status = (! empty($order_data['hrx_order_status'])) ? $order_data['hrx_order_status'] : 'new';
+                                $hide_btn = ($order_status == 'ready') ? 'display:none;' : '';
                                 $btn_text = ($order_registered) ? __('Regenerate order', 'hrx-delivery') : __('Register order', 'hrx-delivery');
                                 ?>
                                 <button id="btn_create_order_<?php echo $row_id; ?>" class="button action btn-create_order" type="button" value="create_order" style="<?php echo $hide_btn; ?>"><?php echo $btn_text; ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_ready) ? 'display:none;' : ''; ?>
+                                <?php $hide_btn = (! $order_registered || $order_status != 'new') ? 'display:none;' : ''; ?>
                                 <button id="btn_ready_order_<?php echo $row_id; ?>" class="button action btn-ready_order" type="button" value="ready_order" style="<?php echo $hide_btn; ?>"><?php echo __('Mark as ready', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered || ! $order_ready) ? 'display:none;' : ''; ?>
+                                <?php $hide_btn = (! $order_registered || $order_status != 'ready') ? 'display:none;' : ''; ?>
                                 <button id="btn_unready_order_<?php echo $row_id; ?>" class="button action btn-unready_order" type="button" value="unready_order" style="<?php echo $hide_btn; ?>"><?php echo __('Unmark ready', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered) ? 'display:none;' : ''; ?>
+                                <?php $hide_btn = (! $order_registered || $order_status == 'error') ? 'display:none;' : ''; ?>
                                 <button id="btn_shipment_label_<?php echo $row_id; ?>" class="button action btn-shipment_label" type="button" value="shipment_label" style="<?php echo $hide_btn; ?>"><?php echo __('Shipment label', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered) ? 'display:none;' : ''; ?>
+                                <?php $hide_btn = (! $order_registered || $order_status == 'error') ? 'display:none;' : ''; ?>
                                 <button id="btn_return_label_<?php echo $row_id; ?>" class="button action btn-return_label" type="button" value="return_label" style="<?php echo $hide_btn; ?>"><?php echo __('Return label', 'hrx-delivery'); ?></button>
                             </td>
                         <?php else : ?>
