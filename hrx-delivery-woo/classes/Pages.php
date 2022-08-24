@@ -410,7 +410,7 @@ class Pages
 
         $order_status = $wc_order->get_meta($this->core->meta_keys->order_status);
         if ( ! empty($order_status) ) {
-            $output .= Html::build_info_row('status', __('Order status', 'hrx-delivery'), $this->get_hrx_status_title($order_status), $order_status);
+            $output .= Html::build_info_row('status', __('Status', 'hrx-delivery'), $this->get_hrx_status_title($order_status), $order_status);
         }
 
         $shipping_number = $this->get_tracking_number_text($wc_order, 'shipping', '');
@@ -420,7 +420,7 @@ class Pages
 
         $error_msg = $wc_order->get_meta($this->core->meta_keys->error_msg);
         if ( ! empty($error_msg) ) {
-            $output .= Html::build_info_row('error', __('Order error', 'hrx-delivery'), $error_msg );
+            $output .= Html::build_info_row('error', __('Error', 'hrx-delivery'), $error_msg );
         }
 
         return $output;
