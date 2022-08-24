@@ -130,6 +130,9 @@
     margin: 0;
     padding: 0;
 }
+.hrx-map .tmjs-terminal-list li:not(.tmjs-city) {
+    padding: 13px;
+}
 .hrx-map .tmjs-city:not(:first-of-type) {
     margin: 0;
 }
