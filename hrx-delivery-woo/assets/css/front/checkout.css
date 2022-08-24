@@ -123,9 +123,12 @@
     background: #f6f6f6;
     padding: 10px 10px 2em;
     border-radius: var(--border-radius);
-}
-.hrx-map .tmjs-terminal-list {
     font-size: var(--list-font-size);
+}
+.hrx-map .tmjs-terminal-list li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
 .hrx-map .tmjs-city:not(:first-of-type) {
     margin: 0;
