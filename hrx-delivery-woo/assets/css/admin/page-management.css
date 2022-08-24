@@ -107,8 +107,36 @@
 .hrx-page .table-container td.column-hrx_order_status .info-error {
     color: #e10000;
 }
-.hrx-page .table-container td.column-hrx_order_status .info-ready {
-    color: #008000;
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value {
+    display: inline-block;
+    padding: 0 5px 2px;
+    border-radius: 5px;
+    background: #909090;
+    color: #fff;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value.new {
+    background-color: #6262f9;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value.ready {
+    background-color: #008000;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value.error {
+    background-color: #d00;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value.in_delivery {
+    background-color: #f962da;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value.in_return {
+    background-color: #ffa500;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value.returned {
+    background-color: #976200;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value.delivered {
+    background-color: #6f2961;
+}
+.hrx-page .table-container td.column-hrx_order_status .info-status .status-value.cancelled {
+    background-color: #6fd1c3;
 }
 .hrx-page .table-container tr.data-row td.column-actions button {
     display: block;

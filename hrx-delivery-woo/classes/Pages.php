@@ -57,9 +57,10 @@ class Pages
                     'position' => 10,
                     'rights' => 'manage_woocommerce',
                     'tabs' => array(
-                        'all_orders' => __('All orders', 'hrx-delivery'),
-                        'new_orders' => __('New orders', 'hrx-delivery'),
-                        'send_orders' => __('Send orders', 'hrx-delivery'),
+                        'all_orders' => __('All shipments', 'hrx-delivery'),
+                        'new_orders' => __('New shipments', 'hrx-delivery'),
+                        'send_orders' => __('Send shipments', 'hrx-delivery'),
+                        'cancelled_orders' => __('Cancelled shipments', 'hrx-delivery'),
                         //'manifests' => __('Manifests', 'hrx-delivery'),
                         'completed_orders' => __('Completed orders', 'hrx-delivery'),
                         'warehouses' => __('Warehouses', 'hrx-delivery'),
@@ -143,19 +144,31 @@ class Pages
             }
 
             if ( isset($query_vars['not_' . $meta_key]) ) {
-                $query['meta_query'][] = array(
+                $query_var_values = $query_vars['not_' . $meta_key];
+                if ( ! is_array($query_var_values) ) {
+                    $query_var_values = array($query_var_values);
+                }
+                $build_query = array(
                     'relation' => 'OR',
                     array(
                         'key' => $meta_key,
                         'compare' => 'NOT EXISTS',
                         'value' => '',
                     ),
-                    array(
+                );
+                $build_subquery = array();
+                foreach ( $query_var_values as $query_var ) {
+                    $build_subquery[] = array(
                         'key' => $meta_key,
                         'compare' => '!=',
-                        'value' => $query_vars['not_' . $meta_key],
-                    )
-                );
+                        'value' => $query_var,
+                    );
+                }
+                if ( count($build_subquery) > 1 ) {
+                    $build_subquery['relation'] = 'AND';
+                }
+                $build_query[] = $build_subquery;
+                $query['meta_query'][] = $build_query;
             }
         }
 
@@ -378,9 +391,27 @@ class Pages
         return (! empty($tracking_number)) ? $tracking_number : $on_empty;
     }
 
+    private function get_hrx_order_status( $wc_order )
+    {
+        $order_status = $wc_order->get_meta($this->core->meta_keys->order_status);
+
+        if ( empty($order_status) ) {
+            $classOrder = new Order();
+            $order_data = $classOrder->update_hrx_order_info($wc_order);
+            $order_status = $order_data['status'];
+        }
+
+        return $order_status;
+    }
+
     private function build_hrx_status_text( $wc_order )
     {
         $output = '';
+
+        $order_status = $wc_order->get_meta($this->core->meta_keys->order_status);
+        if ( ! empty($order_status) ) {
+            $output .= Html::build_info_row('status', __('Order status', 'hrx-delivery'), $this->get_hrx_status_title($order_status), $order_status);
+        }
 
         $shipping_number = $this->get_tracking_number_text($wc_order, 'shipping', '');
         if ( ! empty($shipping_number) ) {
@@ -392,12 +423,23 @@ class Pages
             $output .= Html::build_info_row('error', __('Order error', 'hrx-delivery'), $error_msg );
         }
 
-        $order_status = $wc_order->get_meta($this->core->meta_keys->order_ready);
-        if ( ! empty($order_status) ) {
-            $output .= Html::build_info_row('ready', '', __('The order is marked as ready', 'hrx-delivery') );
-        }
-
         return $output;
+    }
+
+    private function get_hrx_status_title( $status_key )
+    {
+        $status_titles = array(
+            'new' => _x('New', 'HRX order status', 'hrx-delivery'),
+            'ready' => _x('Ready', 'HRX order status', 'hrx-delivery'),
+            'in_delivery' => _x('In delivery', 'HRX order status', 'hrx-delivery'),
+            'in_return' => _x('In return', 'HRX order status', 'hrx-delivery'),
+            'returned' => _x('Returned', 'HRX order status', 'hrx-delivery'),
+            'delivered' => _x('Delivered', 'HRX order status', 'hrx-delivery'),
+            'cancelled' => _x('Cancelled', 'HRX order status', 'hrx-delivery'),
+            'error' => _x('Error', 'HRX order status', 'hrx-delivery'),
+        );
+
+        return $status_titles[$status_key] ?? $status_key;
     }
 
     public function page_management()
@@ -408,9 +450,10 @@ class Pages
     public function page_management_count()
     {
         $args = array(
+            'limit' => -1,
             'hrx_delivery_method' => array_keys($this->core->methods),
             'status' => array('wc-processing', 'wc-on-hold', 'wc-pending'),
-            'not_' . $this->core->meta_keys->order_ready => 1
+            'not_' . $this->core->meta_keys->order_status => array('ready', 'cancelled'),
         );
         $total_orders = count(wc_get_orders($args));
         

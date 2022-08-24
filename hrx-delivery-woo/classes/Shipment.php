@@ -233,9 +233,9 @@ class Shipment
         delete_post_meta($wc_order->get_id(), $core->meta_keys->error_msg);
 
         if ( $result['status'] == 'OK' ) {
-            update_post_meta($wc_order->get_id(), $core->meta_keys->order_id, $result['data']);
-            delete_post_meta($wc_order->get_id(), $core->meta_keys->track_number);
-            delete_post_meta($wc_order->get_id(), $core->meta_keys->order_ready);
+            update_post_meta($wc_order->get_id(), $core->meta_keys->order_id, $result['data']['id']);
+            $wc_order = wc_get_order($wc_order_id);
+            $info = $classOrder->update_hrx_order_info($wc_order);
 
             $status['status'] = 'OK';
             $status['status_code'] = 'registered';

@@ -247,23 +247,15 @@ class Order
 
     public function get_track_number( $order, $tracking_type = 'shipping' )
     {
-        $hrx_order_id = $order->get_meta($this->core->meta_keys->order_id);
         $hrx_track_number = '';
         $hrx_track_url = '';
 
         if ( $tracking_type == 'shipping' ) {
             $hrx_track_number = $order->get_meta($this->core->meta_keys->track_number);
             
-            if ( ! empty($hrx_order_id) && empty($hrx_track_number) ) {
-                $api = new Api();
-                $hrx_order = $api->get_order($hrx_order_id);
-
-                if ( $hrx_order['status'] == 'OK' && ! empty($hrx_order['data']['tracking_number']) ) {
-                    $hrx_track_number = $hrx_order['data']['tracking_number'];
-                    $hrx_track_url = $hrx_order['data']['tracking_url'];
-                    update_post_meta($order->get_id(), $this->core->meta_keys->track_number, wc_clean($hrx_track_number));
-                    update_post_meta($order->get_id(), $this->core->meta_keys->track_url, esc_url($hrx_track_url));
-                }
+            if ( empty($hrx_track_number) ) {
+                $updated_order = $this->update_hrx_order_info($order);
+                $hrx_track_number = $updated_order['track_number'];
             }
         }
 
@@ -272,6 +264,40 @@ class Order
         }
 
         return $hrx_track_number;
+    }
+
+    public function update_hrx_order_info( $order )
+    {
+        $hrx_order_data = array(
+            'track_number' => '',
+            'track_url' => '',
+            'status' => 'unknown',
+        );
+
+        $hrx_order_id = $order->get_meta($this->core->meta_keys->order_id);
+
+        if ( ! empty($hrx_order_id) ) {
+            $api = new Api();
+            $hrx_order = $api->get_order($hrx_order_id);
+
+            if ( $hrx_order['status'] == 'OK' ) {
+                if ( ! empty($hrx_order['data']['tracking_number']) ) {
+                    $hrx_order_data['track_number'] = $hrx_order['data']['tracking_number'];
+                }
+                if ( ! empty($hrx_order['data']['track_url']) ) {
+                    $hrx_order_data['track_url'] = $hrx_order['data']['tracking_url'];
+                }
+                if ( ! empty($hrx_order['data']['status']) ) {
+                    $hrx_order_data['status'] = $hrx_order['data']['status'];
+                }
+
+                update_post_meta($order->get_id(), $this->core->meta_keys->track_number, wc_clean($hrx_order_data['track_number']));
+                update_post_meta($order->get_id(), $this->core->meta_keys->track_url, esc_url($hrx_order_data['track_url']));
+                update_post_meta($order->get_id(), $this->core->meta_keys->order_status, wc_clean($hrx_order_data['status']));
+            }
+        }
+
+        return $hrx_order_data;
     }
 
     public function get_track_url( $order )

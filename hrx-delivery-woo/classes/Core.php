@@ -147,7 +147,7 @@ class Core
             'terminal_id' => $prefix . '_terminal_id',
             'warehouse_id' => $prefix . '_warehouse_id',
             'order_id' => $prefix . '_order_id',
-            'order_ready' => $prefix . '_order_ready',
+            'order_status' => $prefix . '_order_status',
             'track_number' => $prefix . '_track_number',
             'track_url' => $prefix . '_track_url',
             'error_msg' => $prefix . '_error_msg',

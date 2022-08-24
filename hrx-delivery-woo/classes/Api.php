@@ -125,7 +125,7 @@ class Api
                 $output['data'] = print_r($order_response, true);
             } else {
                 $output['msg'] = sprintf(__('Order "%s" successfully created', 'hrx-delivery'), $order_response['sender_reference']);
-                $output['data'] = $order_response['id'];
+                $output['data'] = $order_response;
             }
         } catch (\Exception $e) {
             $output['status'] = 'error';

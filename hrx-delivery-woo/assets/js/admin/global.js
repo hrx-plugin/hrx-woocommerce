@@ -273,6 +273,8 @@
                     if ( show_alert_on_error && response.status == "error" ) {
                         if ( confirm(response.msg + "\n\n" + hrxGlobalVars.txt.alert_retry) ) {
                             hrxAjax.ready_hrx_order(button, mark_ready, hide_buttons, show_buttons, show_alert_on_error);
+                        } else {
+                            location.reload();
                         }
                     }
                     if ( response.status == "OK" ) {

@@ -10,6 +10,7 @@ use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Core;
+use HrxDeliveryWoo\Order;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\Label;
@@ -203,16 +204,18 @@ class Ajax
         }
 
         if ( $result['status'] == 'OK' ) {
-            if ( $mark_ready ) {
-                update_post_meta($wc_order->get_id(), $meta_keys->order_ready, 1);
+            if ( ! empty($result['data']['status']) ) {
+                update_post_meta($wc_order->get_id(), $meta_keys->order_status, esc_attr($result['data']['status']));
             } else {
-                update_post_meta($wc_order->get_id(), $meta_keys->order_ready, 0);
+                update_post_meta($wc_order->get_id(), $meta_keys->order_status, 'unknown');
             }
 
             $status['status'] = 'OK';
             $status['msg'] = __('Order status changed successfully', 'hrx-delivery');
         } else {
             $status['msg'] = __('Failed to change HRX order status', 'hrx-delivery') . ":\n" . $result['msg'];
+            $classOrder = new Order();
+            $classOrder->update_hrx_order_info($wc_order);
         }
 
         echo json_encode($status);
