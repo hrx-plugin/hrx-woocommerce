@@ -55,7 +55,7 @@ class Terminal
 
     public static function get_name_by_id( $terminal_id )
     {
-        $fail_value = 'ID: ' . $terminal_id;
+        $fail_value = '—';
         $terminal_data = Sql::get_row('delivery', array('location_id' => $terminal_id));
 
         if ( empty($terminal_data) ) {
