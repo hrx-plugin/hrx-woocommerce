@@ -10,6 +10,7 @@ use HrxDeliveryWoo\PagesFilter;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
+use HrxDeliveryWoo\Shipment;
 
 /* Variables */
 $page_params = $this->get_subpages('management', true);
@@ -138,7 +139,7 @@ if ( $page_current_tab == 'warehouses' ) {
     }
 
     foreach ( $orders as $order ) {
-        $hrx_order_status = $this->get_hrx_order_status($order);
+        $hrx_order_status = Shipment::get_status($order);
         if ( ($page_current_tab == 'new_orders' && $hrx_order_status == 'ready')
             || ($page_current_tab == 'send_orders' && $hrx_order_status != 'ready') ) {
             continue;

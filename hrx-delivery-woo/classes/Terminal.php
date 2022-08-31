@@ -72,6 +72,7 @@ class Terminal
         $field_name = $params['name'] ?? '';
         $field_id = $params['id'] ?? '';
         $field_class = $params['class'] ?? '';
+        $field_disabled = $params['disabled'] ?? false;
 
         $terminals_options = self::prepare_options($terminals_list, $selected_id);
         $terminals_html = '<option>' . __('Select terminal', 'hrx-delivery') . '</option>';
@@ -86,7 +87,8 @@ class Terminal
             $terminals_html .= '</optgroup>';
         }
 
-        $output = '<select name="' . esc_html($field_name) . '" id="' . esc_html($field_id) . '" class="' . esc_html($field_class) . '">' . $terminals_html . '</select>';
+        $disabled = ($field_disabled) ? 'disabled' : '';
+        $output = '<select name="' . esc_html($field_name) . '" id="' . esc_html($field_id) . '" class="' . esc_html($field_class) . '" ' . $disabled . '>' . $terminals_html . '</select>';
 
         return $output;
     }

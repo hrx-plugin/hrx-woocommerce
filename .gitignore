@@ -1,4 +1,7 @@
+/*.zip
 */var/pdf/*.pdf
 */var/debug/*.log
 */var/logs/*.log
-/*.zip
+*/languages/*.pot~
+*/languages/*.po~
+*/languages/*.mo~

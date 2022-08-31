@@ -74,7 +74,6 @@ class Shipment
         }
 
         $classOrder = new Order();
-        $order_weight = $classOrder->get_order_weight($wc_order);
         $receiver_data = $classOrder->get_order_address($wc_order);
 
         $receiver_phone = str_replace(' ', '', $receiver_data['phone']);
@@ -86,20 +85,11 @@ class Shipment
             $receiver_city .= ', ' . $receiver_data['state'];
         }
 
-        $products_dimmensions = $classOrder->get_order_products_dimmensions($wc_order);
-        //TODO: Make the calculation of the smallest possible box to fit all the goods
-
-        $shipment_dimmensions = array(
-            'length' => '', // TODO: If the initial size of the box will be obtained
-            'width' => '',
-            'height' => '',
-            'weight' => (! empty($order_weight)) ? $order_weight : '',
-        );
-        $shipment_dimmensions = Helper::use_current_or_default_dimmension($method, $shipment_dimmensions);
+        $shipment_dimensions = self::get_dimensions($wc_order);
      
-        $dimmensions_limitation = array(
-            'min' => Helper::get_empty_dimmensions_array(0),
-            'max' => Helper::get_empty_dimmensions_array(0),
+        $dimensions_limitation = array(
+            'min' => Helper::get_empty_dimensions_array(0),
+            'max' => Helper::get_empty_dimensions_array(0),
         );
 
         $has_terminals = false;
@@ -126,14 +116,14 @@ class Shipment
             $receiver_phone_prefix = $terminal_params->phone_prefix;
             $receiver_phone_regex = $terminal_params->phone_regexp;
 
-            $dimmensions_limitation['min']['weight'] = $terminal_params->min_weight;
-            $dimmensions_limitation['min']['length'] = $terminal_params->min_length;
-            $dimmensions_limitation['min']['width'] = $terminal_params->min_width;
-            $dimmensions_limitation['min']['height'] = $terminal_params->min_height;
-            $dimmensions_limitation['max']['weight'] = $terminal_params->max_weight;
-            $dimmensions_limitation['max']['length'] = $terminal_params->max_length;
-            $dimmensions_limitation['max']['width'] = $terminal_params->max_width;
-            $dimmensions_limitation['max']['height'] = $terminal_params->max_height;
+            $dimensions_limitation['min']['weight'] = $terminal_params->min_weight;
+            $dimensions_limitation['min']['length'] = $terminal_params->min_length;
+            $dimensions_limitation['min']['width'] = $terminal_params->min_width;
+            $dimensions_limitation['min']['height'] = $terminal_params->min_height;
+            $dimensions_limitation['max']['weight'] = $terminal_params->max_weight;
+            $dimensions_limitation['max']['length'] = $terminal_params->max_length;
+            $dimensions_limitation['max']['width'] = $terminal_params->max_width;
+            $dimensions_limitation['max']['height'] = $terminal_params->max_height;
         } else {
             $available_countries = $api->get_courier_delivery_locations();
             if ( $available_countries['status'] == 'error' ) {
@@ -146,14 +136,14 @@ class Shipment
             $receiver_phone_prefix = $selected_country_data['recipient_phone_prefix'];
             $receiver_phone_regex = $selected_country_data['recipient_phone_regexp'];
 
-            $dimmensions_limitation['min']['weight'] = $selected_country_data['min_weight_kg'];
-            $dimmensions_limitation['min']['length'] = $selected_country_data['min_length_cm'];
-            $dimmensions_limitation['min']['width'] = $selected_country_data['min_width_cm'];
-            $dimmensions_limitation['min']['height'] = $selected_country_data['min_height_cm'];
-            $dimmensions_limitation['max']['weight'] = $selected_country_data['max_weight_kg'];
-            $dimmensions_limitation['max']['length'] = $selected_country_data['max_length_cm'];
-            $dimmensions_limitation['max']['width'] = $selected_country_data['max_width_cm'];
-            $dimmensions_limitation['max']['height'] = $selected_country_data['max_height_cm'];
+            $dimensions_limitation['min']['weight'] = $selected_country_data['min_weight_kg'];
+            $dimensions_limitation['min']['length'] = $selected_country_data['min_length_cm'];
+            $dimensions_limitation['min']['width'] = $selected_country_data['min_width_cm'];
+            $dimensions_limitation['min']['height'] = $selected_country_data['min_height_cm'];
+            $dimensions_limitation['max']['weight'] = $selected_country_data['max_weight_kg'];
+            $dimensions_limitation['max']['length'] = $selected_country_data['max_length_cm'];
+            $dimensions_limitation['max']['width'] = $selected_country_data['max_width_cm'];
+            $dimensions_limitation['max']['height'] = $selected_country_data['max_height_cm'];
         }
 
         if ( ! Helper::check_phone($receiver_phone, $receiver_phone_prefix, $receiver_phone_regex) ) {
@@ -168,28 +158,28 @@ class Shipment
         }
         $receiver_phone = Helper::remove_phone_prefix($receiver_phone, $receiver_phone_prefix);
 
-        $check_dimmensions = array('weight', 'length', 'width', 'height');
+        $check_dimensions = array('weight', 'length', 'width', 'height');
         $check_limitations = array('min', 'max');
         
-        foreach ( $check_dimmensions as $dim_key ) {
+        foreach ( $check_dimensions as $dim_key ) {
             foreach ( $check_limitations as $lim_key ) {
-                if ( $dimmensions_limitation[$lim_key][$dim_key] == '') {
+                if ( $dimensions_limitation[$lim_key][$dim_key] == '') {
                     continue;
                 }
-                $dimmension_check_msg = self::check_dimmension(
+                $dimmension_check_msg = self::check_dimension(
                     $wc_order->get_id(),
                     $core->meta_keys->error_msg,
                     $dim_key,
-                    (float)$shipment_dimmensions[$dim_key],
-                    (float)$dimmensions_limitation[$lim_key][$dim_key],
+                    (float)$shipment_dimensions[$dim_key],
+                    (float)$dimensions_limitation[$lim_key][$dim_key],
                     Helper::get_compare_symbol($lim_key)
                 );
 
                 if ( ! empty($dimmension_check_msg) ) {
                     Debug::to_log(array(
                         'status' => $status,
-                        'shipment_dimmensions' => $shipment_dimmensions,
-                        'allowed_dimmensions' => $dimmensions_limitation,
+                        'shipment_dimensions' => $shipment_dimensions,
+                        'allowed_dimensions' => $dimensions_limitation,
                     ), 'register_order');
                     
                     $status['msg'] = $dimmension_check_msg;
@@ -212,10 +202,10 @@ class Shipment
         $prepared_shipment = array(
             'reference' => 'WC_' . $wc_order->get_order_number(),
             'comment' => '',
-            'length' => $shipment_dimmensions['length'],
-            'width' => $shipment_dimmensions['width'],
-            'height' => $shipment_dimmensions['height'],
-            'weight' => $shipment_dimmensions['weight'],
+            'length' => $shipment_dimensions['length'],
+            'width' => $shipment_dimensions['width'],
+            'height' => $shipment_dimensions['height'],
+            'weight' => $shipment_dimensions['weight'],
         );
 
         $prepared_order = array(
@@ -248,9 +238,33 @@ class Shipment
         return $status;
     }
 
-    private static function check_dimmension( $order_id, $meta_key, $dimmension_type, $current_value, $compare_value, $compare_symbol = '<' )
+    public static function get_dimensions( $wc_order, $method = '' )
     {
-        $units = Helper::get_empty_dimmensions_array('cm');
+        $core = Core::get_instance();
+        $method = (empty($method)) ? $wc_order->get_meta($core->meta_keys->method) : $method;
+        
+        $classOrder = new Order();
+        $order_weight = $classOrder->get_order_weight($wc_order);
+        $products_dimensions = $classOrder->get_order_products_dimensions($wc_order); // TODO: Make box size calculation
+        
+        $order_dimensions = $wc_order->get_meta($core->meta_keys->dimensions);
+        if ( ! empty($order_dimensions['weight']) ) {
+            $order_weight = $order_dimensions['weight'];
+        }
+
+        $shipment_dimensions = array(
+            'length' => (! empty($order_dimensions['length'])) ? $order_dimensions['length'] : '',
+            'width' => (! empty($order_dimensions['width'])) ? $order_dimensions['width'] : '',
+            'height' => (! empty($order_dimensions['height'])) ? $order_dimensions['height'] : '',
+            'weight' => (! empty($order_weight)) ? $order_weight : '',
+        );
+        
+        return Helper::use_current_or_default_dimmension($method, $shipment_dimensions);
+    }
+
+    private static function check_dimension( $order_id, $meta_key, $dimmension_type, $current_value, $compare_value, $compare_symbol = '<' )
+    {
+        $units = Helper::get_empty_dimensions_array('cm');
         $units['weight'] = 'kg';
 
         $check_msg = false;
@@ -358,5 +372,36 @@ class Shipment
         }
 
         return $status;
+    }
+
+    public static function get_status( $wc_order )
+    {
+        $core = Core::get_instance();
+
+        $order_status = $wc_order->get_meta($core->meta_keys->order_status);
+
+        if ( empty($order_status) ) {
+            $classOrder = new Order();
+            $order_data = $classOrder->update_hrx_order_info($wc_order);
+            $order_status = $order_data['status'];
+        }
+
+        return $order_status;
+    }
+
+    public static function get_status_title( $status_key )
+    {
+        $status_titles = array(
+            'new' => _x('New', 'HRX order status', 'hrx-delivery'),
+            'ready' => _x('Ready', 'HRX order status', 'hrx-delivery'),
+            'in_delivery' => _x('In delivery', 'HRX order status', 'hrx-delivery'),
+            'in_return' => _x('In return', 'HRX order status', 'hrx-delivery'),
+            'returned' => _x('Returned', 'HRX order status', 'hrx-delivery'),
+            'delivered' => _x('Delivered', 'HRX order status', 'hrx-delivery'),
+            'cancelled' => _x('Cancelled', 'HRX order status', 'hrx-delivery'),
+            'error' => _x('Error', 'HRX order status', 'hrx-delivery'),
+        );
+
+        return $status_titles[$status_key] ?? $status_key;
     }
 }

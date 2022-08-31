@@ -356,7 +356,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
 
                 /* Build rate */
                 $rate = array(
-                    'id' => $this->core->id . '_' . $method_key,
+                    'id' => ShipHelper::get_rate_id($method_key),
                     'label' => $method_params['front_title'],
                     'cost' => $current_price,
                 );

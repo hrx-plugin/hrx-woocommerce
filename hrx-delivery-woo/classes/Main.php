@@ -110,6 +110,10 @@ class Main
                 'orders_not_selected' => __('You must choose at least one order', 'hrx-delivery'),
             ),
         ));
+        
+        if ( $hook == 'post.php' && isset($_GET['action']) && $_GET['action'] == 'edit' ) {
+            wp_enqueue_style($this->core->id . '_admin_order', $css_dir . 'order.css', array(), $this->core->version);
+        }
 
         if ( $hook == 'woocommerce_page_wc-settings' && isset($_GET['section']) && $_GET['section'] == $this->core->id ) {
             wp_enqueue_style($this->core->id . '_admin_settings', $css_dir . 'settings.css', array(), $this->core->version);
@@ -121,6 +125,7 @@ class Main
     public function load_init_hooks()
     {
         add_action('init', array($this, 'load_text_domain'));
+        add_action('after_plugin_row_' . $this->core->structure->basename, array($this->core, 'update_message'), 10, 3);
 
         add_filter('plugin_action_links_' . $this->core->structure->basename, array($this, 'add_link_to_settings'));
 

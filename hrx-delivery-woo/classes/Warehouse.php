@@ -46,6 +46,7 @@ class Warehouse
         $field_name = $params['name'] ?? '';
         $field_id = $params['id'] ?? '';
         $field_class = $params['class'] ?? '';
+        $field_disabled = $params['disabled'] ?? false;
 
         $warehouses_options = self::prepare_options($warehouses_list, $selected_id);
         $warehouses_html = '';
@@ -56,7 +57,8 @@ class Warehouse
             $warehouses_html .= '<option value="' . esc_html($warehouse['id']) . '" ' . $selected . ' ' . $disabled .'>' . esc_html($warehouse['name']) . '</option>';
         }
 
-        $output = '<select name="' . esc_html($field_name) . '" id="' . esc_html($field_id) . '" class="' . esc_html($field_class) . '">' . $warehouses_html . '</select>';
+        $disabled = ($field_disabled) ? 'disabled' : '';
+        $output = '<select name="' . esc_html($field_name) . '" id="' . esc_html($field_id) . '" class="' . esc_html($field_class) . '" ' . $disabled . '>' . $warehouses_html . '</select>';
 
         return $output;
     }

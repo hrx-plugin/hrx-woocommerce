@@ -15,7 +15,7 @@ class Cronjob
     public $cronjobs = array(
         'hrx_update_warehouses' => array(
             'func' => 'job_update_warehouses',
-            'freq' => 'monthly',
+            'freq' => 'daily',
             'time' => '02:00:00',
         ),
         'hrx_update_delivery_locations' => array(
