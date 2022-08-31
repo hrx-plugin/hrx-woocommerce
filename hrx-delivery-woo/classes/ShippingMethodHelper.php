@@ -6,8 +6,31 @@ if ( ! defined('ABSPATH') ) {
     exit;
 }
 
+use HrxDeliveryWoo\Core;
+
 class ShippingMethodHelper
 {
+    public static function get_rate_id( $method_key )
+    {
+        $core = Core::get_instance();
+
+        return $core->id . '_' . $method_key;
+    }
+
+    public static function is_hrx_rate( $rate_id )
+    {
+        $core = Core::get_instance();
+
+        return str_contains($rate_id, $core->id . '_');
+    }
+
+    public static function get_method_from_rate_id( $rate_id )
+    {
+        $core = Core::get_instance();
+
+        return str_replace($core->id . '_', '', $rate_id);
+    }
+
     public static function get_cart_amount()
     {
         global $woocommerce;

@@ -12,6 +12,7 @@ use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\Label;
+use HrxDeliveryWoo\Shipment;
 
 class Order
 {
@@ -57,16 +58,26 @@ class Order
         }
 
         $order_weight = $this->get_order_weight($order);
+        $order_size = Shipment::get_dimensions($order);
 
         $tracking_number = $this->get_track_number($order);
+        $hrx_order_status = Shipment::get_status($order);
+        $hrx_order_status_text = Shipment::get_status_title($hrx_order_status);
+
+        $no_more_editable = false;
+        if ( $hrx_order_status == 'ready' || $hrx_order_status == 'in_delivery' || $hrx_order_status == 'in_return' ) {
+            $no_more_editable = true;
+        }
 
         echo Html::build_order_block_preview(array(
             'method' => $method_key,
+            'status' => $hrx_order_status_text,
             'has_terminals' => $has_terminal,
             'terminal_id' => $terminal_id,
             'warehouse_id' => $current_warehouse_id,
             'tracking_number' => $tracking_number,
-            'weight' => $order_weight,
+            'weight' => (! empty($order_size['weight'])) ? $order_size['weight'] : $order_weight,
+            'size' => $order_size,
         ));
 
         echo Html::build_order_block_edit(array(
@@ -77,7 +88,9 @@ class Order
             'selected_warehouse' => $current_warehouse_id,
             'all_warehouses' => Warehouse::get_list(),
             'tracking_number' => $tracking_number,
-            'weight' => $order_weight,
+            'weight' => (! empty($order_size['weight'])) ? $order_size['weight'] : $order_weight,
+            'size' => $order_size,
+            'all_disabled' => $no_more_editable,
         ));
     }
 
@@ -93,6 +106,10 @@ class Order
 
         if ( isset($_POST['hrx_warehouse']) ) {
             update_post_meta($post_id, $this->core->meta_keys->warehouse_id, wc_clean($_POST['hrx_warehouse']));
+        }
+
+        if ( isset($_POST['hrx_dimensions']) ) {
+            update_post_meta($post_id, $this->core->meta_keys->dimensions, $_POST['hrx_dimensions']);
         }
     }
 
@@ -182,9 +199,9 @@ class Order
         return wc_get_weight($total_weight, 'kg');
     }
 
-    public function get_order_products_dimmensions( $order )
+    public function get_order_products_dimensions( $order )
     {
-        $products_dimmensions = array();
+        $products_dimensions = array();
 
         $counter = 0;
         foreach ( $order->get_items() as $item_id => $item ) {
@@ -196,7 +213,7 @@ class Order
                 'length' => 0,
                 'width' => 0,
                 'height' => 0,
-                'weight' => (float)$prod->get_weight(),
+                'weight' => wc_get_weight((float)$prod->get_weight(), 'kg'),
             );
 
             if ( $prod->has_dimensions() ) {
@@ -205,10 +222,10 @@ class Order
                 $prod_dims['height'] = (float)$prod->get_height();
             }
 
-            $products_dimmensions[$counter . '_' . $item_id] = $prod_dims;
+            $products_dimensions[$counter . '_' . $item_id] = $prod_dims;
         }
 
-        return $products_dimmensions;
+        return $products_dimensions;
     }
 
     public function get_billing_fullname( $order )

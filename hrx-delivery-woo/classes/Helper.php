@@ -151,7 +151,7 @@ class Helper
         return $all_symbols[$symbol_key] ?? false;
     }
 
-    public static function get_empty_dimmensions_array( $fill_with_value = '' )
+    public static function get_empty_dimensions_array( $fill_with_value = '' )
     {
         return array(
             'width' => $fill_with_value,
@@ -161,39 +161,39 @@ class Helper
         );
     }
 
-    public static function use_current_or_default_dimmension( $method_key, $current_dimmensions )
+    public static function use_current_or_default_dimmension( $method_key, $current_dimensions )
     {
         $core = Core::get_instance();
 
         if ( empty($core->settings[$method_key . '_default_dimensions']) ) {
-            return $current_dimmensions;
+            return $current_dimensions;
         }
 
         $default_values = json_decode($core->settings[$method_key . '_default_dimensions']);
         if ( ! is_array($default_values) ) {
-            return $current_dimmensions;
+            return $current_dimensions;
         }
 
-        $default_dimmensions = array(
+        $default_dimensions = array(
             'width' => (! empty($default_values[0])) ? $default_values[0] : 0,
             'height' => (! empty($default_values[1])) ? $default_values[1] : 0,
             'length' => (! empty($default_values[2])) ? $default_values[2] : 0,
             'weight' => (! empty($default_values[3])) ? $default_values[3] : 0,
         );
 
-        if ( empty($current_dimmensions['weight']) && $current_dimmensions['weight'] != '0' ) {
-            $current_dimmensions['weight'] = $default_dimmensions['weight'];
+        if ( empty($current_dimensions['weight']) && $current_dimensions['weight'] != '0' ) {
+            $current_dimensions['weight'] = $default_dimensions['weight'];
         }
 
-        if ( (empty($current_dimmensions['width']) && $current_dimmensions['width'] != '0')
-            || (empty($current_dimmensions['height']) && $current_dimmensions['height'] != '0')
-            || (empty($current_dimmensions['length']) && $current_dimmensions['length'] != '0') ) {
-            $current_dimmensions['width'] = $default_dimmensions['width'];
-            $current_dimmensions['height'] = $default_dimmensions['height'];
-            $current_dimmensions['length'] = $default_dimmensions['length'];
+        if ( (empty($current_dimensions['width']) && $current_dimensions['width'] != '0')
+            || (empty($current_dimensions['height']) && $current_dimensions['height'] != '0')
+            || (empty($current_dimensions['length']) && $current_dimensions['length'] != '0') ) {
+            $current_dimensions['width'] = $default_dimensions['width'];
+            $current_dimensions['height'] = $default_dimensions['height'];
+            $current_dimensions['length'] = $default_dimensions['length'];
         }
 
-        return $current_dimmensions;
+        return $current_dimensions;
     }
 
     public static function check_phone( $full_phone, $prefix, $regex )

@@ -1,0 +1,5 @@
+#order_data .order_data_column .edit_address .hrx_width_field,
+#order_data .order_data_column .edit_address .hrx_length_field {
+    float: right;
+    clear: right;
+}

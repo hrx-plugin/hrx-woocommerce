@@ -12,6 +12,7 @@ use HrxDeliveryWoo\Debug;
 use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\PagesHtml as Html;
 use HrxDeliveryWoo\Order;
+use HrxDeliveryWoo\Shipment;
 
 class Pages
 {
@@ -391,26 +392,22 @@ class Pages
         return (! empty($tracking_number)) ? $tracking_number : $on_empty;
     }
 
-    private function get_hrx_order_status( $wc_order )
-    {
-        $order_status = $wc_order->get_meta($this->core->meta_keys->order_status);
-
-        if ( empty($order_status) ) {
-            $classOrder = new Order();
-            $order_data = $classOrder->update_hrx_order_info($wc_order);
-            $order_status = $order_data['status'];
-        }
-
-        return $order_status;
-    }
-
     private function build_hrx_status_text( $wc_order )
     {
         $output = '';
 
         $order_status = $wc_order->get_meta($this->core->meta_keys->order_status);
         if ( ! empty($order_status) ) {
-            $output .= Html::build_info_row('status', __('Status', 'hrx-delivery'), $this->get_hrx_status_title($order_status), $order_status);
+            $output .= Html::build_info_row('status', __('Status', 'hrx-delivery'), Shipment::get_status_title($order_status), $order_status);
+        }
+
+        $order_dimensions = Shipment::get_dimensions($wc_order);
+        if ( ! empty($order_dimensions) ) {
+            $dims_text = (float)$order_dimensions['weight'] . ' kg<br/>'
+                . (float)$order_dimensions['width'] . '×'
+                . (float)$order_dimensions['height'] . '×'
+                . (float)$order_dimensions['length'] . ' cm';
+            $output .= Html::build_info_row('dims', __('Package', 'hrx-delivery'), $dims_text);
         }
 
         $shipping_number = $this->get_tracking_number_text($wc_order, 'shipping', '');
@@ -424,22 +421,6 @@ class Pages
         }
 
         return $output;
-    }
-
-    private function get_hrx_status_title( $status_key )
-    {
-        $status_titles = array(
-            'new' => _x('New', 'HRX order status', 'hrx-delivery'),
-            'ready' => _x('Ready', 'HRX order status', 'hrx-delivery'),
-            'in_delivery' => _x('In delivery', 'HRX order status', 'hrx-delivery'),
-            'in_return' => _x('In return', 'HRX order status', 'hrx-delivery'),
-            'returned' => _x('Returned', 'HRX order status', 'hrx-delivery'),
-            'delivered' => _x('Delivered', 'HRX order status', 'hrx-delivery'),
-            'cancelled' => _x('Cancelled', 'HRX order status', 'hrx-delivery'),
-            'error' => _x('Error', 'HRX order status', 'hrx-delivery'),
-        );
-
-        return $status_titles[$status_key] ?? $status_key;
     }
 
     public function page_management()
