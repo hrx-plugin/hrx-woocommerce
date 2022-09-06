@@ -43,7 +43,7 @@ $hrx_params['methods'] = array(
     'terminal' => array(
         'title' => __('Parcel terminal', 'hrx-delivery'),
         'front_title' => _x('HRX parcel terminal', 'Shipping method title in checkout', 'hrx-delivery'),
-        'countries' => array('LT', 'LV', 'PL'),
+        'countries' => array('LT', 'LV', 'EE', 'PL', 'FI', 'SE'),
         'has_terminals' => true,
     ),
 );
