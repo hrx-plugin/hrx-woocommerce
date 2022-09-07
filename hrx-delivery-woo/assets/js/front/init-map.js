@@ -45,7 +45,7 @@
                 hideContainer: true,
                 hideSelectBtn: true,
                 cssThemeRule: "tmjs-default-theme",
-                terminalList: terminals,
+                terminalList: terminals
             });
 
             hrxMap.update_list();
