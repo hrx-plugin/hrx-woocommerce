@@ -136,6 +136,9 @@
 .hrx-map .tmjs-city:not(:first-of-type) {
     margin: 0;
 }
+.hrx-map .tmjs-terminal-distance {
+    margin: 0;
+}
 .hrx-map .tmjs-terminal.tmjs-active {
     margin: 0;
     padding: 10px;
@@ -143,6 +146,10 @@
     background-color: var(--second-color) !important;
     color: var(--second-font-color);
     border-radius: var(--border-radius);
+}
+.hrx-map .tmjs-terminal.tmjs-active .tmjs-terminal-distance {
+    color: var(--placeholder-color);
+    width: auto;
 }
 .hrx-map .tmjs-active .tmjs-terminal-name {
     font-weight: normal;
