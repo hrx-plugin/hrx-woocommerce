@@ -16,6 +16,8 @@
         var container_parcel_terminal = document.getElementById("hrx-method-terminal-map");
         if (typeof(container_parcel_terminal) != "undefined" && container_parcel_terminal != null && container_parcel_terminal.innerHTML === "" ) {
             hrxMap.init(container_parcel_terminal, hrx_terminal_terminals);
+        } else {
+            hrxMap.update_list();
         }
     }
 

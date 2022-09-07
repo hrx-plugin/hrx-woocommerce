@@ -90,7 +90,7 @@
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TerminalMapping", function() { return TerminalMapping; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HrxMapping", function() { return HrxMapping; });
 /* harmony import */ var _styles_main_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
 /* harmony import */ var _styles_main_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_styles_main_css__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _modules_DependencyCheck_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
@@ -108,11 +108,11 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
-var TerminalMapping = /*#__PURE__*/function () {
-  function TerminalMapping(api_server_url) {
+var HrxMapping = /*#__PURE__*/function () {
+  function HrxMapping(api_server_url) {
     var _this = this;
 
-    _classCallCheck(this, TerminalMapping);
+    _classCallCheck(this, HrxMapping);
 
     /* Terminal Mapping version */
     this.version = '1.2.2';
@@ -178,7 +178,7 @@ var TerminalMapping = /*#__PURE__*/function () {
     this.map = null;
   }
 
-  _createClass(TerminalMapping, [{
+  _createClass(HrxMapping, [{
     key: "init",
     value: function init() {
       var _this2 = this;
@@ -372,9 +372,9 @@ var TerminalMapping = /*#__PURE__*/function () {
     }
   }]);
 
-  return TerminalMapping;
+  return HrxMapping;
 }();
-window.TerminalMapping = TerminalMapping;
+window.HrxMapping = HrxMapping;
 
 /***/ }),
 /* 1 */
