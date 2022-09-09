@@ -46,7 +46,7 @@
                 hideSelectBtn: true,
                 cssThemeRule: "tmjs-default-theme",
                 terminalList: terminals,
-                customTileServerUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                customTileServerUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
             });
 
             hrxMap.update_list();
