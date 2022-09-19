@@ -289,6 +289,7 @@ class ShippingMethodHtml
                             </div>
                             <div class="box-content">
                                 <?php $country_prices = $country_values['prices'] ?? array(array()); ?>
+                                <?php $country_prices = array_values($country_prices); //Fix array keys ?>
                                 <?php for ( $i = 0; $i < count($country_prices); $i++ ) : ?>
                                     <?php echo self::build_price_row(array(
                                         'key' => $country_key . '_prices',
