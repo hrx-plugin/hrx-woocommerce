@@ -129,8 +129,6 @@ class Ajax
             echo json_encode(__('Failed to change default warehouse', 'hrx-delivery'));
         }
 
-        echo json_encode($result);
-
         wp_die();
     }
 
