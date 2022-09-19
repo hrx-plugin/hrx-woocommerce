@@ -20,6 +20,10 @@ use HrxDeliveryWoo\Debug;
 
 class Ajax
 {
+    /**
+     * Register Ajax functions
+     * @since 1.0.0
+     */
     public static function init()
     {
         $this_class = __NAMESPACE__ . '\Ajax::';
@@ -35,6 +39,10 @@ class Ajax
         add_action('wp_ajax_hrx_table_mass_action', $this_class . 'admin_btn_table_mass_action');
     }
 
+    /**
+     * Save the selected terminal in the session data
+     * @since 1.0.0
+     */
     public static function front_add_terminal_to_session()
     {
         if ( ! empty($_POST['terminal_id']) ) {
@@ -44,6 +52,10 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Check if API token is good
+     * @since 1.0.0
+     */
     public static function admin_btn_check_token()
     {
         $api = new Api();
@@ -64,6 +76,10 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Update delivery locations
+     * @since 1.0.0
+     */
     public static function admin_btn_update_delivery_locations()
     {
         $result = Terminal::update_delivery_locations();
@@ -75,6 +91,10 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Update pickup locations (Warehouses)
+     * @since 1.0.0
+     */
     public static function admin_btn_update_pickup_locations()
     {
         $result = Warehouse::update_pickup_locations();
@@ -86,6 +106,14 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Get the information about locations update in formatted text
+     * @since 1.0.0
+     * 
+     * @param (array) $result - Statistic for updated data
+     * @param (string) $current_time - Formatted current time
+     * @return (string) - Formatted informational text
+     */
     private static function get_location_result_output( $result, $current_time )
     {
         $output = array();
@@ -115,6 +143,10 @@ class Ajax
         return $output;
     }
 
+    /**
+     * Change default warehouse
+     * @since 1.0.0
+     */
     public static function admin_btn_change_default_warehouse()
     {
         if ( empty($_POST['warehouse']) ) {
@@ -132,12 +164,13 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Register HRX order
+     * @since 1.0.0
+     */
     public static function admin_btn_create_hrx_order()
     {
-        $status = array(
-            'status' => 'error',
-            'msg' => '',
-        );
+        $status = self::prepare_status();
 
         if ( empty($_POST['order_id']) ) {
             self::output_status_on_error($status, __('Order ID not received', 'hrx-delivery'), true);
@@ -149,12 +182,13 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Get label for HRX order
+     * @since 1.0.0
+     */
     public static function admin_btn_get_hrx_label()
     {
-        $status = array(
-            'status' => 'error',
-            'msg' => '',
-        );
+        $status = self::prepare_status();
 
         if ( empty($_POST['order_id']) ) {
             self::output_status_on_error($status, __('Order ID not received', 'hrx-delivery'), true);
@@ -172,12 +206,13 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Mark HRX order as Ready
+     * @since 1.0.0
+     */
     public static function admin_btn_ready_hrx_order()
     {
-        $status = array(
-            'status' => 'error',
-            'msg' => '',
-        );
+        $status = self::prepare_status();
         $meta_keys = Core::get_instance()->meta_keys;
 
         if ( empty($_POST['order_id']) ) {
@@ -220,13 +255,14 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Execute mass action command
+     * @since 1.0.0
+     */
     public static function admin_btn_table_mass_action()
     {
-        $status = array(
-            'status' => 'error',
-            'msg' => '',
-            'file' => '',
-        );
+        $status = self::prepare_status(array('file' => ''));
+
         $meta_keys = Core::get_instance()->meta_keys;
 
         if ( empty($_POST['mass_action']) ) {
@@ -264,8 +300,16 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Get Woocommerce order by ID
+     * @since 1.0.0
+     * 
+     * @param (integer) $order_id - WC Order ID
+     * @return (object) - WC Order
+     */
     private static function get_wc_order( $order_id )
     {
+        $status = self::prepare_status();
         $wc_order = wc_get_order($order_id);
 
         if ( empty($wc_order) ) {
@@ -275,6 +319,37 @@ class Ajax
         return $wc_order;
     }
 
+    /**
+     * Prepear status object
+     * @since 1.0.0
+     * 
+     * @param (array) $add_additional - Additional array elements for status object
+     * @return (array) - Status object
+     */
+    private static function prepare_status( $add_additional = false )
+    {
+        $status = array(
+            'status' => 'error',
+            'msg' => '',
+        );
+
+        if ( is_array($add_additional) ) {
+            foreach ( $add_additional as $key => $value ) {
+                $status[$key] = $value;
+            }
+        }
+
+        return $status;
+    }
+
+    /**
+     * Print error message and stop execute AJAX request
+     * @since 1.0.0
+     * 
+     * @param (array) $status - Status object
+     * @param (string) $message - Message text
+     * @param (boolean) $add_programmer_note - Whether to add additional text to the message
+     */
     private static function output_status_on_error( $status, $message = '', $add_programmer_note = false )
     {
         if ( $status['status'] != 'error' ) {
@@ -294,6 +369,14 @@ class Ajax
         wp_die();
     }
 
+    /**
+     * Fix phone number
+     * @since 1.0.0
+     * 
+     * @param (string) $phone - Phone number
+     * @param (string) $prefix - Phone number prefix which need remove
+     * @return (string) - Fixed phone number
+     */
     private static function fix_phone( $phone, $prefix )
     {
         if ( substr($phone, 0, strlen($prefix)) === $prefix ) {
