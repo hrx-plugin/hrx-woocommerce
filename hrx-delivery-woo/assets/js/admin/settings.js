@@ -79,6 +79,8 @@
             $(parent).find(selector).prop("id", key + "_" + subkey);
             $(parent).find(selector).prop("name", name + "[" + subkey + "]");
             $(parent).find(selector).val(value);
+            $(parent).find(selector).prop("min", 0);
+            $(parent).find(selector).prop("max", "");
         },
 
         prices_prepare_new_block: function( element, container, fields_key, fields_name ) {
