@@ -109,18 +109,22 @@ if ( $page_current_tab == 'warehouses' ) {
 
     if ( $page_current_tab == 'new_orders' ) {
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending');
-        $args['not_' . $this->core->meta_keys->order_status] = array('ready', 'cancelled');
+        // Not show HRX statuses
+        $args['not_' . $this->core->meta_keys->order_status] = array('ready', 'cancelled', 'in_delivery', 'delivered', 'in_return');
     }
     if ( $page_current_tab == 'send_orders' ) {
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending');
+        // Show HRX statuses
         $args[$this->core->meta_keys->order_status] = array('ready', 'in_delivery', 'delivered', 'in_return');
     }
     if ( $page_current_tab == 'cancelled_orders' ) {
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending', 'wc-completed');
+        // Show HRX statuses
         $args[$this->core->meta_keys->order_status] = array('cancelled');
     }
     if ( $page_current_tab == 'completed_orders' ) {
         $args['status'] = array('wc-completed');
+        // Show all HRX statuses
     }
 
     if ( isset($tab_columns['order_status']['filter_options']) && ! empty($args['status']) ) {
