@@ -55,8 +55,8 @@ $hrx_params['option_prefix'] = 'hrx';
 
 /* Update */
 $hrx_params['update'] = array(
-    'check_url' => 'https://api.github.com/repos/mijora/hrx-woocommerce/releases/latest',
-    'download_url' => 'https://github.com/mijora/hrx-woocommerce/releases/latest/download/hrx-delivery-woo.zip',
+    'check_url' => 'https://api.github.com/repos/hrx-plugin/hrx-woocommerce/releases/latest',
+    'download_url' => 'https://github.com/hrx-plugin/hrx-woocommerce/releases/latest/download/hrx-delivery-woo.zip',
 );
 
 /* Init */
