@@ -54,6 +54,8 @@ class Main
         wp_localize_script($this->core->id . '_front_global', 'hrxGlobalVars', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'img_url' => $img_dir,
+            'identifier_prefix' => $this->core->option_prefix . '_',
+            'available_countries' => Helper::get_available_countries(),
             'txt' => array(
                 'mapModal' => array(
                     'modal_header' => __('Terminal map', 'hrx-delivery'),

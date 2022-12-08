@@ -2,6 +2,7 @@
 
     window.hrxMap = {
         lib: null,
+        iconsURL: 'https://mijora.ams3.digitaloceanspaces.com/hrx/hrx/',
         init: function( container, terminals ) {
             this.lib = new HrxMapping();
             
@@ -21,6 +22,15 @@
             });
 
             this.lib.sub("tmjs-ready", function(data) {
+                hrxMap.lib.map.createIcon('default', hrxMap.iconsURL + 'default.png');
+                for ( var i = 0; i < hrxGlobalVars.available_countries.length; i++) {
+                    hrxMap.lib.map.createIcon(
+                        hrxGlobalVars.identifier_prefix + hrxGlobalVars.available_countries[i],
+                        hrxMap.iconsURL + hrxGlobalVars.available_countries[i] + '.png'
+                    );
+                }
+                hrxMap.lib.map.refreshMarkerIcons();
+
                 let selected_location = data.map.getLocationById(selected_field.value);
                 if (typeof(selected_location) != 'undefined' && selected_location != null) {
                     hrxMap.lib.dom.setActiveTerminal(selected_location);

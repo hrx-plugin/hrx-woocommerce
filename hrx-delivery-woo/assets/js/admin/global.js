@@ -55,35 +55,38 @@
             var button = $(button);
             button.addClass("hrx-loading").prop("disabled", true);
 
-            $.ajax({
-                type: "POST",
-                url: hrxGlobalVars.ajax_url,
-                dataType: "json",
-                async: false,
-                data: {
-                    action: "hrx_" + action
-                },
-                success: function( response ) {
-                    if ( output_to ) {
-                        $(output_to).removeClass("value-empty");
-                        
-                        if ( response.status == "error" ) {
-                            $(output_to).addClass("value-empty");
+            setTimeout(function (){
+                $.ajax({
+                    type: "POST",
+                    url: hrxGlobalVars.ajax_url,
+                    dataType: "json",
+                    async: false,
+                    data: {
+                        action: "hrx_" + action
+                    },
+                    success: function( response ) {
+                        if ( output_to ) {
+                            $(output_to).removeClass("value-empty");
+                            $(output_to).removeClass("value-old");
+                            
+                            if ( response.status == "error" ) {
+                                $(output_to).addClass("value-empty");
+                            }
+                            
+                            $(output_to).html(response.msg);
                         }
-                        
-                        $(output_to).html(response.msg);
+                    },
+                    error: function( xhr, status, error ) {
+                        if ( output_to ) {
+                            $(output_to).addClass("value-empty");
+                            $(output_to).html(hrxGlobalVars.txt.request_error + " - " + error);
+                        }
+                    },
+                    complete: function() {
+                        button.removeClass("hrx-loading").prop("disabled", false);
                     }
-                },
-                error: function( xhr, status, error ) {
-                    if ( output_to ) {
-                        $(output_to).addClass("value-empty");
-                        $(output_to).html(hrxGlobalVars.txt.request_error + " - " + error);
-                    }
-                },
-                complete: function() {
-                    button.removeClass("hrx-loading").prop("disabled", false);
-                }
-            });
+                });
+            }, 500);
         },
 
         execute_table_mass_button: function( button, mass_action, selected_orders, show_alert_on_error = true ) {
