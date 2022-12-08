@@ -9,6 +9,7 @@ if ( ! defined('ABSPATH') ) {
 use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Helper;
+use HrxDeliveryWoo\Core;
 
 class Terminal
 {
@@ -19,6 +20,23 @@ class Terminal
         }
         
         return Sql::get_multi_rows('delivery', array('country' => $country));
+    }
+
+    public static function add_info_to_list_elems( $terminals_list, $add_info = array(), $allow_override = false )
+    {
+        $changed_list = array();
+        foreach ( $terminals_list as $elem_key => $elem_data ) {
+            $elem = (array)$elem_data;
+            foreach ( $add_info as $info_key => $info_value ) {
+                if ( ! $allow_override && isset($elem[$info_key]) ) {
+                    continue;
+                }
+                $elem[$info_key] = $info_value;
+            }
+            $changed_list[$elem_key] = (object)$elem;
+        }
+
+        return $changed_list;
     }
 
     public static function prepare_options( $terminals_list, $force_show_id = false )
@@ -110,9 +128,10 @@ class Terminal
     public static function build_list_in_script( $params )
     {
         $method_key = $params['method'] ?? 'terminal';
+        $country = $params['country'] ?? '';
         $terminals_list = $params['all_terminals'] ?? array();
 
-        $terminals_script_data = self::prepare_script_data($terminals_list);
+        $terminals_script_data = self::prepare_script_data($terminals_list, $country);
 
         $output = '<script>';
         $output .= 'var hrx_' . $method_key . '_terminals = ' . json_encode($terminals_script_data) . ';';
@@ -121,8 +140,9 @@ class Terminal
         return $output;
     }
 
-    public static function prepare_script_data( $terminals_list )
+    public static function prepare_script_data( $terminals_list, $country )
     {
+        $core = Core::get_instance();
         $list = array();
 
         foreach ( $terminals_list as $terminal_data ) {
@@ -138,6 +158,7 @@ class Terminal
                     'lat' => $terminal_data->latitude,
                     'lng' => $terminal_data->longitude,
                 ),
+                'identifier' => $core->option_prefix . '_' . $country,
             );
         }
 

@@ -21,6 +21,15 @@
             });
 
             this.lib.sub("tmjs-ready", function(data) {
+                hrxMap.lib.map.createIcon('default', 'https://mijora.ams3.digitaloceanspaces.com/hrx/hrx/default.png');
+                for ( var i = 0; i < hrxGlobalVars.available_countries.length; i++) {
+                    hrxMap.lib.map.createIcon(
+                        hrxGlobalVars.identifier_prefix + hrxGlobalVars.available_countries[i],
+                        'https://mijora.ams3.digitaloceanspaces.com/hrx/hrx/' + hrxGlobalVars.available_countries[i] + '.png'
+                    );
+                }
+                hrxMap.lib.map.refreshMarkerIcons();
+
                 let selected_location = data.map.getLocationById(selected_field.value);
                 if (typeof(selected_location) != 'undefined' && selected_location != null) {
                     hrxMap.lib.dom.setActiveTerminal(selected_location);
