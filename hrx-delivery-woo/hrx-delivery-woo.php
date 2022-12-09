@@ -5,15 +5,15 @@
  * Author: Mijora
  * Author URI: https://www.mijora.dev/
  * Plugin URI: https://www.mijora.dev/
- * Version: 1.0.0
+ * Version: 1.0.1
  * 
  * Domain Path: /languages
  * Text Domain: hrx-delivery
  * 
  * Requires at least: 5.1
- * Tested up to: 6.0.1
+ * Tested up to: 6.1.1
  * WC requires at least: 5.0.0
- * WC tested up to: 6.8.2
+ * WC tested up to: 7.1.1
  * Requires PHP: 7.2
  */
 
@@ -29,7 +29,7 @@ use HrxDeliveryWoo\Helper;
 
 /* Version */
 $hrx_params = array(
-    'version' => '1.0.0',
+    'version' => '1.0.1',
     'custom_changes' => array(), // If plugin have custom changes, add changes descriptions to this array
 );
 

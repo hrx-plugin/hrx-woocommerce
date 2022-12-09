@@ -154,6 +154,7 @@ class Front
         $output .= '<div id="hrx-method-' . $method_key . '-map" class="hrx-map map-' . $method_key . '" data-method="' . $method_key .'" data-country="' . $country . '"></div>';
         $output .= Terminal::build_list_in_script(array(
             'method' => $method_key,
+            'country' => $country,
             'all_terminals' => $terminals_list,
         ));
         $output .= '</div>';
