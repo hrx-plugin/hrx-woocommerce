@@ -423,6 +423,23 @@ class Pages
         return $output;
     }
 
+    public function default_per_page_options()
+    {
+        $available_values = array(10, 25, 50, 100);
+        
+        if ( ! in_array($this->default_per_page, $available_values)) {
+            $available_values[] = $this->default_per_page;
+        }
+        sort($available_values);
+
+        return $available_values;
+    }
+
+    public function get_current_per_page()
+    {
+        return (isset($_GET['per_page'])) ? (int) $_GET['per_page'] : $this->default_per_page;
+    }
+
     public function page_management()
     {
         include_once($this->core->structure->path . $this->core->structure->includes . 'page-management.php');

@@ -20,6 +20,7 @@ $page_tabs = $page_params['tabs'];
 $page_current_tab = 'new_orders';
 $page_current_no = 1;
 $page_current_filters = array();
+$per_page = $this->get_current_per_page();
 $pagination_links = false;
 $all_columns = $this->get_available_table_columns();
 $show_mass_buttons = array();
@@ -102,7 +103,7 @@ if ( $page_current_tab == 'warehouses' ) {
     $show_mass_buttons = array(/*'manifest',*/ 'ship_label', 'return_label');
     $args = array(
         'paginate' => true,
-        'limit' => $this->default_per_page,
+        'limit' => $per_page,
         'paged' => $page_current_no,
         'hrx_delivery_method' => array_keys($this->core->methods),
     );
@@ -200,11 +201,14 @@ if ( $page_current_tab == 'warehouses' ) {
     <?php echo PagesHtml::build_page_title($page_title, $page_image); ?>
     <?php echo PagesHtml::build_page_navigation($page_tabs, $page_current_tab); ?>
     
-    <?php echo PagesHtml::build_mass_buttons(array(
-        'key' => $page_current_tab,
-        'show_buttons' => $show_mass_buttons,
-    )); ?>
-    <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
+    <div class="table-header">
+        <?php echo PagesHtml::build_mass_buttons(array(
+            'key' => $page_current_tab,
+            'show_buttons' => $show_mass_buttons,
+        )); ?>
+        <?php echo PagesHtml::build_per_page_selection($this->default_per_page_options(), $per_page); ?>
+        <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
+    </div>
     <?php echo PagesHtml::build_table(array(
         'key' => $page_current_tab,
         'columns' => $tab_columns,
@@ -212,9 +216,11 @@ if ( $page_current_tab == 'warehouses' ) {
         'selected' => $selected_values,
         'filters_selected' => $page_current_filters,
     )); ?>
-    <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
-    <?php echo PagesHtml::build_mass_buttons(array(
-        'key' => $page_current_tab,
-        'show_buttons' => $show_mass_buttons,
-    )); ?>
+    <div class="table-footer">
+        <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
+        <?php echo PagesHtml::build_mass_buttons(array(
+            'key' => $page_current_tab,
+            'show_buttons' => $show_mass_buttons,
+        )); ?>
+    </div>
 </div>

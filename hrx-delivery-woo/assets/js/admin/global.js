@@ -47,6 +47,25 @@
             }
 
             return url.protocol === "http:" || url.protocol === "https:"
+        },
+
+        add_param_to_url: function( param_name, param_value, remove_old_params = [] ) {
+            var url = window.location.href;
+            
+            if ( remove_old_params.length > 0 ) {
+                for ( var i = 0; i < remove_old_params.length; ++i ) {
+                    var pattern = new RegExp("[?&]" + remove_old_params[i] + "=([^&]+)");
+                    url = url.replace(pattern, "");
+                }
+            }
+
+            if ( url.indexOf("?") < 0 ) {
+                url += "?" + param_name + "=" + param_value;
+            } else {
+                url += "&" + param_name + "=" + param_value;
+            }
+            
+            return url;
         }
     };
 
