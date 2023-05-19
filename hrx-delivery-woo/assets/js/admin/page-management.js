@@ -1,6 +1,10 @@
 (function($) {
 
     $(document).ready(function() {
+        $(document).on('change', "#hrx-per_page", function() {
+            window.location = hrxHelper.add_param_to_url('per_page', $(this).val(), ["per_page", "paged"]);
+        });
+
         $(document).on("change", ".hrx-table-warehouses .column-selected input", function() {
             hrxAjax.change_default_warehouse(this.value);
         });

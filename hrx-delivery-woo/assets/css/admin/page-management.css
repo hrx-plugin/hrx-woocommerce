@@ -51,6 +51,14 @@
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+.hrx-page .table-header {
+    position: relative;
+}
+.hrx-page .table-header .page-pp {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 9px;
+}
 .hrx-page .hrx-table-filter {
     background-color: rgba(0, 115, 170, 0.5);
 }

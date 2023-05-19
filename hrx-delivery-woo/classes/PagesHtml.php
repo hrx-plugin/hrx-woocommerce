@@ -64,6 +64,31 @@ class PagesHtml
         return $html;
     }
 
+    public static function build_per_page_selection( $values, $current = 25 )
+    {
+        if ( empty($values) ) {
+            return '';
+        }
+
+        ob_start();
+        ?>
+        <form id="hrx-per_page-form" class="page-pp" method="post">
+            <?php _e('Show', 'hrx-delivery') ?>
+            <select id="hrx-per_page" name="per_page">
+              <?php foreach ($values as $pp) {
+                echo '<option value="' . $pp . '"';
+                echo ($current == $pp) ? 'selected' : '';
+                echo '>' . $pp . '</option>';
+              } ?>
+            </select>
+          </form>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+
+        return $html;
+    }
+
     public static function build_mass_buttons( $params )
     {
         $table_key = $params['key'] ?? '';
