@@ -21,6 +21,7 @@ $page_current_tab = 'new_orders';
 $page_current_no = 1;
 $page_current_filters = array();
 $per_page = $this->get_current_per_page();
+$per_page_options = $this->default_per_page_options();
 $pagination_links = false;
 $all_columns = $this->get_available_table_columns();
 $show_mass_buttons = array();
@@ -76,6 +77,7 @@ if ( ! isset($_POST['clear_filters']) ) {
 $tab_data = array();
 $selected_values = array();
 if ( $page_current_tab == 'warehouses' ) {
+    $per_page_options = false;
     $current_warehouse = Warehouse::get_default_id();
 
     foreach ( $all_warehouses as $warehouse ) {
@@ -98,6 +100,7 @@ if ( $page_current_tab == 'warehouses' ) {
         $selected_values['selected'] = $current_warehouse;
     }
 } else if ( $page_current_tab == 'manifests' ) {
+    $per_page_options = false;
     //TODO: Manifest - Do it if need it
 } else {
     $show_mass_buttons = array(/*'manifest',*/ 'ship_label', 'return_label');
@@ -206,7 +209,7 @@ if ( $page_current_tab == 'warehouses' ) {
             'key' => $page_current_tab,
             'show_buttons' => $show_mass_buttons,
         )); ?>
-        <?php echo PagesHtml::build_per_page_selection($this->default_per_page_options(), $per_page); ?>
+        <?php echo PagesHtml::build_per_page_selection($per_page_options, $per_page); ?>
         <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
     </div>
     <?php echo PagesHtml::build_table(array(
