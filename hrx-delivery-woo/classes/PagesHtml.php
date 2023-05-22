@@ -259,10 +259,17 @@ class PagesHtml
             <?php foreach ( $data as $row_id => $row ) : ?>
                 <tr class="data-row" data-id="<?php echo $row_id; ?>">
                     <?php foreach ( $columns as $col_id => $col_data ) : ?>
-                        <?php $classes = self::prepare_class_list_html($col_id, $col_data); ?>
+                        <?php
+                        $classes = self::prepare_class_list_html($col_id, $col_data);
+                        $order_data = $data_selected['actions'][$row_id];
+                        $order_registered = (! empty($order_data['hrx_order_id'])) ? true : false;
+                        $order_status = (! empty($order_data['hrx_order_status'])) ? $order_data['hrx_order_status'] : 'new';
+                        ?>
                         <?php if ( $col_id == 'cb' ) : ?>
                             <th scope="row" class="<?php echo $classes; ?>">
-                                <input type="checkbox" name="col_<?php echo $col_id; ?>[]" value="<?php echo $row_id; ?>"/>
+                                <?php if ( $order_registered && $order_status != 'error' ) : ?>
+                                    <input type="checkbox" name="col_<?php echo $col_id; ?>[]" value="<?php echo $row_id; ?>"/>
+                                <?php endif; ?>
                             </th>
                         <?php elseif ( $col_id == 'selected' ) : ?>
                             <td class="<?php echo $classes; ?>">
@@ -276,9 +283,6 @@ class PagesHtml
                         <?php elseif ( $col_id == 'actions' ) : ?>
                             <td class="<?php echo $classes; ?>">
                                 <?php
-                                $order_data = $data_selected[$col_id][$row_id];
-                                $order_registered = (! empty($order_data['hrx_order_id'])) ? true : false;
-                                $order_status = (! empty($order_data['hrx_order_status'])) ? $order_data['hrx_order_status'] : 'new';
                                 $hide_btn = ($order_status == 'ready') ? 'display:none;' : '';
                                 $btn_text = ($order_registered) ? __('Regenerate order', 'hrx-delivery') : __('Register order', 'hrx-delivery');
                                 ?>
