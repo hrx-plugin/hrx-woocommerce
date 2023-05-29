@@ -170,7 +170,7 @@ if ( $page_current_tab == 'warehouses' ) {
         $hrx_status_text = $this->build_hrx_status_text($order);
 
         $tab_data[$order->get_id()] = array(
-            'order_id' => '<a href="' . $order->get_edit_order_url() . '">#' . $order->get_order_number() . '</a>',
+            'order_id' => '<a href="' . $order->get_edit_order_url() . '">#' . $order->get_order_number() . '</a>' . PagesHtml::build_order_preview_link(),
             'customer' => $this->get_order_customer_fullname($order),
             'order_status' => $this->get_order_status_text($order),
             'order_date' => $order->get_date_created()->format('Y-m-d H:i:s'),
@@ -201,9 +201,12 @@ if ( $page_current_tab == 'warehouses' ) {
 /* Template */
 ?>
 <div class="wrap hrx-page hrx-page-management">
+    <div class="table-script-elements">
+        <?php echo PagesHtml::build_message_modal(); ?>
+        <?php echo PagesHtml::build_order_preview_modal(); ?>
+    </div>
     <?php echo PagesHtml::build_page_title($page_title, $page_image); ?>
     <?php echo PagesHtml::build_page_navigation($page_tabs, $page_current_tab); ?>
-    
     <div class="table-header">
         <?php echo PagesHtml::build_mass_buttons(array(
             'key' => $page_current_tab,
