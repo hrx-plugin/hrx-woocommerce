@@ -162,6 +162,135 @@ class PagesHtml
         return $output;
     }
 
+    public static function build_order_preview_link()
+    {
+        $link_title = __('Preview', 'hrx-delivery');
+        $output = '<a href="#" class="hrx-open-modal " data-modal="order_preview" title="' . $link_title . '">' . $link_title . '</a>';
+
+        return $output;
+    }
+
+    public static function build_order_preview_modal()
+    {
+        ob_start();
+        ?>
+        <div id="hrx-modal-order_preview" class="hrx-modal hrx-modal-order_preview" style="display:none;">
+            <div class="modal-holder">
+                <div class="modal-header">
+                    <div class="modal-header-title">
+                        <?php printf(__('WC Order #%s', 'hrx-delivery'), '<span class="modal-data-title"></span>'); ?>
+                    </div>
+                    <mark class="modal-data-status order-status"><span>Test</span></mark>
+                    <button class="modal-close" onclick="hrxModal.close(this);"></button>
+                </div>
+                <div class="modal-content">
+                    <div class="modal-content-billing">
+                        <span class="modal-content-title"><?php echo __('Billing details', 'hrx-delivery'); ?></span>
+                        <span class="modal-data-billing-name"></span>
+                        <span class="modal-data-billing-address"></span>
+                        <span class="modal-data-billing-city"></span>
+                        <span class="modal-data-billing-postcode"></span>
+                        <span class="modal-data-billing-country"></span>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Contacts', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-billing-email"></span>
+                            <span class="modal-data-billing-phone"></span>
+                        </div>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Payment method', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-billing-payment"></span>
+                            <span class="modal-value-title"><?php echo __('Total order amount', 'hrx-delivery'); ?></span>
+                            <span class="modal-value-inline">
+                                <span class="modal-value-inline-title"><?php echo __('Products', 'hrx-delivery'); ?>:</span>
+                                <span class="modal-data-billing-total-products"></span>
+                            </span>
+                            <span class="modal-value-inline">
+                                <span class="modal-value-inline-title"><?php echo __('Shipping', 'hrx-delivery'); ?>:</span>
+                                <span class="modal-data-billing-total-shipping"></span>
+                            </span>
+                            <span class="modal-value-inline">
+                                <span class="modal-value-inline-title"><?php echo __('Tax', 'hrx-delivery'); ?>:</span>
+                                <span class="modal-data-billing-total-tax"></span>
+                            </span>
+                            <span class="modal-value-inline">
+                                <span class="modal-value-inline-title"><?php echo __('Total', 'hrx-delivery'); ?>:</span>
+                                <span class="modal-data-billing-total"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="modal-content-shipping">
+                        <span class="modal-content-title"><?php echo __('Shipping details', 'hrx-delivery'); ?></span>
+                        <span class="modal-data-shipping-name"></span>
+                        <span class="modal-data-shipping-address"></span>
+                        <span class="modal-data-shipping-city"></span>
+                        <span class="modal-data-shipping-postcode"></span>
+                        <span class="modal-data-shipping-country"></span>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Shipping method', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-method"></span>
+                            <span class="modal-value-title"><?php echo __('Parcel terminal', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-terminal">-</span>
+                        </div>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Warehouse', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-warehouse">-</span>
+                            <span class="modal-value-title"><?php echo __('Size', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-size"></span>
+                        </div>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Tracking number', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-tracking">-</span>
+                        </div>
+                    </div>
+                    <div class="modal-content-products">
+                        <table class="modal-content-table modal-data-products">
+                            <tr>
+                                <th><?php echo __('Product', 'hrx-delivery'); ?></th>
+                                <th><?php echo __('SKU', 'hrx-delivery'); ?></th>
+                                <th><?php echo __('Price', 'hrx-delivery'); ?></th>
+                                <th><?php echo __('Quantity', 'hrx-delivery'); ?></th>
+                                <th><?php echo __('Total', 'hrx-delivery'); ?></th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+            <div class="modal-background" onclick="hrxModal.close(this);"></div>
+        </div>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+        
+        return $html;
+    }
+
+    public static function build_message_modal()
+    {
+        ob_start();
+        ?>
+        <div id="hrx-modal-message" class="hrx-modal hrx-modal-message" style="display:none;">
+            <div class="modal-holder">
+                <div class="modal-header">
+                    <div class="modal-header-title">
+                        <span class="modal-data-title"></span>
+                    </div>
+                    <button class="modal-close" onclick="hrxModal.close(this);"></button>
+                </div>
+                <div class="modal-content">
+                    <span class="modal-data-message"></span>
+                </div>
+            </div>
+            <div class="modal-background" onclick="hrxModal.close(this);"></div>
+        </div>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+        
+        return $html;
+    }
+
     private static function build_table_filter( $columns, $params )
     {
         if ( ! is_array($columns) ) {
@@ -271,6 +400,8 @@ class PagesHtml
                                     <input type="checkbox" name="col_<?php echo $col_id; ?>[]" value="<?php echo $row_id; ?>"/>
                                 <?php endif; ?>
                             </th>
+                        <?php elseif ( $col_id == 'order_id' ) : ?>
+                            <td class="<?php echo $classes; ?>"><?php echo $row[$col_id] ?? ''; ?></td>
                         <?php elseif ( $col_id == 'selected' ) : ?>
                             <td class="<?php echo $classes; ?>">
                                 <?php $checked = (isset($data_selected[$col_id]) && $data_selected[$col_id] == $row[$col_id]) ? 'checked' : ''; ?>

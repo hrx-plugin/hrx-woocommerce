@@ -69,6 +69,88 @@
         }
     };
 
+    window.hrxModal = {
+        modals: {},
+        check_element: function( modal ) {
+            return modal.length;
+        },
+        init: function( modal_id ) {
+            const modal = $("#hrx-modal-" + modal_id);
+            if ( ! this.check_element(modal) ) {
+                return;
+            }
+
+            this.modals[modal_id] = modal;
+
+            return hrxModal;
+        },
+        close: function( close_button ) {
+            var modal = $(close_button).closest(".hrx-modal");
+            if ( ! this.check_element(modal) ) {
+                return;
+            }
+            modal.hide();
+        },
+        check: function( modal_id ) {
+            return modal_id in this.modals;
+        },
+        open: function( modal_id ) {
+            if ( this.check(modal_id) ) {
+                this.modals[modal_id].show();
+            }
+        },
+        change_data_html: function( modal_id, data_key, data_value ) {
+            if ( ! this.check(modal_id) ) {
+                return;
+            }
+
+            this.modals[modal_id].find(".modal-data-" + data_key).html(data_value);
+        },
+        add_data_class: function( modal_id, data_key, class_name ) {
+            if ( ! this.check(modal_id) ) {
+                return;
+            }
+
+            this.modals[modal_id].find(".modal-data-" + data_key).addClass(class_name);
+        },
+        remove_data_class: function( modal_id, data_key, class_name ) {
+            if ( ! this.check(modal_id) ) {
+                return;
+            }
+
+            this.modals[modal_id].find(".modal-data-" + data_key).removeClass(class_name);
+        },
+        add_table_rows: function( modal_id, data_key, rows_values = [] ) {
+            if ( ! this.check(modal_id) || ! rows_values.length ) {
+                return;
+            }
+
+            const table = this.modals[modal_id].find(".modal-data-" + data_key);
+            if ( ! table.length ) {
+                return;
+            }
+
+            for ( let i = 0; i < rows_values.length; i++ ) {
+                let new_row = table[0].insertRow();
+                for ( let j = 0; j < rows_values[i].length; j++ ) {
+                    let new_cell = new_row.insertCell();
+                    let text = rows_values[i][j];
+                    if ( text == "" ) {
+                        text = "—";
+                    }
+                    new_cell.innerHTML = text;
+                }
+            }
+        },
+        remove_table_rows: function( modal_id, data_key ) {
+            if ( ! this.check(modal_id) ) {
+                return;
+            }
+
+            this.modals[modal_id].find(".modal-data-" + data_key).find("tr:not(:first)").remove();
+        }
+    };
+
     window.hrxAjax = {
         execute_button_action: function( button, action, output_to = false ) {
             var button = $(button);
@@ -322,6 +404,21 @@
                 complete: function() {
                     button.removeClass("hrx-loading").prop("disabled", false);
                 }
+            });
+        },
+
+        get_wc_order_data: function( order_id, callback ) {
+            $.ajax({
+                type: "POST",
+                url: hrxGlobalVars.ajax_url,
+                dataType: "json",
+                async: false,
+                data: {
+                    action: "hrx_get_wc_order_data",
+                    wc_order_id: order_id,
+                },
+                success: callback,
+                error: callback
             });
         }
     };

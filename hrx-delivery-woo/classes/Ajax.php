@@ -37,6 +37,7 @@ class Ajax
         add_action('wp_ajax_hrx_get_label', $this_class . 'admin_btn_get_hrx_label');
         add_action('wp_ajax_hrx_ready_order', $this_class . 'admin_btn_ready_hrx_order');
         add_action('wp_ajax_hrx_table_mass_action', $this_class . 'admin_btn_table_mass_action');
+        add_action('wp_ajax_hrx_get_wc_order_data', $this_class . 'admin_hrx_get_wc_order_data');
     }
 
     /**
@@ -297,6 +298,121 @@ class Ajax
         }
 
         echo json_encode($status);
+        wp_die();
+    }
+
+    public static function admin_hrx_get_wc_order_data()
+    {
+        if ( empty($_POST['wc_order_id']) ) {
+            wp_die();
+        }
+
+        $wc_order_id = esc_attr($_POST['wc_order_id']);
+        $wc_order = wc_get_order($wc_order_id);
+
+        if ( ! $wc_order ) {
+            wp_die();
+        }
+
+        $meta_keys = Core::get_instance()->meta_keys;
+        $hrx_method = $wc_order->get_meta($meta_keys->method);
+
+        $billing_address = $wc_order->get_billing_address_1();
+        if ( ! empty($wc_order->get_billing_address_2()) ) {
+            $billing_address .= ' - ' . $wc_order->get_billing_address_2();
+        }
+        $billing_city = $wc_order->get_billing_city();
+        if ( ! empty($wc_order->get_billing_state()) ) {
+            $billing_city .= ', ' . $wc_order->get_billing_state();
+        }
+        $shipping_address = $wc_order->get_shipping_address_1();
+        if ( ! empty($wc_order->get_shipping_address_2()) ) {
+            $shipping_address .= ' - ' . $wc_order->get_shipping_address_2();
+        }
+        $shipping_city = $wc_order->get_shipping_city();
+        if ( ! empty($wc_order->get_shipping_state()) ) {
+            $shipping_city .= ', ' . $wc_order->get_shipping_state();
+        }
+
+        $terminal_title = '—';
+        if ( Helper::method_has_terminals($hrx_method) ) {
+            $terminal_id = $wc_order->get_meta($meta_keys->terminal_id);
+            $terminal_title = Terminal::get_name_by_id($terminal_id);
+        }
+        $tracking_number = $wc_order->get_meta($meta_keys->track_number);
+        if ( empty($tracking_number) ) {
+            $tracking_number = '—';
+        }
+        $warehouse_id = $wc_order->get_meta($meta_keys->warehouse_id);
+
+        $order_dimensions = Shipment::get_dimensions($wc_order);
+        $decimal_separator = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : '.';
+        $weight_text = number_format((float)$order_dimensions['weight'], 3, $decimal_separator, '') . ' kg';
+        $dimensions_text = (float)$order_dimensions['width'] . '×'
+            . (float)$order_dimensions['height'] . '×'
+            . (float)$order_dimensions['length'] . ' cm';
+
+        $products = array();
+        foreach ( $wc_order->get_items() as $item_id => $item ) {
+            $product = $item->get_product();
+            $products[] = array(
+                'id' => $item->get_product_id(),
+                'name' => $item->get_name(),
+                'sku' => $product->get_sku(),
+                'price' => wc_price($product->get_price()),
+                'qty' => $item->get_quantity(),
+                'total' => wc_price($item->get_total()),
+            );
+        }
+
+        $data = array(
+            'wc_order' => array(
+                'id' => $wc_order_id,
+                'number' => $wc_order->get_order_number(),
+                'status' => $wc_order->get_status(),
+                'status_text' => wc_get_order_status_name($wc_order->get_status()),
+                'payment' => array(
+                    'title' => $wc_order->get_payment_method_title(),
+                    'currency' => get_woocommerce_currency_symbol(),
+                    'products' => wc_price($wc_order->get_subtotal()),
+                    'shipping' => wc_price($wc_order->get_shipping_total()),
+                    'tax' => wc_price($wc_order->get_total_tax()),
+                    'total' => wc_price($wc_order->get_total()),
+                ),
+                'billing' => array(
+                    'fullname' => $wc_order->get_formatted_billing_full_name(),
+                    'company' => $wc_order->get_billing_company(),
+                    'address' => $billing_address,
+                    'city' => $billing_city,
+                    'postcode' => $wc_order->get_billing_postcode(),
+                    'country' => $wc_order->get_billing_country(),
+                    'country_name' => \WC()->countries->countries[$wc_order->get_billing_country()],
+                    'email' => $wc_order->get_billing_email(),
+                    'phone' => $wc_order->get_billing_phone(),
+                ),
+                'shipping' => array(
+                    'fullname' => $wc_order->get_formatted_shipping_full_name(),
+                    'company' => $wc_order->get_shipping_company(),
+                    'address' => $shipping_address,
+                    'city' => $shipping_city,
+                    'postcode' => $wc_order->get_shipping_postcode(),
+                    'country' => $wc_order->get_shipping_country(),
+                    'country_name' => \WC()->countries->countries[$wc_order->get_shipping_country()],
+                    'phone' => $wc_order->get_shipping_phone(),
+                ),
+                'shipment' => array(
+                    'method_title' => $wc_order->get_shipping_method(),
+                    'terminal_title' => $terminal_title,
+                    'tracking_number' => $tracking_number,
+                    'warehouse_title' => Warehouse::get_name_by_id($warehouse_id),
+                    'weight' => $weight_text,
+                    'dimensions' => $dimensions_text,
+                ),
+                'products' => $products,
+            )
+        );
+
+        echo json_encode($data);
         wp_die();
     }
 
