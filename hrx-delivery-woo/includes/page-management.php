@@ -45,7 +45,7 @@ if ( $page_current_tab == 'warehouses' ) {
     $all_columns['zip']['filter_label'] = __('Warehouse post code', 'hrx-delivery');
     $all_columns['address']['filter_label'] = __('Warehouse address', 'hrx-delivery');
 } else {
-    $columns = array('cb', 'order_id', 'customer', 'order_status', 'order_date', 'method', 'warehouse_name', 'hrx_order_status', 'actions');
+    $columns = array('cb', 'order_id', 'customer', 'order_status_text', 'order_date', 'method', 'warehouse_name', 'hrx_order_status', 'actions');
     
     $all_columns['warehouse_name']['title'] = __('Warehouse', 'hrx-delivery');
     $all_columns['warehouse_name']['filter'] = 'select';
@@ -131,8 +131,8 @@ if ( $page_current_tab == 'warehouses' ) {
         // Show all HRX statuses
     }
 
-    if ( isset($tab_columns['order_status']['filter_options']) && ! empty($args['status']) ) {
-        $tab_columns['order_status']['filter_options'] = PagesFilter::remove_not_available_options($tab_columns['order_status']['filter_options'], $args['status']);
+    if ( isset($tab_columns['order_status_text']['filter_options']) && ! empty($args['status']) ) {
+        $tab_columns['order_status_text']['filter_options'] = PagesFilter::remove_not_available_options($tab_columns['order_status_text']['filter_options'], $args['status']);
     }
 
     $args = PagesFilter::change_args_by_filters($args, $page_current_filters);
@@ -172,7 +172,8 @@ if ( $page_current_tab == 'warehouses' ) {
         $tab_data[$order->get_id()] = array(
             'order_id' => '<a href="' . $order->get_edit_order_url() . '">#' . $order->get_order_number() . '</a>' . PagesHtml::build_order_preview_link(),
             'customer' => $this->get_order_customer_fullname($order),
-            'order_status' => $this->get_order_status_text($order),
+            'order_status' => $order->get_status(),
+            'order_status_text' => $this->get_order_status_text($order),
             'order_date' => $order->get_date_created()->format('Y-m-d H:i:s'),
             'method' => $this->get_method_delivery_name($order_method, $deliver_to),
             'hrx_order_status' => (! empty($hrx_status_text)) ? $hrx_status_text : '—',

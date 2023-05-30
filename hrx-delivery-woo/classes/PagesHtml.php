@@ -393,6 +393,7 @@ class PagesHtml
                         $order_data = $data_selected['actions'][$row_id];
                         $order_registered = (! empty($order_data['hrx_order_id'])) ? true : false;
                         $order_status = (! empty($order_data['hrx_order_status'])) ? $order_data['hrx_order_status'] : 'new';
+                        $wc_order_status = (! empty($row['order_status'])) ? $row['order_status'] : 'processing';
                         ?>
                         <?php if ( $col_id == 'cb' ) : ?>
                             <th scope="row" class="<?php echo $classes; ?>">
@@ -414,17 +415,28 @@ class PagesHtml
                         <?php elseif ( $col_id == 'actions' ) : ?>
                             <td class="<?php echo $classes; ?>">
                                 <?php
-                                $hide_btn = ($order_status == 'ready') ? 'display:none;' : '';
+                                $hide_for_wc_status = array('completed', 'cancelled', 'refunded', 'failed');
+                                $hide_btn = ($order_status == 'ready' || in_array($wc_order_status, $hide_for_wc_status)) ? 'display:none;' : '';
                                 $btn_text = ($order_registered) ? __('Regenerate order', 'hrx-delivery') : __('Register order', 'hrx-delivery');
                                 ?>
                                 <button id="btn_create_order_<?php echo $row_id; ?>" class="button action btn-create_order" type="button" value="create_order" style="<?php echo $hide_btn; ?>"><?php echo $btn_text; ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_status != 'new') ? 'display:none;' : ''; ?>
+                                <?php
+                                $hide_for_wc_status = array('cancelled', 'refunded', 'failed');
+                                $hide_btn = (! $order_registered || $order_status != 'new' || in_array($wc_order_status, $hide_for_wc_status)) ? 'display:none;' : '';
+                                ?>
                                 <button id="btn_ready_order_<?php echo $row_id; ?>" class="button action btn-ready_order" type="button" value="ready_order" style="<?php echo $hide_btn; ?>"><?php echo __('Mark as ready', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_status != 'ready') ? 'display:none;' : ''; ?>
+                                <?php
+                                $hide_for_wc_status = array('completed', 'cancelled', 'refunded', 'failed');
+                                $hide_btn = (! $order_registered || $order_status != 'ready' || in_array($wc_order_status, $hide_for_wc_status)) ? 'display:none;' : '';
+                                ?>
                                 <button id="btn_unready_order_<?php echo $row_id; ?>" class="button action btn-unready_order" type="button" value="unready_order" style="<?php echo $hide_btn; ?>"><?php echo __('Unmark ready', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_status == 'error') ? 'display:none;' : ''; ?>
+                                <?php
+                                $hide_btn = (! $order_registered || $order_status == 'error') ? 'display:none;' : '';
+                                ?>
                                 <button id="btn_shipment_label_<?php echo $row_id; ?>" class="button action btn-shipment_label" type="button" value="shipment_label" style="<?php echo $hide_btn; ?>"><?php echo __('Shipment label', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_status == 'error') ? 'display:none;' : ''; ?>
+                                <?php
+                                $hide_btn = (! $order_registered || $order_status == 'error') ? 'display:none;' : '';
+                                ?>
                                 <button id="btn_return_label_<?php echo $row_id; ?>" class="button action btn-return_label" type="button" value="return_label" style="<?php echo $hide_btn; ?>"><?php echo __('Return label', 'hrx-delivery'); ?></button>
                             </td>
                         <?php else : ?>
