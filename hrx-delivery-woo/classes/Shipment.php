@@ -374,6 +374,50 @@ class Shipment
         return $status;
     }
 
+    public static function ready_order( $wc_order, $unmark = false )
+    {
+        $core = Core::get_instance();
+        $status = array(
+            'status' => 'error',
+            'msg' => '',
+        );
+
+        $hrx_order_id = $wc_order->get_meta($core->meta_keys->order_id);
+        if ( empty($hrx_order_id) ) {
+            $status['msg'] = __('Failed to get HRX order ID from order', 'hrx-delivery');
+            
+            return $status;
+        }
+
+        $api = new Api();
+
+        if ( $unmark ) {
+            $result = $api->ready_order($hrx_order_id, false);
+        } else {
+            $result = $api->ready_order($hrx_order_id, true);
+        }
+
+        if ( $result['status'] == 'OK' ) {
+            $hrx_status = 'unknown';
+            if ( ! empty($result['data']['status']) ) {
+                $hrx_status = esc_attr($result['data']['status']);
+            }
+            $wc_order->update_meta_data($core->meta_keys->order_status, $hrx_status);
+            $wc_order->save();
+
+            $status['status'] = 'OK';
+            $status['msg'] = __('Order status changed successfully', 'hrx-delivery');
+            
+            return $status;
+        }
+
+        $status['msg'] = __('Failed to change HRX order status', 'hrx-delivery') . ":\n" . $result['msg'];
+        $classOrder = new Order();
+        $classOrder->update_hrx_order_info($wc_order);
+
+        return $status;
+    }
+
     public static function get_status( $wc_order )
     {
         $core = Core::get_instance();
@@ -403,5 +447,105 @@ class Shipment
         );
 
         return $status_titles[$status_key] ?? $status_key;
+    }
+
+    public static function get_allowed_order_actions()
+    {
+        return array(
+            'register_order' => array(
+                'hrx' => array('unknown'),
+                'hrx_not' => array(),
+                'wc' => array(),
+                'wc_not' => array('completed', 'cancelled', 'refunded', 'failed'),
+            ),
+            'regenerate_order' => array(
+                'hrx' => array(),
+                'hrx_not' => array('ready', 'unknown'),
+                'wc' => array(),
+                'wc_not' => array('completed', 'cancelled', 'refunded', 'failed'),
+            ),
+            'mark_ready' => array(
+                'hrx' => array('new'),
+                'hrx_not' => array(),
+                'wc' => array(),
+                'wc_not' => array('cancelled', 'refunded', 'failed'),
+            ),
+            'unmark_ready' => array(
+                'hrx' => array('ready'),
+                'hrx_not' => array(),
+                'wc' => array(),
+                'wc_not' => array('completed', 'cancelled', 'refunded', 'failed'),
+            ),
+            'ship_label' => array(
+                'hrx' => array(),
+                'hrx_not' => array('unknown', 'error'),
+                'wc' => array(),
+                'wc_not' => array(),
+            ),
+            'return_label' => array(
+                'hrx' => array(),
+                'hrx_not' => array('unknown', 'error'),
+                'wc' => array(),
+                'wc_not' => array(),
+            ),
+            /*'manifest' => array(
+                'hrx' => array(),
+                'hrx_not' => array(),
+                'wc' => array(),
+                'wc_not' => array(),
+            ),*/
+        );
+    }
+
+    public static function convert_allowed_order_action_from_mass( $mass_action )
+    {
+        if ( $mass_action == 'register_orders' ) {
+            return 'register_order';
+        }
+        if ( $mass_action == 'regenerate_orders' ) {
+            return 'regenerate_order';
+        }
+
+        return $mass_action;
+    }
+
+    public static function check_any_allowed_order_action( $hrx_status, $wc_status )
+    {
+        $allowed_actions = self::get_allowed_order_actions();
+
+        foreach( $allowed_actions as $action => $statuses ) {
+            if ( self::check_specific_allowed_order_action($action, $hrx_status, $wc_status) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function check_specific_allowed_order_action( $action, $hrx_status, $wc_status )
+    {
+        $allowed_actions = self::get_allowed_order_actions();
+
+        if ( ! isset($allowed_actions[$action]) ) {
+            return true;
+        }
+
+        $allowed_action = $allowed_actions[$action];
+
+        if ( ! empty($allowed_action['hrx_not']) && in_array($hrx_status, $allowed_action['hrx_not']) ) {
+            return false;
+        }
+        if ( ! empty($allowed_action['wc_not']) && in_array($wc_status, $allowed_action['wc_not']) ) {
+            return false;
+        }
+
+        if ( ! empty($allowed_action['hrx']) && ! in_array($hrx_status, $allowed_action['hrx']) ) {
+            return false;
+        }
+        if ( ! empty($allowed_action['wc']) && ! in_array($wc_status, $allowed_action['wc']) ) {
+            return false;
+        }
+
+        return true;
     }
 }

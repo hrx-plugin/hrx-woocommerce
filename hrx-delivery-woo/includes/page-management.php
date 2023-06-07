@@ -103,7 +103,7 @@ if ( $page_current_tab == 'warehouses' ) {
     $per_page_options = false;
     //TODO: Manifest - Do it if need it
 } else {
-    $show_mass_buttons = array(/*'manifest',*/ 'ship_label', 'return_label');
+    $show_mass_buttons = array(/*'manifest',*/'register_orders', 'mark_ready', 'ship_label', 'return_label');
     $args = array(
         'paginate' => true,
         'limit' => $per_page,
@@ -117,16 +117,19 @@ if ( $page_current_tab == 'warehouses' ) {
         $args['not_' . $this->core->meta_keys->order_status] = array('ready', 'cancelled', 'in_delivery', 'delivered', 'in_return');
     }
     if ( $page_current_tab == 'send_orders' ) {
+        $show_mass_buttons = array('unmark_ready', 'ship_label', 'return_label');
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending');
         // Show HRX statuses
         $args[$this->core->meta_keys->order_status] = array('ready', 'in_delivery', 'delivered', 'in_return');
     }
     if ( $page_current_tab == 'cancelled_orders' ) {
+        $show_mass_buttons = array('regenerate_orders', 'ship_label', 'return_label');
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending', 'wc-completed');
         // Show HRX statuses
         $args[$this->core->meta_keys->order_status] = array('cancelled');
     }
     if ( $page_current_tab == 'completed_orders' ) {
+        $show_mass_buttons = array('mark_ready', 'ship_label', 'return_label');
         $args['status'] = array('wc-completed');
         // Show all HRX statuses
     }

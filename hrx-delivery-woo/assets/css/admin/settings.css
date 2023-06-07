@@ -54,6 +54,9 @@
 .woocommerce table.hrx-settings .button-action .action-txt-value.value-old {
     color: orange;
 }
+.woocommerce table.hrx-settings .button-action .action-txt-value.value-progress {
+    color: blue;
+}
 .woocommerce table.hrx-settings tr textarea.textarea-static {
     width: 400px;
     resize: none;

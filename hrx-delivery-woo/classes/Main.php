@@ -12,6 +12,7 @@ use HrxDeliveryWoo\Ajax;
 use HrxDeliveryWoo\Pages;
 use HrxDeliveryWoo\Order;
 use HrxDeliveryWoo\Cronjob;
+use HrxDeliveryWoo\Shipment;
 
 class Main
 {
@@ -102,15 +103,18 @@ class Main
         wp_localize_script($this->core->id . '_admin_global', 'hrxGlobalVars', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'txt' => array(
+                'locations_progress' => __('Downloading locations', 'hrx-delivery'),
                 'request_error' => __('Request error', 'hrx-delivery'),
                 'warehouse_change_error' => __('An error occurred while changing default warehouse', 'hrx-delivery'),
                 'table_action_error' => __('An error occurred while executing action', 'hrx-delivery'),
                 'alert_retry' => __('Do you want to try again?', 'hrx-delivery'),
+                'alert_reload' => __('Do you want reload page?', 'hrx-delivery'),
                 'label_download_fail' => __('The label was received but could not be opened', 'hrx-delivery'),
                 'file_download_fail' => __('The file was received but could not be opened', 'hrx-delivery'),
                 'reload_confirmation' => __('Do you want to reload the page to update the displayed data?', 'hrx-delivery'),
                 'orders_not_selected' => __('You must choose at least one order', 'hrx-delivery'),
             ),
+            'allowed_order_actions' => Shipment::get_allowed_order_actions(),
         ));
         
         if ( $hook == 'post.php' && isset($_GET['action']) && $_GET['action'] == 'edit' ) {

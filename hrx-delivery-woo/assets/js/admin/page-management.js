@@ -97,15 +97,20 @@
         });
 
         $(document).on("click", ".mass-buttons button", function() {
-            var checked_rows = $("#" + this.dataset.table + " tr.data-row .column-cb input:checked");
-            var selected_orders = [];
+            let checked_rows = $("#" + this.dataset.table + " tr.data-row .column-cb input:checked");
+            let selected_orders = [];
 
-            for ( var i = 0; i < checked_rows.length; i++ ) {
-                selected_orders.push(checked_rows[i].value);
+            for ( let i = 0; i < checked_rows.length; i++ ) {
+                let hrx_status = checked_rows[i].dataset.hrxstatus;
+                let wc_status = checked_rows[i].dataset.wcstatus;
+
+                if ( hrxHelper.check_allowed_order_action(this.value, hrx_status, wc_status) ) {
+                    selected_orders.push(checked_rows[i].value);
+                }
             }
 
             hrxAjax.execute_table_mass_button(this, this.value, selected_orders);
         });
     });
-
+    
 })(jQuery);
