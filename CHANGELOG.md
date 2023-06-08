@@ -6,6 +6,7 @@
 - Disabled mass action checkbox for orders, which have error
 - Added Woocommerce Order preview ability in HRX delivery page
 - Disabled new shipment registration when WC order status is Cancelled, Refunded or Failed
+- Added mass buttons for all Order actions
 
 ## [1.0.1] - 2022-12-09
 ### Improved

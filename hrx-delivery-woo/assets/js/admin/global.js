@@ -66,6 +66,29 @@
             }
             
             return url;
+        },
+
+        check_allowed_order_action: function( action, hrx_status, wc_status ) {
+            if ( ! (action in hrxGlobalVars.allowed_order_actions) ) {
+                return true;
+            }
+
+            let allowed_actions = hrxGlobalVars.allowed_order_actions[action];
+
+            if ( allowed_actions.hrx_not.length && allowed_actions.hrx_not.includes(hrx_status) ) {
+                return false;
+            }
+            if ( allowed_actions.wc_not.length && allowed_actions.wc_not.includes(wc_status) ) {
+                return false;
+            }
+            if ( allowed_actions.hrx.length && ! allowed_actions.hrx.includes(hrx_status) ) {
+                return false;
+            }
+            if ( allowed_actions.wc.length && ! allowed_actions.wc.includes(wc_status) ) {
+                return false;
+            }
+
+            return true;
         }
     };
 
@@ -156,19 +179,40 @@
             var button = $(button);
             button.addClass("hrx-loading").prop("disabled", true);
 
+            if ( output_to ) {
+                $(output_to).addClass("value-progress");
+                $(output_to).html(hrxGlobalVars.txt.locations_progress + "... " + 0);
+            }
+
             setTimeout(function (){
-                $.ajax({
-                    type: "POST",
-                    url: hrxGlobalVars.ajax_url,
-                    dataType: "json",
-                    async: false,
-                    data: {
-                        action: "hrx_" + action
-                    },
-                    success: function( response ) {
+                hrxAjax.send_button_action(action, 1, button, output_to);
+            }, 100);
+        },
+
+        send_button_action: function(action, page, button, output_to = false) {
+            $.ajax({
+                type: "POST",
+                url: hrxGlobalVars.ajax_url,
+                dataType: "json",
+                async: false,
+                data: {
+                    action: "hrx_" + action,
+                    page: page
+                },
+                success: function( response ) {
+                    //console.log(response);
+                    if ( response.repeat ) {
+                        setTimeout(function (){
+                            hrxAjax.button_action_ajax(action, page + 1, button, output_to);
+                        }, 100);
+                        if ( output_to ) {
+                            $(output_to).html(hrxGlobalVars.txt.locations_progress + "... " + response.total);
+                        }
+                    } else {
                         if ( output_to ) {
                             $(output_to).removeClass("value-empty");
                             $(output_to).removeClass("value-old");
+                            $(output_to).removeClass("value-progress");
                             
                             if ( response.status == "error" ) {
                                 $(output_to).addClass("value-empty");
@@ -176,18 +220,19 @@
                             
                             $(output_to).html(response.msg);
                         }
-                    },
-                    error: function( xhr, status, error ) {
-                        if ( output_to ) {
-                            $(output_to).addClass("value-empty");
-                            $(output_to).html(hrxGlobalVars.txt.request_error + " - " + error);
-                        }
-                    },
-                    complete: function() {
                         button.removeClass("hrx-loading").prop("disabled", false);
                     }
-                });
-            }, 500);
+                },
+                error: function( xhr, status, error ) {
+                    if ( output_to ) {
+                        $(output_to).addClass("value-empty");
+                        $(output_to).html(hrxGlobalVars.txt.request_error + " - " + error);
+                    }
+                    button.removeClass("hrx-loading").prop("disabled", false);
+                },
+                complete: function() {
+                }
+            });
         },
 
         execute_table_mass_button: function( button, mass_action, selected_orders, show_alert_on_error = true ) {
@@ -215,16 +260,39 @@
                 },
                 success: function( response ) {
                     //console.log(response);
-                    if ( show_alert_on_error && response.status == "error" ) {
+                    if ( show_alert_on_error && response.status == "error" && response.msg !== "" ) {
                         if ( confirm(response.msg + "\n\n" + hrxGlobalVars.txt.alert_retry) ) {
                             hrxAjax.execute_table_mass_button(button, mass_action, selected_orders, show_alert_on_error);
+                        } else {
+                            location.reload();
                         }
                     }
                     if ( response.status == "OK" ) {
-                        if ( hrxHelper.is_url(response.file) ) {
-                            window.open(response.file, '_blank').focus();
-                        } else if ( show_alert_on_error ) {
-                            alert(hrxGlobalVars.txt.label_download_fail);
+                        if ( "file" in response && response.file !== "" ) {
+                            if ( hrxHelper.is_url(response.file) ) {
+                                window.open(response.file, '_blank').focus();
+                            } else if ( show_alert_on_error ) {
+                                alert(hrxGlobalVars.txt.label_download_fail);
+                            }
+                        }
+                        if ( "multi_msg" in response ) {
+                            let alert_message = "";
+                            if ( "successes" in response.multi_msg && response.multi_msg.successes.length ) {
+                                for ( let i = 0; i < response.multi_msg.successes.length; i++ ) {
+                                    alert_message += response.multi_msg.successes[i] + "\n";
+                                }
+                                alert_message += "\n";
+                            }
+                            if ( "errors" in response.multi_msg && response.multi_msg.errors.length ) {
+                                for ( let i = 0; i < response.multi_msg.errors.length; i++ ) {
+                                    alert_message += response.multi_msg.errors[i] + "\n";
+                                }
+                            }
+                            if ( alert_message != "" ) {
+                                if ( confirm(alert_message + "\n\n" + hrxGlobalVars.txt.alert_reload) ) {
+                                    location.reload();
+                                }
+                            }
                         }
                     }
                 },

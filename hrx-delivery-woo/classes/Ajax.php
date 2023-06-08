@@ -11,6 +11,7 @@ use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\Order;
+use HrxDeliveryWoo\OrderHelper;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\Label;
@@ -83,10 +84,21 @@ class Ajax
      */
     public static function admin_btn_update_delivery_locations()
     {
-        $result = Terminal::update_delivery_locations();
+        $page = (int)esc_attr($_POST['page']);
+        if ($page < 1) $page = 1;
+
+        Debug::to_log('Delivery locations update. Page: ' . $page, 'locations');
+        
+        $result = Terminal::update_delivery_locations($page);
 
         $current_time = current_time("Y-m-d H:i:s");
         $output = self::get_location_result_output($result, $current_time);
+        $output['repeat'] = false;
+        $output['total'] = 250 * $page + $result['total'];
+
+        if ($result['total'] >= 250) {
+            $output['repeat'] = true;
+        }
 
         echo json_encode($output);
         wp_die();
@@ -98,6 +110,8 @@ class Ajax
      */
     public static function admin_btn_update_pickup_locations()
     {
+        Debug::to_log('Pickup locations update.');
+
         $result = Warehouse::update_pickup_locations();
 
         $current_time = current_time("Y-m-d H:i:s");
@@ -126,9 +140,10 @@ class Ajax
                 $msg = $current_time . '. ' . $msg;
             }
             $output['msg'] = $msg;
+            Debug::to_log($result, 'locations');
         } else {
             $msg = $current_time;
-            if ( $result['added'] > 0 ) {
+            /*if ( $result['added'] > 0 ) {
                 $msg .= '. ' . __('Total added', 'hrx-delivery') . ': ' . $result['added'];
             }
             if ( $result['updated'] > 0 ) {
@@ -136,9 +151,10 @@ class Ajax
             }
             if ( $result['errors'] > 0 ) {
                 $msg .= '. ' . __('Total errors', 'hrx-delivery') . ': ' . $result['errors'];
-            }
+            }*/
             $output['status'] = 'OK';
             $output['msg'] = $msg;
+            Debug::to_log('Successful location request. Added: ' . $result['added'] . ' Updated: ' . $result['updated'] . ' Errors: ' . $result['failed'], 'locations');
         }
 
         return $output;
@@ -221,36 +237,11 @@ class Ajax
         }
 
         $wc_order = self::get_wc_order(esc_attr($_POST['order_id']));
-
-        $hrx_order_id = $wc_order->get_meta($meta_keys->order_id);
-        if ( empty($hrx_order_id) ) {
-            self::output_status_on_error($status, __('Failed to get HRX order ID from order', 'hrx-delivery'), true);
-        }
-
         $mark_ready = (! empty($_POST['ready'])) ? filter_var(esc_attr($_POST['ready']), FILTER_VALIDATE_BOOLEAN) : true;
 
-        $api = new Api();
-        
-        if ( $mark_ready ) {
-            $result = $api->ready_order($hrx_order_id, true);
-        } else {
-            $result = $api->ready_order($hrx_order_id, false);
-        }
-
-        if ( $result['status'] == 'OK' ) {
-            if ( ! empty($result['data']['status']) ) {
-                update_post_meta($wc_order->get_id(), $meta_keys->order_status, esc_attr($result['data']['status']));
-            } else {
-                update_post_meta($wc_order->get_id(), $meta_keys->order_status, 'unknown');
-            }
-
-            $status['status'] = 'OK';
-            $status['msg'] = __('Order status changed successfully', 'hrx-delivery');
-        } else {
-            $status['msg'] = __('Failed to change HRX order status', 'hrx-delivery') . ":\n" . $result['msg'];
-            $classOrder = new Order();
-            $classOrder->update_hrx_order_info($wc_order);
-        }
+        $result = Shipment::ready_order($wc_order, (!$mark_ready));
+        $status['status'] = $result['status'];
+        $status['msg'] = $result['msg'];
 
         echo json_encode($status);
         wp_die();
@@ -263,6 +254,7 @@ class Ajax
     public static function admin_btn_table_mass_action()
     {
         $status = self::prepare_status(array('file' => ''));
+        $output_file = false;
 
         $meta_keys = Core::get_instance()->meta_keys;
 
@@ -276,7 +268,109 @@ class Ajax
         }
         $selected_orders = array_map('esc_attr', $_POST['selected_orders']);
 
+        foreach ( $selected_orders as $key => $order_id ) {
+            if ( empty((int)$order_id) ) {
+                unset($selected_orders[$key]);
+                continue;
+            }
+            
+            $wc_order = wc_get_order((int)$order_id);
+            if ( ! $wc_order ) {
+                unset($selected_orders[$key]);
+                continue;
+            }
+
+            $hrx_order_status = Shipment::get_status($wc_order);
+            $wc_order_status = OrderHelper::get_status($wc_order);
+
+            $converted_action = Shipment::convert_allowed_order_action_from_mass($action);
+            if ( ! Shipment::check_specific_allowed_order_action($converted_action, $hrx_order_status, $wc_order_status) ) {
+                unset($selected_orders[$key]);
+                continue;
+            }
+        }
+        $selected_orders = array_values($selected_orders); // Reorganize the array keys
+
+        if ( empty($selected_orders) ) {
+            self::output_status_on_error($status, __('Neither order is suitable for performing the desired action', 'hrx-delivery'));
+        }
+
         $received_files = array();
+
+        if ( $action == 'register_orders' ) {
+            $successes = array();
+            foreach ( $selected_orders as $wc_order_id ) {
+                $result = Shipment::register_order($wc_order_id);
+                if ( $result['status'] == 'OK' ) {
+                    $successes[] = '#' . $wc_order_id;
+                } else {
+                    $status['multi_msg']['errors'][] = sprintf(__('Failed to register order #%1$s. Error: %2$s', 'hrx-delivery'), $wc_order_id, $result['msg']);
+                }
+            }
+            if ( ! empty($successes) ) {
+                $status['status'] = 'OK';
+                $status['multi_msg']['successes'][] = sprintf(__('Successfully registered orders: %s.', 'hrx-delivery'), implode(', ', $successes));
+            } else {
+                $status['msg'] = __('Could not register any orders', 'hrx-delivery');
+            }
+        }
+
+        if ( $action == 'regenerate_orders' ) {
+            $successes = array();
+            foreach ( $selected_orders as $wc_order_id ) {
+                $result = Shipment::register_order($wc_order_id, true);
+                $result = (rand(1,2) == 1) ? array('status'=>'OK') : array('status'=>'error','msg'=>'Testine klaida');
+                if ( $result['status'] == 'OK' ) {
+                    $successes[] = '#' . $wc_order_id;
+                } else {
+                    $status['multi_msg']['errors'][] = sprintf(__('Failed to regenerate order #%1$s. Error: %2$s', 'hrx-delivery'), $wc_order_id, $result['msg']);
+                }
+            }
+            if ( ! empty($successes) ) {
+                $status['status'] = 'OK';
+                $status['multi_msg']['successes'][] = sprintf(__('Successfully regenerated orders: %s.', 'hrx-delivery'), implode(', ', $successes));
+            } else {
+                $status['msg'] = __('Could not regenerate any orders', 'hrx-delivery');
+            }
+        }
+
+        if ( $action == 'mark_ready' ) {
+            $successes = array();
+            foreach ( $selected_orders as $wc_order_id ) {
+                $wc_order = self::get_wc_order($wc_order_id);
+                $result = Shipment::ready_order($wc_order);
+                if ( $result['status'] == 'OK' ) {
+                    $successes[] = '#' . $wc_order_id;
+                } else {
+                    $status['multi_msg']['errors'][] = sprintf(__('Failed to ready order #%1$s. Error: %2$s', 'hrx-delivery'), $wc_order_id, $result['msg']);
+                }
+            }
+            if ( ! empty($successes) ) {
+                $status['status'] = 'OK';
+                $status['multi_msg']['successes'][] = sprintf(__('Successfully marked as ready orders: %s.', 'hrx-delivery'), implode(', ', $successes));
+            } else {
+                $status['msg'] = __('Could not ready any orders', 'hrx-delivery');
+            }
+        }
+
+        if ( $action == 'unmark_ready' ) {
+            $successes = array();
+            foreach ( $selected_orders as $wc_order_id ) {
+                $wc_order = self::get_wc_order($wc_order_id);
+                $result = Shipment::ready_order($wc_order, true);
+                if ( $result['status'] == 'OK' ) {
+                    $successes[] = '#' . $wc_order_id;
+                } else {
+                    $status['multi_msg']['errors'][] = sprintf(__('Failed to remove ready status from order #%1$s. Error: %2$s', 'hrx-delivery'), $wc_order_id, $result['msg']);
+                }
+            }
+            if ( ! empty($successes) ) {
+                $status['status'] = 'OK';
+                $status['multi_msg']['successes'][] = sprintf(__('Successfully removed ready status from orders: %s.', 'hrx-delivery'), implode(', ', $successes));
+            } else {
+                $status['msg'] = __('None of the orders could be removed the ready status', 'hrx-delivery');
+            }
+        }
 
         if ( $action == 'manifest' ) {
             //TODO: Manifest - Do it if need it
@@ -290,11 +384,13 @@ class Ajax
             $output_file = Label::get_merged_file($selected_orders, 'return', $action . 's.pdf');
         }
         
-        if ( $output_file['status'] == 'OK' ) {
-            $status['status'] = 'OK';
-            $status['file'] = $output_file['file']['url'];
-        } else {
-            $status['msg'] = $output_file['msg'];
+        if ( $output_file ) {
+            if ( $output_file['status'] == 'OK' ) {
+                $status['status'] = 'OK';
+                $status['file'] = $output_file['file']['url'];
+            } else {
+                $status['msg'] = $output_file['msg'];
+            }
         }
 
         echo json_encode($status);
@@ -447,6 +543,10 @@ class Ajax
         $status = array(
             'status' => 'error',
             'msg' => '',
+            'multi_msg' => array(
+                'errors' => array(),
+                'successes' => array(),
+            ),
         );
 
         if ( is_array($add_additional) ) {
