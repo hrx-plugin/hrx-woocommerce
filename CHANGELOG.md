@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.1.0] - 2023-06-12
 ### Improved
 - Added a option to choose how much orders show in HRX Orders list
 - Disabled mass action checkbox for orders, which have error
