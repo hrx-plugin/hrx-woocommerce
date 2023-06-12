@@ -20,6 +20,8 @@ $page_tabs = $page_params['tabs'];
 $page_current_tab = 'new_orders';
 $page_current_no = 1;
 $page_current_filters = array();
+$per_page = $this->get_current_per_page();
+$per_page_options = $this->default_per_page_options();
 $pagination_links = false;
 $all_columns = $this->get_available_table_columns();
 $show_mass_buttons = array();
@@ -43,7 +45,7 @@ if ( $page_current_tab == 'warehouses' ) {
     $all_columns['zip']['filter_label'] = __('Warehouse post code', 'hrx-delivery');
     $all_columns['address']['filter_label'] = __('Warehouse address', 'hrx-delivery');
 } else {
-    $columns = array('cb', 'order_id', 'customer', 'order_status', 'order_date', 'method', 'warehouse_name', 'hrx_order_status', 'actions');
+    $columns = array('cb', 'order_id', 'customer', 'order_status_text', 'order_date', 'method', 'warehouse_name', 'hrx_order_status', 'actions');
     
     $all_columns['warehouse_name']['title'] = __('Warehouse', 'hrx-delivery');
     $all_columns['warehouse_name']['filter'] = 'select';
@@ -75,6 +77,7 @@ if ( ! isset($_POST['clear_filters']) ) {
 $tab_data = array();
 $selected_values = array();
 if ( $page_current_tab == 'warehouses' ) {
+    $per_page_options = false;
     $current_warehouse = Warehouse::get_default_id();
 
     foreach ( $all_warehouses as $warehouse ) {
@@ -97,12 +100,13 @@ if ( $page_current_tab == 'warehouses' ) {
         $selected_values['selected'] = $current_warehouse;
     }
 } else if ( $page_current_tab == 'manifests' ) {
+    $per_page_options = false;
     //TODO: Manifest - Do it if need it
 } else {
-    $show_mass_buttons = array(/*'manifest',*/ 'ship_label', 'return_label');
+    $show_mass_buttons = array(/*'manifest',*/'register_orders', 'mark_ready', 'ship_label', 'return_label');
     $args = array(
         'paginate' => true,
-        'limit' => $this->default_per_page,
+        'limit' => $per_page,
         'paged' => $page_current_no,
         'hrx_delivery_method' => array_keys($this->core->methods),
     );
@@ -113,22 +117,25 @@ if ( $page_current_tab == 'warehouses' ) {
         $args['not_' . $this->core->meta_keys->order_status] = array('ready', 'cancelled', 'in_delivery', 'delivered', 'in_return');
     }
     if ( $page_current_tab == 'send_orders' ) {
+        $show_mass_buttons = array('unmark_ready', 'ship_label', 'return_label');
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending');
         // Show HRX statuses
         $args[$this->core->meta_keys->order_status] = array('ready', 'in_delivery', 'delivered', 'in_return');
     }
     if ( $page_current_tab == 'cancelled_orders' ) {
+        $show_mass_buttons = array('regenerate_orders', 'ship_label', 'return_label');
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending', 'wc-completed');
         // Show HRX statuses
         $args[$this->core->meta_keys->order_status] = array('cancelled');
     }
     if ( $page_current_tab == 'completed_orders' ) {
+        $show_mass_buttons = array('mark_ready', 'ship_label', 'return_label');
         $args['status'] = array('wc-completed');
         // Show all HRX statuses
     }
 
-    if ( isset($tab_columns['order_status']['filter_options']) && ! empty($args['status']) ) {
-        $tab_columns['order_status']['filter_options'] = PagesFilter::remove_not_available_options($tab_columns['order_status']['filter_options'], $args['status']);
+    if ( isset($tab_columns['order_status_text']['filter_options']) && ! empty($args['status']) ) {
+        $tab_columns['order_status_text']['filter_options'] = PagesFilter::remove_not_available_options($tab_columns['order_status_text']['filter_options'], $args['status']);
     }
 
     $args = PagesFilter::change_args_by_filters($args, $page_current_filters);
@@ -166,9 +173,10 @@ if ( $page_current_tab == 'warehouses' ) {
         $hrx_status_text = $this->build_hrx_status_text($order);
 
         $tab_data[$order->get_id()] = array(
-            'order_id' => '<a href="' . $order->get_edit_order_url() . '">#' . $order->get_order_number() . '</a>',
+            'order_id' => '<a href="' . $order->get_edit_order_url() . '">#' . $order->get_order_number() . '</a>' . PagesHtml::build_order_preview_link(),
             'customer' => $this->get_order_customer_fullname($order),
-            'order_status' => $this->get_order_status_text($order),
+            'order_status' => $order->get_status(),
+            'order_status_text' => $this->get_order_status_text($order),
             'order_date' => $order->get_date_created()->format('Y-m-d H:i:s'),
             'method' => $this->get_method_delivery_name($order_method, $deliver_to),
             'hrx_order_status' => (! empty($hrx_status_text)) ? $hrx_status_text : '—',
@@ -197,14 +205,20 @@ if ( $page_current_tab == 'warehouses' ) {
 /* Template */
 ?>
 <div class="wrap hrx-page hrx-page-management">
+    <div class="table-script-elements">
+        <?php echo PagesHtml::build_message_modal(); ?>
+        <?php echo PagesHtml::build_order_preview_modal(); ?>
+    </div>
     <?php echo PagesHtml::build_page_title($page_title, $page_image); ?>
     <?php echo PagesHtml::build_page_navigation($page_tabs, $page_current_tab); ?>
-    
-    <?php echo PagesHtml::build_mass_buttons(array(
-        'key' => $page_current_tab,
-        'show_buttons' => $show_mass_buttons,
-    )); ?>
-    <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
+    <div class="table-header">
+        <?php echo PagesHtml::build_mass_buttons(array(
+            'key' => $page_current_tab,
+            'show_buttons' => $show_mass_buttons,
+        )); ?>
+        <?php echo PagesHtml::build_per_page_selection($per_page_options, $per_page); ?>
+        <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
+    </div>
     <?php echo PagesHtml::build_table(array(
         'key' => $page_current_tab,
         'columns' => $tab_columns,
@@ -212,9 +226,11 @@ if ( $page_current_tab == 'warehouses' ) {
         'selected' => $selected_values,
         'filters_selected' => $page_current_filters,
     )); ?>
-    <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
-    <?php echo PagesHtml::build_mass_buttons(array(
-        'key' => $page_current_tab,
-        'show_buttons' => $show_mass_buttons,
-    )); ?>
+    <div class="table-footer">
+        <?php echo PagesHtml::build_pagination_links($pagination_links); ?>
+        <?php echo PagesHtml::build_mass_buttons(array(
+            'key' => $page_current_tab,
+            'show_buttons' => $show_mass_buttons,
+        )); ?>
+    </div>
 </div>

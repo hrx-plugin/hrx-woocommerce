@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: HRX delivery\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-30 13:25+0000\n"
+"POT-Creation-Date: 2023-05-19 14:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -16,11 +16,16 @@ msgstr ""
 "X-Loco-Version: 2.6.2; wp-6.0.1\n"
 "X-Domain: hrx-delivery"
 
+#: classes/Core.php:169
+#, php-format
+msgid "A newer version of the plugin (%s) has been released."
+msgstr ""
+
 #: classes/Pages.php:331
 msgid "Actions"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:555
+#: classes/ShippingMethodHtml.php:556
 msgid "Add extra rule"
 msgstr ""
 
@@ -32,15 +37,15 @@ msgstr ""
 msgid "All shipments"
 msgstr ""
 
-#: classes/Main.php:104
+#: classes/Main.php:106
 msgid "An error occurred while changing default warehouse"
 msgstr ""
 
-#: classes/Main.php:105
+#: classes/Main.php:107
 msgid "An error occurred while executing action"
 msgstr ""
 
-#: classes/Warehouse.php:97 classes/Terminal.php:156
+#: classes/Terminal.php:177 classes/Warehouse.php:97
 msgid "An unexpected error occurred during the operation"
 msgstr ""
 
@@ -56,7 +61,7 @@ msgstr ""
 msgid "API key in test server"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:501
+#: classes/ShippingMethodHtml.php:502
 msgid "Block error"
 msgstr ""
 
@@ -76,7 +81,7 @@ msgstr ""
 msgid "Check key"
 msgstr ""
 
-#: classes/Main.php:63 classes/Main.php:69 classes/Main.php:74
+#: classes/Main.php:65 classes/Main.php:71 classes/Main.php:76
 msgid "Choose terminal"
 msgstr ""
 
@@ -84,7 +89,7 @@ msgstr ""
 msgid "City"
 msgstr ""
 
-#: classes/PagesHtml.php:188
+#: classes/PagesHtml.php:213
 msgid "Clear"
 msgstr ""
 
@@ -100,7 +105,7 @@ msgstr ""
 msgid "Completed orders"
 msgstr ""
 
-#: classes/Main.php:72
+#: classes/Main.php:74
 msgid "Contacts"
 msgstr ""
 
@@ -112,7 +117,7 @@ msgstr ""
 msgid "Courier"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:325
+#: classes/ShippingMethodHtml.php:326
 msgid "Custom changes"
 msgstr ""
 
@@ -144,15 +149,15 @@ msgstr ""
 msgid "Delivery methods"
 msgstr ""
 
-#: classes/Main.php:65
+#: classes/Main.php:67
 msgid "Distance calculated from this point"
 msgstr ""
 
-#: classes/Main.php:109
+#: classes/Main.php:111
 msgid "Do you want to reload the page to update the displayed data?"
 msgstr ""
 
-#: classes/Main.php:106
+#: classes/Main.php:108
 msgid "Do you want to try again?"
 msgstr ""
 
@@ -181,19 +186,19 @@ msgstr ""
 msgid "Enable this method for %s"
 msgstr ""
 
-#: classes/Pages.php:420 classes/Shipment.php:130 classes/Core.php:91
+#: classes/Core.php:112 classes/Shipment.php:130 classes/Pages.php:420
 msgid "Error"
 msgstr ""
 
-#: classes/Ajax.php:129
+#: classes/Ajax.php:161
 msgid "Failed to change default warehouse"
 msgstr ""
 
-#: classes/Ajax.php:216
+#: classes/Ajax.php:249
 msgid "Failed to change HRX order status"
 msgstr ""
 
-#: classes/Core.php:91
+#: classes/Core.php:112
 msgid "Failed to create temporary files directories"
 msgstr ""
 
@@ -201,7 +206,7 @@ msgstr ""
 msgid "Failed to get available shipping countries"
 msgstr ""
 
-#: classes/Ajax.php:193 classes/Shipment.php:349
+#: classes/Ajax.php:226 classes/Shipment.php:349
 msgid "Failed to get HRX order ID from order"
 msgstr ""
 
@@ -213,7 +218,7 @@ msgstr ""
 msgid "Failed to get label"
 msgstr ""
 
-#: classes/Ajax.php:240
+#: classes/Ajax.php:274
 msgid "Failed to get list of selected orders"
 msgstr ""
 
@@ -221,7 +226,7 @@ msgstr ""
 msgid "Failed to get order"
 msgstr ""
 
-#: classes/Ajax.php:274
+#: classes/Ajax.php:316
 msgid "Failed to get order information"
 msgstr ""
 
@@ -229,7 +234,7 @@ msgstr ""
 msgid "Failed to get selected shipping method"
 msgstr ""
 
-#: classes/Core.php:124
+#: classes/Core.php:252
 msgid "Failed to get the path of the main file"
 msgstr ""
 
@@ -237,7 +242,7 @@ msgstr ""
 msgid "Failed to get the selected warehouse. Please check warehouse settings."
 msgstr ""
 
-#: classes/Ajax.php:235
+#: classes/Ajax.php:269
 msgid "Failed to get what action to perform"
 msgstr ""
 
@@ -251,11 +256,11 @@ msgid ""
 "You can repeat this action to try get labels again."
 msgstr ""
 
-#: classes/Main.php:62
+#: classes/Main.php:64
 msgid "Find"
 msgstr ""
 
-#: hrx-delivery-woo.php:62
+#: hrx-delivery-woo.php:68
 #, php-format
 msgid ""
 "For the %1$s plugin to work, must have the following plugins activated: %2$s."
@@ -285,11 +290,11 @@ msgctxt "Frequency"
 msgid "Once weekly"
 msgstr ""
 
-#: classes/PagesHtml.php:81
+#: classes/PagesHtml.php:106
 msgid "Generate manifest"
 msgstr ""
 
-#: classes/Main.php:68
+#: classes/Main.php:70
 msgid "Geolocation is not supported"
 msgstr ""
 
@@ -355,11 +360,11 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:329
+#: classes/ShippingMethodHtml.php:330
 msgid "Images"
 msgstr ""
 
-#: classes/Ajax.php:60
+#: classes/Ajax.php:72
 msgid "Key is good"
 msgstr ""
 
@@ -379,7 +384,7 @@ msgstr ""
 msgid "Length"
 msgstr ""
 
-#: classes/PagesHtml.php:262
+#: classes/PagesHtml.php:287
 msgid "Mark as ready"
 msgstr ""
 
@@ -387,7 +392,7 @@ msgstr ""
 msgid "Mijora"
 msgstr ""
 
-#: classes/Ajax.php:287
+#: classes/Ajax.php:360
 msgid "Need a programmer to check this problem"
 msgstr ""
 
@@ -399,15 +404,15 @@ msgstr ""
 msgid "New shipments"
 msgstr ""
 
-#: classes/Main.php:76
+#: classes/Main.php:78
 msgid "No information"
 msgstr ""
 
-#: classes/Main.php:73
+#: classes/Main.php:75
 msgid "No terminal to select"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:501
+#: classes/ShippingMethodHtml.php:502
 msgid "Not received fields key"
 msgstr ""
 
@@ -415,7 +420,7 @@ msgstr ""
 msgid "Not the HRX delivery method"
 msgstr ""
 
-#: classes/Main.php:66
+#: classes/Main.php:68
 msgid "Nothing found"
 msgstr ""
 
@@ -436,7 +441,7 @@ msgstr ""
 msgid "Order ID"
 msgstr ""
 
-#: classes/Ajax.php:145 classes/Ajax.php:162 classes/Ajax.php:186
+#: classes/Ajax.php:176 classes/Ajax.php:194 classes/Ajax.php:219
 msgid "Order ID not received"
 msgstr ""
 
@@ -448,11 +453,11 @@ msgstr ""
 msgid "Order status"
 msgstr ""
 
-#: classes/Ajax.php:214
+#: classes/Ajax.php:247
 msgid "Order status changed successfully"
 msgstr ""
 
-#: includes/page-management.php:50
+#: includes/page-management.php:51
 msgid "Order warehouse"
 msgstr ""
 
@@ -502,15 +507,20 @@ msgstr ""
 msgid "Post code"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:512
+#: classes/Core.php:173
+msgctxt "Press here"
+msgid "here"
+msgstr ""
+
+#: classes/ShippingMethodHtml.php:513
 msgid "Price"
 msgstr ""
 
-#: classes/PagesHtml.php:87
+#: classes/PagesHtml.php:112
 msgid "Print return label"
 msgstr ""
 
-#: classes/PagesHtml.php:84
+#: classes/PagesHtml.php:109
 msgid "Print shipment label"
 msgstr ""
 
@@ -518,7 +528,7 @@ msgstr ""
 msgid "Problems with orders"
 msgstr ""
 
-#: classes/Warehouse.php:126 classes/Terminal.php:186
+#: classes/Terminal.php:207 classes/Warehouse.php:126
 msgid "Reached maximum number of cycles"
 msgstr ""
 
@@ -526,36 +536,36 @@ msgstr ""
 msgid "Recipient email address is required"
 msgstr ""
 
-#: classes/PagesHtml.php:258
+#: classes/PagesHtml.php:283
 msgid "Regenerate order"
 msgstr ""
 
-#: classes/PagesHtml.php:258
+#: classes/PagesHtml.php:283
 msgid "Register order"
 msgstr ""
 
-#: classes/Main.php:103 classes/Ajax.php:55 classes/Ajax.php:95
-#: classes/Warehouse.php:184 classes/Terminal.php:262
+#: classes/Ajax.php:67 classes/Ajax.php:123 classes/Terminal.php:283
+#: classes/Main.php:105 classes/Warehouse.php:184
 msgid "Request error"
 msgstr ""
 
-#: classes/Main.php:75
+#: classes/Main.php:77
 msgid "Reset search"
 msgstr ""
 
-#: classes/PagesHtml.php:268
+#: classes/PagesHtml.php:293
 msgid "Return label"
 msgstr ""
 
-#: classes/PagesHtml.php:187
+#: classes/PagesHtml.php:212
 msgid "Search"
 msgstr ""
 
-#: classes/Main.php:61
+#: classes/Main.php:63
 msgid "Search around"
 msgstr ""
 
-#: classes/Terminal.php:78
+#: classes/Terminal.php:96
 msgid "Select terminal"
 msgstr ""
 
@@ -576,7 +586,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: classes/PagesHtml.php:266
+#: classes/PagesHtml.php:291
 msgid "Shipment label"
 msgstr ""
 
@@ -594,12 +604,16 @@ msgctxt "Shipping method title in checkout"
 msgid "HRX parcel terminal"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:331
+#: classes/ShippingMethodHtml.php:332
 msgid "Shipping methods"
 msgstr ""
 
 #: classes/ShippingMethod.php:34
 msgid "Shipping methods for HRX delivery"
+msgstr ""
+
+#: classes/PagesHtml.php:76
+msgid "Show"
 msgstr ""
 
 #: classes/Label.php:76
@@ -612,23 +626,23 @@ msgstr ""
 msgid "Specified price for countries"
 msgstr ""
 
-#: classes/Pages.php:261 classes/Pages.php:401 classes/OrderHtml.php:78
+#: classes/OrderHtml.php:78 classes/Pages.php:261 classes/Pages.php:401
 msgid "Status"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:326
+#: classes/ShippingMethodHtml.php:327
 msgid "Structure"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:330
+#: classes/ShippingMethodHtml.php:331
 msgid "Temporary files"
 msgstr ""
 
-#: classes/Main.php:60
+#: classes/Main.php:62
 msgid "Terminal list"
 msgstr ""
 
-#: classes/Main.php:59
+#: classes/Main.php:61
 msgid "Terminal map"
 msgstr ""
 
@@ -651,11 +665,11 @@ msgstr ""
 msgid "The %1$s of the order (%2$s) is not equal to required (%3$s)"
 msgstr ""
 
-#: classes/Ajax.php:127
+#: classes/Ajax.php:159
 msgid "The default warehouse has been successfully changed"
 msgstr ""
 
-#: classes/Main.php:108
+#: classes/Main.php:110
 msgid "The file was received but could not be opened"
 msgstr ""
 
@@ -663,7 +677,7 @@ msgstr ""
 msgid "The key, which you received from HRX"
 msgstr ""
 
-#: classes/Main.php:107
+#: classes/Main.php:109
 msgid "The label was received but could not be opened"
 msgstr ""
 
@@ -686,7 +700,7 @@ msgstr ""
 msgid "The terminal specified in the order was not found"
 msgstr ""
 
-#: classes/Main.php:67
+#: classes/Main.php:69
 msgid "There were no cities found for your search term"
 msgstr ""
 
@@ -699,7 +713,7 @@ msgstr ""
 msgid "This type of label does not exist"
 msgstr ""
 
-#: classes/Pages.php:289 classes/ShippingMethodHtml.php:323
+#: classes/ShippingMethodHtml.php:324 classes/Pages.php:289
 msgid "Title"
 msgstr ""
 
@@ -708,32 +722,32 @@ msgctxt "To somewhere"
 msgid "to"
 msgstr ""
 
-#: classes/Ajax.php:103
+#: classes/Ajax.php:131
 msgid "Total added"
 msgstr ""
 
-#: classes/Ajax.php:109
+#: classes/Ajax.php:137
 msgid "Total errors"
 msgstr ""
 
-#: classes/Ajax.php:106
+#: classes/Ajax.php:134
 msgid "Total updated"
 msgstr ""
 
-#: includes/page-management.php:54 classes/Pages.php:278 classes/Pages.php:415
-#: classes/OrderHtml.php:93
+#: includes/page-management.php:55 classes/OrderHtml.php:93
+#: classes/Pages.php:278 classes/Pages.php:415
 msgid "Tracking number"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:476
+#: classes/ShippingMethodHtml.php:477
 msgid "Turned off"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:475
+#: classes/ShippingMethodHtml.php:476
 msgid "Turned on"
 msgstr ""
 
-#: classes/Main.php:70
+#: classes/Main.php:72
 msgid "Type address"
 msgstr ""
 
@@ -745,7 +759,7 @@ msgstr ""
 msgid "Unknown error"
 msgstr ""
 
-#: classes/PagesHtml.php:264
+#: classes/PagesHtml.php:289
 msgid "Unmark ready"
 msgstr ""
 
@@ -757,7 +771,7 @@ msgstr ""
 msgid "Use API test server"
 msgstr ""
 
-#: classes/Main.php:64
+#: classes/Main.php:66
 msgid "Use my location"
 msgstr ""
 
@@ -765,23 +779,23 @@ msgstr ""
 msgid "Use this price when the cart does not fit any range"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:324
+#: classes/ShippingMethodHtml.php:325
 msgid "Version"
 msgstr ""
 
-#: includes/page-management.php:48
+#: includes/page-management.php:49
 msgid "Warehouse"
 msgstr ""
 
-#: includes/page-management.php:44
+#: includes/page-management.php:45
 msgid "Warehouse address"
 msgstr ""
 
-#: includes/page-management.php:42
+#: includes/page-management.php:43
 msgid "Warehouse city"
 msgstr ""
 
-#: includes/page-management.php:41
+#: includes/page-management.php:42
 msgid "Warehouse country"
 msgstr ""
 
@@ -793,7 +807,7 @@ msgstr ""
 msgid "Warehouse name"
 msgstr ""
 
-#: includes/page-management.php:43
+#: includes/page-management.php:44
 msgid "Warehouse post code"
 msgstr ""
 
@@ -801,11 +815,17 @@ msgstr ""
 msgid "Warehouses"
 msgstr ""
 
+#: classes/Core.php:178
+msgid ""
+"We do not recommend update the plugin, because your plugin have changes that "
+"is not included in the update"
+msgstr ""
+
 #: classes/OrderHtml.php:163 classes/ShippingMethodHtml.php:152
 msgid "Weight"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:525
+#: classes/ShippingMethodHtml.php:526
 msgid "Weight range"
 msgstr ""
 
@@ -813,12 +833,17 @@ msgstr ""
 msgid "Width"
 msgstr ""
 
-#: classes/Main.php:71
+#: classes/Main.php:73
 msgid "Workhours"
 msgstr ""
 
 #: classes/Api.php:274
 msgid "Wrong key"
+msgstr ""
+
+#: classes/Core.php:173
+#, php-format
+msgid "You can download it by pressing %s."
 msgstr ""
 
 #: classes/Order.php:179
@@ -830,6 +855,6 @@ msgstr ""
 msgid "You can track your shipment with this number"
 msgstr ""
 
-#: classes/Main.php:110
+#: classes/Main.php:112
 msgid "You must choose at least one order"
 msgstr ""

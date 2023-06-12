@@ -11,6 +11,7 @@ use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\Order;
+use HrxDeliveryWoo\OrderHelper;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\Label;
@@ -37,6 +38,7 @@ class Ajax
         add_action('wp_ajax_hrx_get_label', $this_class . 'admin_btn_get_hrx_label');
         add_action('wp_ajax_hrx_ready_order', $this_class . 'admin_btn_ready_hrx_order');
         add_action('wp_ajax_hrx_table_mass_action', $this_class . 'admin_btn_table_mass_action');
+        add_action('wp_ajax_hrx_get_wc_order_data', $this_class . 'admin_hrx_get_wc_order_data');
     }
 
     /**
@@ -82,10 +84,21 @@ class Ajax
      */
     public static function admin_btn_update_delivery_locations()
     {
-        $result = Terminal::update_delivery_locations();
+        $page = (int)esc_attr($_POST['page']);
+        if ($page < 1) $page = 1;
+
+        Debug::to_log('Delivery locations update. Page: ' . $page, 'locations');
+        
+        $result = Terminal::update_delivery_locations($page);
 
         $current_time = current_time("Y-m-d H:i:s");
         $output = self::get_location_result_output($result, $current_time);
+        $output['repeat'] = false;
+        $output['total'] = 250 * $page + $result['total'];
+
+        if ($result['total'] >= 250) {
+            $output['repeat'] = true;
+        }
 
         echo json_encode($output);
         wp_die();
@@ -97,6 +110,8 @@ class Ajax
      */
     public static function admin_btn_update_pickup_locations()
     {
+        Debug::to_log('Pickup locations update.');
+
         $result = Warehouse::update_pickup_locations();
 
         $current_time = current_time("Y-m-d H:i:s");
@@ -125,9 +140,10 @@ class Ajax
                 $msg = $current_time . '. ' . $msg;
             }
             $output['msg'] = $msg;
+            Debug::to_log($result, 'locations');
         } else {
             $msg = $current_time;
-            if ( $result['added'] > 0 ) {
+            /*if ( $result['added'] > 0 ) {
                 $msg .= '. ' . __('Total added', 'hrx-delivery') . ': ' . $result['added'];
             }
             if ( $result['updated'] > 0 ) {
@@ -135,9 +151,10 @@ class Ajax
             }
             if ( $result['errors'] > 0 ) {
                 $msg .= '. ' . __('Total errors', 'hrx-delivery') . ': ' . $result['errors'];
-            }
+            }*/
             $output['status'] = 'OK';
             $output['msg'] = $msg;
+            Debug::to_log('Successful location request. Added: ' . $result['added'] . ' Updated: ' . $result['updated'] . ' Errors: ' . $result['failed'], 'locations');
         }
 
         return $output;
@@ -220,36 +237,11 @@ class Ajax
         }
 
         $wc_order = self::get_wc_order(esc_attr($_POST['order_id']));
-
-        $hrx_order_id = $wc_order->get_meta($meta_keys->order_id);
-        if ( empty($hrx_order_id) ) {
-            self::output_status_on_error($status, __('Failed to get HRX order ID from order', 'hrx-delivery'), true);
-        }
-
         $mark_ready = (! empty($_POST['ready'])) ? filter_var(esc_attr($_POST['ready']), FILTER_VALIDATE_BOOLEAN) : true;
 
-        $api = new Api();
-        
-        if ( $mark_ready ) {
-            $result = $api->ready_order($hrx_order_id, true);
-        } else {
-            $result = $api->ready_order($hrx_order_id, false);
-        }
-
-        if ( $result['status'] == 'OK' ) {
-            if ( ! empty($result['data']['status']) ) {
-                update_post_meta($wc_order->get_id(), $meta_keys->order_status, esc_attr($result['data']['status']));
-            } else {
-                update_post_meta($wc_order->get_id(), $meta_keys->order_status, 'unknown');
-            }
-
-            $status['status'] = 'OK';
-            $status['msg'] = __('Order status changed successfully', 'hrx-delivery');
-        } else {
-            $status['msg'] = __('Failed to change HRX order status', 'hrx-delivery') . ":\n" . $result['msg'];
-            $classOrder = new Order();
-            $classOrder->update_hrx_order_info($wc_order);
-        }
+        $result = Shipment::ready_order($wc_order, (!$mark_ready));
+        $status['status'] = $result['status'];
+        $status['msg'] = $result['msg'];
 
         echo json_encode($status);
         wp_die();
@@ -262,6 +254,7 @@ class Ajax
     public static function admin_btn_table_mass_action()
     {
         $status = self::prepare_status(array('file' => ''));
+        $output_file = false;
 
         $meta_keys = Core::get_instance()->meta_keys;
 
@@ -275,7 +268,109 @@ class Ajax
         }
         $selected_orders = array_map('esc_attr', $_POST['selected_orders']);
 
+        foreach ( $selected_orders as $key => $order_id ) {
+            if ( empty((int)$order_id) ) {
+                unset($selected_orders[$key]);
+                continue;
+            }
+            
+            $wc_order = wc_get_order((int)$order_id);
+            if ( ! $wc_order ) {
+                unset($selected_orders[$key]);
+                continue;
+            }
+
+            $hrx_order_status = Shipment::get_status($wc_order);
+            $wc_order_status = OrderHelper::get_status($wc_order);
+
+            $converted_action = Shipment::convert_allowed_order_action_from_mass($action);
+            if ( ! Shipment::check_specific_allowed_order_action($converted_action, $hrx_order_status, $wc_order_status) ) {
+                unset($selected_orders[$key]);
+                continue;
+            }
+        }
+        $selected_orders = array_values($selected_orders); // Reorganize the array keys
+
+        if ( empty($selected_orders) ) {
+            self::output_status_on_error($status, __('Neither order is suitable for performing the desired action', 'hrx-delivery'));
+        }
+
         $received_files = array();
+
+        if ( $action == 'register_orders' ) {
+            $successes = array();
+            foreach ( $selected_orders as $wc_order_id ) {
+                $result = Shipment::register_order($wc_order_id);
+                if ( $result['status'] == 'OK' ) {
+                    $successes[] = '#' . $wc_order_id;
+                } else {
+                    $status['multi_msg']['errors'][] = sprintf(__('Failed to register order #%1$s. Error: %2$s', 'hrx-delivery'), $wc_order_id, $result['msg']);
+                }
+            }
+            if ( ! empty($successes) ) {
+                $status['status'] = 'OK';
+                $status['multi_msg']['successes'][] = sprintf(__('Successfully registered orders: %s.', 'hrx-delivery'), implode(', ', $successes));
+            } else {
+                $status['msg'] = __('Could not register any orders', 'hrx-delivery');
+            }
+        }
+
+        if ( $action == 'regenerate_orders' ) {
+            $successes = array();
+            foreach ( $selected_orders as $wc_order_id ) {
+                $result = Shipment::register_order($wc_order_id, true);
+                $result = (rand(1,2) == 1) ? array('status'=>'OK') : array('status'=>'error','msg'=>'Testine klaida');
+                if ( $result['status'] == 'OK' ) {
+                    $successes[] = '#' . $wc_order_id;
+                } else {
+                    $status['multi_msg']['errors'][] = sprintf(__('Failed to regenerate order #%1$s. Error: %2$s', 'hrx-delivery'), $wc_order_id, $result['msg']);
+                }
+            }
+            if ( ! empty($successes) ) {
+                $status['status'] = 'OK';
+                $status['multi_msg']['successes'][] = sprintf(__('Successfully regenerated orders: %s.', 'hrx-delivery'), implode(', ', $successes));
+            } else {
+                $status['msg'] = __('Could not regenerate any orders', 'hrx-delivery');
+            }
+        }
+
+        if ( $action == 'mark_ready' ) {
+            $successes = array();
+            foreach ( $selected_orders as $wc_order_id ) {
+                $wc_order = self::get_wc_order($wc_order_id);
+                $result = Shipment::ready_order($wc_order);
+                if ( $result['status'] == 'OK' ) {
+                    $successes[] = '#' . $wc_order_id;
+                } else {
+                    $status['multi_msg']['errors'][] = sprintf(__('Failed to ready order #%1$s. Error: %2$s', 'hrx-delivery'), $wc_order_id, $result['msg']);
+                }
+            }
+            if ( ! empty($successes) ) {
+                $status['status'] = 'OK';
+                $status['multi_msg']['successes'][] = sprintf(__('Successfully marked as ready orders: %s.', 'hrx-delivery'), implode(', ', $successes));
+            } else {
+                $status['msg'] = __('Could not ready any orders', 'hrx-delivery');
+            }
+        }
+
+        if ( $action == 'unmark_ready' ) {
+            $successes = array();
+            foreach ( $selected_orders as $wc_order_id ) {
+                $wc_order = self::get_wc_order($wc_order_id);
+                $result = Shipment::ready_order($wc_order, true);
+                if ( $result['status'] == 'OK' ) {
+                    $successes[] = '#' . $wc_order_id;
+                } else {
+                    $status['multi_msg']['errors'][] = sprintf(__('Failed to remove ready status from order #%1$s. Error: %2$s', 'hrx-delivery'), $wc_order_id, $result['msg']);
+                }
+            }
+            if ( ! empty($successes) ) {
+                $status['status'] = 'OK';
+                $status['multi_msg']['successes'][] = sprintf(__('Successfully removed ready status from orders: %s.', 'hrx-delivery'), implode(', ', $successes));
+            } else {
+                $status['msg'] = __('None of the orders could be removed the ready status', 'hrx-delivery');
+            }
+        }
 
         if ( $action == 'manifest' ) {
             //TODO: Manifest - Do it if need it
@@ -289,14 +384,131 @@ class Ajax
             $output_file = Label::get_merged_file($selected_orders, 'return', $action . 's.pdf');
         }
         
-        if ( $output_file['status'] == 'OK' ) {
-            $status['status'] = 'OK';
-            $status['file'] = $output_file['file']['url'];
-        } else {
-            $status['msg'] = $output_file['msg'];
+        if ( $output_file ) {
+            if ( $output_file['status'] == 'OK' ) {
+                $status['status'] = 'OK';
+                $status['file'] = $output_file['file']['url'];
+            } else {
+                $status['msg'] = $output_file['msg'];
+            }
         }
 
         echo json_encode($status);
+        wp_die();
+    }
+
+    public static function admin_hrx_get_wc_order_data()
+    {
+        if ( empty($_POST['wc_order_id']) ) {
+            wp_die();
+        }
+
+        $wc_order_id = esc_attr($_POST['wc_order_id']);
+        $wc_order = wc_get_order($wc_order_id);
+
+        if ( ! $wc_order ) {
+            wp_die();
+        }
+
+        $meta_keys = Core::get_instance()->meta_keys;
+        $hrx_method = $wc_order->get_meta($meta_keys->method);
+
+        $billing_address = $wc_order->get_billing_address_1();
+        if ( ! empty($wc_order->get_billing_address_2()) ) {
+            $billing_address .= ' - ' . $wc_order->get_billing_address_2();
+        }
+        $billing_city = $wc_order->get_billing_city();
+        if ( ! empty($wc_order->get_billing_state()) ) {
+            $billing_city .= ', ' . $wc_order->get_billing_state();
+        }
+        $shipping_address = $wc_order->get_shipping_address_1();
+        if ( ! empty($wc_order->get_shipping_address_2()) ) {
+            $shipping_address .= ' - ' . $wc_order->get_shipping_address_2();
+        }
+        $shipping_city = $wc_order->get_shipping_city();
+        if ( ! empty($wc_order->get_shipping_state()) ) {
+            $shipping_city .= ', ' . $wc_order->get_shipping_state();
+        }
+
+        $terminal_title = '—';
+        if ( Helper::method_has_terminals($hrx_method) ) {
+            $terminal_id = $wc_order->get_meta($meta_keys->terminal_id);
+            $terminal_title = Terminal::get_name_by_id($terminal_id);
+        }
+        $tracking_number = $wc_order->get_meta($meta_keys->track_number);
+        if ( empty($tracking_number) ) {
+            $tracking_number = '—';
+        }
+        $warehouse_id = $wc_order->get_meta($meta_keys->warehouse_id);
+
+        $order_dimensions = Shipment::get_dimensions($wc_order);
+        $decimal_separator = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : '.';
+        $weight_text = number_format((float)$order_dimensions['weight'], 3, $decimal_separator, '') . ' kg';
+        $dimensions_text = (float)$order_dimensions['width'] . '×'
+            . (float)$order_dimensions['height'] . '×'
+            . (float)$order_dimensions['length'] . ' cm';
+
+        $products = array();
+        foreach ( $wc_order->get_items() as $item_id => $item ) {
+            $product = $item->get_product();
+            $products[] = array(
+                'id' => $item->get_product_id(),
+                'name' => $item->get_name(),
+                'sku' => $product->get_sku(),
+                'price' => wc_price($product->get_price()),
+                'qty' => $item->get_quantity(),
+                'total' => wc_price($item->get_total()),
+            );
+        }
+
+        $data = array(
+            'wc_order' => array(
+                'id' => $wc_order_id,
+                'number' => $wc_order->get_order_number(),
+                'status' => $wc_order->get_status(),
+                'status_text' => wc_get_order_status_name($wc_order->get_status()),
+                'payment' => array(
+                    'title' => $wc_order->get_payment_method_title(),
+                    'currency' => get_woocommerce_currency_symbol(),
+                    'products' => wc_price($wc_order->get_subtotal()),
+                    'shipping' => wc_price($wc_order->get_shipping_total()),
+                    'tax' => wc_price($wc_order->get_total_tax()),
+                    'total' => wc_price($wc_order->get_total()),
+                ),
+                'billing' => array(
+                    'fullname' => $wc_order->get_formatted_billing_full_name(),
+                    'company' => $wc_order->get_billing_company(),
+                    'address' => $billing_address,
+                    'city' => $billing_city,
+                    'postcode' => $wc_order->get_billing_postcode(),
+                    'country' => $wc_order->get_billing_country(),
+                    'country_name' => \WC()->countries->countries[$wc_order->get_billing_country()],
+                    'email' => $wc_order->get_billing_email(),
+                    'phone' => $wc_order->get_billing_phone(),
+                ),
+                'shipping' => array(
+                    'fullname' => $wc_order->get_formatted_shipping_full_name(),
+                    'company' => $wc_order->get_shipping_company(),
+                    'address' => $shipping_address,
+                    'city' => $shipping_city,
+                    'postcode' => $wc_order->get_shipping_postcode(),
+                    'country' => $wc_order->get_shipping_country(),
+                    'country_name' => \WC()->countries->countries[$wc_order->get_shipping_country()],
+                    'phone' => $wc_order->get_shipping_phone(),
+                ),
+                'shipment' => array(
+                    'method_title' => $wc_order->get_shipping_method(),
+                    'terminal_title' => $terminal_title,
+                    'tracking_number' => $tracking_number,
+                    'warehouse_title' => Warehouse::get_name_by_id($warehouse_id),
+                    'weight' => $weight_text,
+                    'dimensions' => $dimensions_text,
+                ),
+                'products' => $products,
+            )
+        );
+
+        echo json_encode($data);
         wp_die();
     }
 
@@ -331,6 +543,10 @@ class Ajax
         $status = array(
             'status' => 'error',
             'msg' => '',
+            'multi_msg' => array(
+                'errors' => array(),
+                'successes' => array(),
+            ),
         );
 
         if ( is_array($add_additional) ) {

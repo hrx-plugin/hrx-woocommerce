@@ -165,12 +165,15 @@ class Terminal
         return $list;
     }
 
-    public static function update_delivery_locations()
+    public static function update_delivery_locations( $page )
     {
-        Sql::update_multi_rows('delivery', array('active' => 0), array());
+        if ( $page === false || $page === 1 ) {
+            Sql::update_multi_rows('delivery', array('active' => 0), array());
+        }
 
         try {
-            $result = self::save_delivery_locations(1);
+            $start_page = ($page === false ) ? 1 : $page;
+            $result = self::save_delivery_locations($start_page, ($page === false));
         } catch (\Exception $e) {
             $result = array(
                 'status' => 'error',
@@ -186,7 +189,7 @@ class Terminal
         return $result;
     }
 
-    private static function save_delivery_locations( $page, $protector = 1)
+    private static function save_delivery_locations( $page, $self_repeat = false, $protector = 1 )
     {
         $api = new Api();
         $response = $api->get_delivery_locations($page, 250);
@@ -199,7 +202,7 @@ class Terminal
             'failed' => 0,
             'msg' => '',
         );
-        $max_cycles = 200;
+        $max_cycles = 1000;
 
         if ( $protector > $max_cycles ) {
             return array(
@@ -257,8 +260,9 @@ class Terminal
                 $count_all++;
             }
 
-            if ( count($response['data']) == 250 ) {
-                $next_page = self::save_delivery_locations($page + 1, $protector + 1);
+            if ( $self_repeat && count($response['data']) >= 250 ) {
+                sleep(1);
+                $next_page = self::save_delivery_locations($page + 1, $self_repeat, $protector + 1);
                 if ( $next_page['status'] == 'error' ) {
                     $status['status'] = 'error';
                     $status['msg'] = $next_page['msg'];

@@ -6,6 +6,8 @@ if ( ! defined('ABSPATH') ) {
     exit;
 }
 
+use HrxDeliveryWoo\Shipment;
+
 class PagesHtml
 {
     public static function build_page_title( $title, $image = false )
@@ -64,6 +66,31 @@ class PagesHtml
         return $html;
     }
 
+    public static function build_per_page_selection( $values, $current = 25 )
+    {
+        if ( empty($values) ) {
+            return '';
+        }
+
+        ob_start();
+        ?>
+        <form id="hrx-per_page-form" class="page-pp" method="post">
+            <?php _e('Show', 'hrx-delivery') ?>
+            <select id="hrx-per_page" name="per_page">
+              <?php foreach ($values as $pp) {
+                echo '<option value="' . $pp . '"';
+                echo ($current == $pp) ? 'selected' : '';
+                echo '>' . $pp . '</option>';
+              } ?>
+            </select>
+          </form>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+
+        return $html;
+    }
+
     public static function build_mass_buttons( $params )
     {
         $table_key = $params['key'] ?? '';
@@ -77,14 +104,26 @@ class PagesHtml
         ?>
         <div class="mass-container <?php echo 'hrx-mass-' . $table_key; ?>">
             <div class="mass-buttons">
-                <?php if ( in_array('manifest', $show_buttons) ) : ?>
-                    <button class="button action btn-mass-manifest" type="button" value="manifest" data-table="<?php echo 'hrx-table-' . $table_key; ?>"><?php echo __('Generate manifest', 'hrx-delivery'); ?></button>
+                <?php if ( in_array('register_orders', $show_buttons) ) : ?>
+                    <button class="button action btn-mass-register_orders" type="button" value="register_orders" data-table="<?php echo 'hrx-table-' . $table_key; ?>"><?php echo __('Register order', 'hrx-delivery'); ?></button>
+                <?php endif; ?>
+                <?php if ( in_array('regenerate_orders', $show_buttons) ) : ?>
+                    <button class="button action btn-mass-regenerate_orders" type="button" value="regenerate_orders" data-table="<?php echo 'hrx-table-' . $table_key; ?>"><?php echo __('Regenerate order', 'hrx-delivery'); ?></button>
+                <?php endif; ?>
+                <?php if ( in_array('mark_ready', $show_buttons) ) : ?>
+                    <button class="button action btn-mass-mark_ready" type="button" value="mark_ready" data-table="<?php echo 'hrx-table-' . $table_key; ?>"><?php echo __('Mark as ready', 'hrx-delivery'); ?></button>
+                <?php endif; ?>
+                <?php if ( in_array('unmark_ready', $show_buttons) ) : ?>
+                    <button class="button action btn-mass-unmark_ready" type="button" value="unmark_ready" data-table="<?php echo 'hrx-table-' . $table_key; ?>"><?php echo __('Unmark ready', 'hrx-delivery'); ?></button>
                 <?php endif; ?>
                 <?php if ( in_array('ship_label', $show_buttons) ) : ?>
                     <button class="button action btn-mass-shipping_label" type="button" value="shipping_label" data-table="<?php echo 'hrx-table-' . $table_key; ?>"><?php echo __('Print shipment label', 'hrx-delivery'); ?></button>
                 <?php endif; ?>
                 <?php if ( in_array('return_label', $show_buttons) ) : ?>
                     <button class="button action btn-mass-return_label" type="button" value="return_label" data-table="<?php echo 'hrx-table-' . $table_key; ?>"><?php echo __('Print return label', 'hrx-delivery'); ?></button>
+                <?php endif; ?>
+                <?php if ( in_array('manifest', $show_buttons) ) : ?>
+                    <button class="button action btn-mass-manifest" type="button" value="manifest" data-table="<?php echo 'hrx-table-' . $table_key; ?>"><?php echo __('Generate manifest', 'hrx-delivery'); ?></button>
                 <?php endif; ?>
             </div>
         </div>
@@ -135,6 +174,135 @@ class PagesHtml
         $output .= '<span class="status-value ' . esc_html($value_class) . '">' . $value . '</span></p>';
 
         return $output;
+    }
+
+    public static function build_order_preview_link()
+    {
+        $link_title = __('Preview', 'hrx-delivery');
+        $output = '<a href="#" class="hrx-open-modal " data-modal="order_preview" title="' . $link_title . '">' . $link_title . '</a>';
+
+        return $output;
+    }
+
+    public static function build_order_preview_modal()
+    {
+        ob_start();
+        ?>
+        <div id="hrx-modal-order_preview" class="hrx-modal hrx-modal-order_preview" style="display:none;">
+            <div class="modal-holder">
+                <div class="modal-header">
+                    <div class="modal-header-title">
+                        <?php printf(__('WC Order #%s', 'hrx-delivery'), '<span class="modal-data-title"></span>'); ?>
+                    </div>
+                    <mark class="modal-data-status order-status"><span>Test</span></mark>
+                    <button class="modal-close" onclick="hrxModal.close(this);"></button>
+                </div>
+                <div class="modal-content">
+                    <div class="modal-content-billing">
+                        <span class="modal-content-title"><?php echo __('Billing details', 'hrx-delivery'); ?></span>
+                        <span class="modal-data-billing-name"></span>
+                        <span class="modal-data-billing-address"></span>
+                        <span class="modal-data-billing-city"></span>
+                        <span class="modal-data-billing-postcode"></span>
+                        <span class="modal-data-billing-country"></span>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Contacts', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-billing-email"></span>
+                            <span class="modal-data-billing-phone"></span>
+                        </div>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Payment method', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-billing-payment"></span>
+                            <span class="modal-value-title"><?php echo __('Total order amount', 'hrx-delivery'); ?></span>
+                            <span class="modal-value-inline">
+                                <span class="modal-value-inline-title"><?php echo __('Products', 'hrx-delivery'); ?>:</span>
+                                <span class="modal-data-billing-total-products"></span>
+                            </span>
+                            <span class="modal-value-inline">
+                                <span class="modal-value-inline-title"><?php echo __('Shipping', 'hrx-delivery'); ?>:</span>
+                                <span class="modal-data-billing-total-shipping"></span>
+                            </span>
+                            <span class="modal-value-inline">
+                                <span class="modal-value-inline-title"><?php echo __('Tax', 'hrx-delivery'); ?>:</span>
+                                <span class="modal-data-billing-total-tax"></span>
+                            </span>
+                            <span class="modal-value-inline">
+                                <span class="modal-value-inline-title"><?php echo __('Total', 'hrx-delivery'); ?>:</span>
+                                <span class="modal-data-billing-total"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="modal-content-shipping">
+                        <span class="modal-content-title"><?php echo __('Shipping details', 'hrx-delivery'); ?></span>
+                        <span class="modal-data-shipping-name"></span>
+                        <span class="modal-data-shipping-address"></span>
+                        <span class="modal-data-shipping-city"></span>
+                        <span class="modal-data-shipping-postcode"></span>
+                        <span class="modal-data-shipping-country"></span>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Shipping method', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-method"></span>
+                            <span class="modal-value-title"><?php echo __('Parcel terminal', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-terminal">-</span>
+                        </div>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Warehouse', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-warehouse">-</span>
+                            <span class="modal-value-title"><?php echo __('Size', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-size"></span>
+                        </div>
+                        <div class="modal-value-group">
+                            <span class="modal-value-title"><?php echo __('Tracking number', 'hrx-delivery'); ?></span>
+                            <span class="modal-data-shipping-tracking">-</span>
+                        </div>
+                    </div>
+                    <div class="modal-content-products">
+                        <table class="modal-content-table modal-data-products">
+                            <tr>
+                                <th><?php echo __('Product', 'hrx-delivery'); ?></th>
+                                <th><?php echo __('SKU', 'hrx-delivery'); ?></th>
+                                <th><?php echo __('Price', 'hrx-delivery'); ?></th>
+                                <th><?php echo __('Quantity', 'hrx-delivery'); ?></th>
+                                <th><?php echo __('Total', 'hrx-delivery'); ?></th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+            <div class="modal-background" onclick="hrxModal.close(this);"></div>
+        </div>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+        
+        return $html;
+    }
+
+    public static function build_message_modal()
+    {
+        ob_start();
+        ?>
+        <div id="hrx-modal-message" class="hrx-modal hrx-modal-message" style="display:none;">
+            <div class="modal-holder">
+                <div class="modal-header">
+                    <div class="modal-header-title">
+                        <span class="modal-data-title"></span>
+                    </div>
+                    <button class="modal-close" onclick="hrxModal.close(this);"></button>
+                </div>
+                <div class="modal-content">
+                    <span class="modal-data-message"></span>
+                </div>
+            </div>
+            <div class="modal-background" onclick="hrxModal.close(this);"></div>
+        </div>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+        
+        return $html;
     }
 
     private static function build_table_filter( $columns, $params )
@@ -234,11 +402,36 @@ class PagesHtml
             <?php foreach ( $data as $row_id => $row ) : ?>
                 <tr class="data-row" data-id="<?php echo $row_id; ?>">
                     <?php foreach ( $columns as $col_id => $col_data ) : ?>
-                        <?php $classes = self::prepare_class_list_html($col_id, $col_data); ?>
+                        <?php
+                        $classes = self::prepare_class_list_html($col_id, $col_data);
+                        $order_data = (! empty($data_selected['actions'])) ? $data_selected['actions'][$row_id] : false;
+                        $order_registered = (! empty($order_data['hrx_order_id'])) ? true : false;
+                        $order_status = (! empty($order_data['hrx_order_status'])) ? $order_data['hrx_order_status'] : 'new';
+                        $wc_order_status = (! empty($row['order_status'])) ? $row['order_status'] : 'processing';
+                        $show_buttons = array(
+                            'register' => Shipment::check_specific_allowed_order_action('register_order', $order_status, $wc_order_status),
+                            'regenerate' => Shipment::check_specific_allowed_order_action('regenerate_order', $order_status, $wc_order_status),
+                            'ready' => Shipment::check_specific_allowed_order_action('mark_ready', $order_status, $wc_order_status),
+                            'unready' => Shipment::check_specific_allowed_order_action('unmark_ready', $order_status, $wc_order_status),
+                            'ship_label' => Shipment::check_specific_allowed_order_action('ship_label', $order_status, $wc_order_status),
+                            'return_label' => Shipment::check_specific_allowed_order_action('return_label', $order_status, $wc_order_status),
+                        );
+                        $show_cb = false;
+                        foreach ( $show_buttons as $show_btn ) {
+                            if ( $show_btn ) {
+                                $show_cb = true;
+                                break;
+                            }
+                        }
+                        ?>
                         <?php if ( $col_id == 'cb' ) : ?>
                             <th scope="row" class="<?php echo $classes; ?>">
-                                <input type="checkbox" name="col_<?php echo $col_id; ?>[]" value="<?php echo $row_id; ?>"/>
+                                <?php if ( $show_cb ) : ?>
+                                    <input type="checkbox" name="col_<?php echo $col_id; ?>[]" value="<?php echo $row_id; ?>" data-hrxstatus="<?php echo $order_status; ?>" data-wcstatus="<?php echo $wc_order_status; ?>"/>
+                                <?php endif; ?>
                             </th>
+                        <?php elseif ( $col_id == 'order_id' ) : ?>
+                            <td class="<?php echo $classes; ?>"><?php echo $row[$col_id] ?? ''; ?></td>
                         <?php elseif ( $col_id == 'selected' ) : ?>
                             <td class="<?php echo $classes; ?>">
                                 <?php $checked = (isset($data_selected[$col_id]) && $data_selected[$col_id] == $row[$col_id]) ? 'checked' : ''; ?>
@@ -251,20 +444,27 @@ class PagesHtml
                         <?php elseif ( $col_id == 'actions' ) : ?>
                             <td class="<?php echo $classes; ?>">
                                 <?php
-                                $order_data = $data_selected[$col_id][$row_id];
-                                $order_registered = (! empty($order_data['hrx_order_id'])) ? true : false;
-                                $order_status = (! empty($order_data['hrx_order_status'])) ? $order_data['hrx_order_status'] : 'new';
-                                $hide_btn = ($order_status == 'ready') ? 'display:none;' : '';
-                                $btn_text = ($order_registered) ? __('Regenerate order', 'hrx-delivery') : __('Register order', 'hrx-delivery');
+                                $hide_btn = '';
+                                if ( $show_buttons['register'] ) {
+                                    $btn_text = __('Register order', 'hrx-delivery');
+                                } else if ( $show_buttons['regenerate'] ) {
+                                    $btn_text = __('Regenerate order', 'hrx-delivery');
+                                } else {
+                                    $hide_btn = 'display:none;';
+                                }
                                 ?>
                                 <button id="btn_create_order_<?php echo $row_id; ?>" class="button action btn-create_order" type="button" value="create_order" style="<?php echo $hide_btn; ?>"><?php echo $btn_text; ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_status != 'new') ? 'display:none;' : ''; ?>
+
+                                <?php $hide_btn = ($show_buttons['ready']) ? '' : 'display:none;'; ?>
                                 <button id="btn_ready_order_<?php echo $row_id; ?>" class="button action btn-ready_order" type="button" value="ready_order" style="<?php echo $hide_btn; ?>"><?php echo __('Mark as ready', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_status != 'ready') ? 'display:none;' : ''; ?>
+
+                                <?php $hide_btn = ($show_buttons['unready']) ? '' : 'display:none;'; ?>
                                 <button id="btn_unready_order_<?php echo $row_id; ?>" class="button action btn-unready_order" type="button" value="unready_order" style="<?php echo $hide_btn; ?>"><?php echo __('Unmark ready', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_status == 'error') ? 'display:none;' : ''; ?>
+
+                                <?php $hide_btn = ($show_buttons['ship_label']) ? '' : 'display:none;'; ?>
                                 <button id="btn_shipment_label_<?php echo $row_id; ?>" class="button action btn-shipment_label" type="button" value="shipment_label" style="<?php echo $hide_btn; ?>"><?php echo __('Shipment label', 'hrx-delivery'); ?></button>
-                                <?php $hide_btn = (! $order_registered || $order_status == 'error') ? 'display:none;' : ''; ?>
+
+                                <?php $hide_btn = ($show_buttons['return_label']) ? '' : 'display:none;'; ?>
                                 <button id="btn_return_label_<?php echo $row_id; ?>" class="button action btn-return_label" type="button" value="return_label" style="<?php echo $hide_btn; ?>"><?php echo __('Return label', 'hrx-delivery'); ?></button>
                             </td>
                         <?php else : ?>

@@ -4,8 +4,8 @@
  * Description: The official HRX delivery plugin for WooCommerce
  * Author: Mijora
  * Author URI: https://www.mijora.dev/
- * Plugin URI: https://www.mijora.dev/
- * Version: 1.0.1
+ * Plugin URI: https://www.hrx.eu
+ * Version: 1.1.0
  * 
  * Domain Path: /languages
  * Text Domain: hrx-delivery
@@ -29,7 +29,7 @@ use HrxDeliveryWoo\Helper;
 
 /* Version */
 $hrx_params = array(
-    'version' => '1.0.1',
+    'version' => '1.1.0',
     'custom_changes' => array(), // If plugin have custom changes, add changes descriptions to this array
 );
 

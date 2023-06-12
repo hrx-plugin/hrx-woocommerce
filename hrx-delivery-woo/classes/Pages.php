@@ -257,7 +257,7 @@ class Pages
                 'filter_label' => __('Client full name', 'hrx-delivery'),
                 'filter_key' => 'client',
             ),
-            'order_status' => array(
+            'order_status_text' => array(
                 'title' => __('Status', 'hrx-delivery'),
                 'filter' => 'select',
                 'filter_label' => __('Order status', 'hrx-delivery'),
@@ -268,7 +268,7 @@ class Pages
                 'title' => __('Order date', 'hrx-delivery'),
             ),
             'hrx_order_status' => array(
-                'title' => __('HRX status', 'hrx-delivery'),
+                'title' => __('HRX shipment status', 'hrx-delivery'),
                 'filter' => 'text',
                 'filter_title' => __('Text in status', 'hrx-delivery'),
                 'filter_label' => __('Text in status', 'hrx-delivery'),
@@ -421,6 +421,23 @@ class Pages
         }
 
         return $output;
+    }
+
+    public function default_per_page_options()
+    {
+        $available_values = array(10, 25, 50, 100);
+        
+        if ( ! in_array($this->default_per_page, $available_values)) {
+            $available_values[] = $this->default_per_page;
+        }
+        sort($available_values);
+
+        return $available_values;
+    }
+
+    public function get_current_per_page()
+    {
+        return (isset($_GET['per_page'])) ? (int) $_GET['per_page'] : $this->default_per_page;
     }
 
     public function page_management()

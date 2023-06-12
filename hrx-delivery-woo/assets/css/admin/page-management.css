@@ -51,6 +51,14 @@
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+.hrx-page .table-header {
+    position: relative;
+}
+.hrx-page .table-header .page-pp {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 9px;
+}
 .hrx-page .hrx-table-filter {
     background-color: rgba(0, 115, 170, 0.5);
 }
@@ -84,7 +92,7 @@
     padding: 20px 10px;
 }
 .hrx-page .table-container td.column-order_id {
-    width: 85px;
+    width: 110px;
 }
 .hrx-page .table-container td.column-order_status {
     width: 130px;
@@ -156,4 +164,118 @@
     left: 0;
     right: 0;
     margin: auto;
+}
+.hrx-page .table-container td.column-order_id .hrx-open-modal {
+    float: right;
+    width: 16px;
+    padding: 18px 2px 2px 2px;
+    height: 0;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+.hrx-page .table-container td.column-order_id .hrx-open-modal:hover {
+    border: 2px solid #00a0d2;
+}
+.hrx-page .table-container td.column-order_id .hrx-open-modal:before {
+    font-family: WooCommerce;
+    speak: never;
+    font-weight: 400;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    margin: 0;
+    text-indent: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    content: "\e010";
+    line-height: 16px;
+    font-size: 14px;
+    vertical-align: middle;
+    top: 2px;
+}
+.hrx-page .table-container td.column-order_id .hrx-open-modal.hrx-loading:before {
+    display: none;
+}
+.hrx-page .hrx-modal-order_preview .modal-data-status {
+    float: right;
+    margin-right: 54px;
+}
+.hrx-page .hrx-modal-order_preview .modal-content {
+    display: flex;
+    flex-wrap: wrap;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-billing,
+.hrx-page .hrx-modal-order_preview .modal-content-shipping {
+    flex: 50%;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-products {
+    flex: 100%;
+    margin-top: 10px;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-billing span,
+.hrx-page .hrx-modal-order_preview .modal-content-shipping span {
+    display: block;
+}
+.hrx-page .hrx-modal-order_preview span.woocommerce-Price-amount,
+.hrx-page .hrx-modal-order_preview .woocommerce-Price-amount span {
+    display: unset;
+}
+.hrx-page .hrx-modal-order_preview .modal-value-inline span {
+    display: unset;
+}
+.hrx-page .hrx-modal-order_preview .modal-value-inline > span {
+    display: inline-block;
+    min-width: 70px;
+    text-align: right;
+}
+.hrx-page .hrx-modal-order_preview .modal-value-inline .modal-value-inline-title {
+    min-width: 30%;
+    text-align: unset;
+}
+.hrx-page .hrx-modal-order_preview .modal-data-billing-total {
+    font-weight: 600;
+}
+.hrx-page .hrx-modal-order_preview .modal-value-group {
+    margin-top: 10px;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-products table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-products table th,
+.hrx-page .hrx-modal-order_preview .modal-content-products table td {
+    text-align: right;
+    padding: 3px;
+    min-width: 60px;
+    vertical-align: top;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-products table th {
+    border-bottom: 1px solid #ddd;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-products table th:first-child,
+.hrx-page .hrx-modal-order_preview .modal-content-products table td:first-child {
+    text-align: left;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-products table th:nth-child(2),
+.hrx-page .hrx-modal-order_preview .modal-content-products table td:nth-child(2) {
+    width: 100px;
+    text-align: left;
+}
+.hrx-page .hrx-modal-order_preview .modal-content-products table th:nth-child(4),
+.hrx-page .hrx-modal-order_preview .modal-content-products table td:nth-child(4) {
+    width: 60px;
+    text-align: center;
+}
+
+.hrx-page .hrx-modal-order_preview .modal-content-products table th:nth-child(3),
+.hrx-page .hrx-modal-order_preview .modal-content-products table td:nth-child(3),
+.hrx-page .hrx-modal-order_preview .modal-content-products table th:nth-child(5),
+.hrx-page .hrx-modal-order_preview .modal-content-products table td:nth-child(5) {
+    width: 70px;
 }

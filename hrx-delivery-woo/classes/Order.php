@@ -8,6 +8,7 @@ if ( ! defined('ABSPATH') ) {
 
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\OrderHtml as Html;
+use HrxDeliveryWoo\OrderHelper as WcHelper;
 use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
@@ -96,7 +97,7 @@ class Order
 
     public function save_admin_order_block( $post_id )
     {
-        if ( ! $this->is_order_page() ) {
+        if ( ! WcHelper::is_order_page() ) {
             return $post_id;
         }
 
@@ -381,16 +382,5 @@ class Order
         }
 
         return get_post_meta($admin_order->get_id(), $this->core->meta_keys->method, true);
-    }
-
-    private function is_order_page()
-    {
-        global $post_type;
-
-        if ( 'shop_order' == $post_type ) {
-            return true;
-        }
-
-        return false;
     }
 }
