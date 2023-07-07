@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.0.1] - 2023-07-07
+### Fixed
+- Fixed delivery locations Update button action
+
 ## [1.1.0] - 2023-06-12
 ### Improved
 - Added a option to choose how much orders show in HRX Orders list
