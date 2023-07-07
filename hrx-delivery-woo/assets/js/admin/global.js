@@ -203,7 +203,7 @@
                     //console.log(response);
                     if ( response.repeat ) {
                         setTimeout(function (){
-                            hrxAjax.button_action_ajax(action, page + 1, button, output_to);
+                            hrxAjax.send_button_action(action, page + 1, button, output_to);
                         }, 100);
                         if ( output_to ) {
                             $(output_to).html(hrxGlobalVars.txt.locations_progress + "... " + response.total);
