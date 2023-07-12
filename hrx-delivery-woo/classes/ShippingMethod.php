@@ -10,6 +10,7 @@ use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\ShippingMethodHelper as ShipHelper;
 use HrxDeliveryWoo\ShippingMethodHtml as Html;
+use HrxDeliveryWoo\LocationsDelivery;
 use HrxDeliveryWoo\Debug;
 
 if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
@@ -161,7 +162,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 'id' => 'upd_delivery_loc',
                 'message' => __('Last update', 'hrx-delivery') . ':',
                 'default' => __('Never', 'hrx-delivery'),
-                'value' => Helper::get_hrx_option('last_sync_delivery_loc', ''),
+                'value' => Helper::get_hrx_option(LocationsDelivery::get_option_name('last_sync_terminal'), ''),
                 'repeat' => '30 days',
             );
 

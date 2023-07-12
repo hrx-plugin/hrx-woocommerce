@@ -13,10 +13,15 @@ use HrxDeliveryWoo\Helper;
 
 class LocationsDelivery
 {
-    private static $wp_options = array(
-        'last_sync_terminal' => 'last_sync_delivery_loc_terminal',
-        'last_sync_courier' => 'last_sync_delivery_loc_courier',
-    );
+    public static function get_option_name( $option_key )
+    {
+        $all_options = array(
+            'last_sync_terminal' => 'last_sync_delivery_loc_terminal',
+            'last_sync_courier' => 'last_sync_delivery_loc_courier',
+        );
+
+        return $all_options[$option_key] ?? $option_key;
+    }
 
     public static function get_methods()
     {
@@ -65,7 +70,7 @@ class LocationsDelivery
 
         if ( $result['status'] == 'OK' ) {
             $current_time = current_time("Y-m-d H:i:s");
-            Helper::update_hrx_option(self::$wp_options['last_sync_' . $type], $current_time);
+            Helper::update_hrx_option(self::get_option_name('last_sync_' . $type), $current_time);
         }
 
         return $result;
@@ -186,7 +191,7 @@ class LocationsDelivery
 
         if ( $result['status'] == 'OK' ) {
             $current_time = current_time("Y-m-d H:i:s");
-            Helper::update_hrx_option(self::$wp_options['last_sync_' . $type], $current_time);
+            Helper::update_hrx_option(self::get_option_name('last_sync_' . $type), $current_time);
         }
 
         return $result;
