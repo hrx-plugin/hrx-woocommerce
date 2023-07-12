@@ -50,6 +50,7 @@ class LocationsDelivery
         $type = 'terminal';
         if ( $page === false || $page === 1 ) {
             Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
+            Helper::delete_hrx_option('countries');
         }
 
         try {
@@ -67,7 +68,6 @@ class LocationsDelivery
             Helper::update_hrx_option(self::$wp_options['last_sync_' . $type], $current_time);
         }
 
-        Helper::delete_hrx_option('countries');
         return $result;
     }
 
@@ -172,6 +172,7 @@ class LocationsDelivery
         $type = 'courier';
         if ( $page === false || $page === 1 ) {
             Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
+            Helper::delete_hrx_option('countries');
         }
 
         try {
@@ -188,7 +189,6 @@ class LocationsDelivery
             Helper::update_hrx_option(self::$wp_options['last_sync_' . $type], $current_time);
         }
 
-        Helper::delete_hrx_option('countries');
         return $result;
     }
 
