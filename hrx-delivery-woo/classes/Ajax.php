@@ -14,6 +14,7 @@ use HrxDeliveryWoo\Order;
 use HrxDeliveryWoo\OrderHelper;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
+use HrxDeliveryWoo\LocationsDelivery;
 use HrxDeliveryWoo\Label;
 use HrxDeliveryWoo\Shipment;
 use HrxDeliveryWoo\Pdf;
@@ -84,19 +85,28 @@ class Ajax
      */
     public static function admin_btn_update_delivery_locations()
     {
+        $max_in_page = 250;
+        $all_methods = LocationsDelivery::get_methods();
+
         $page = (int)esc_attr($_POST['page']);
-        if ($page < 1) $page = 1;
+        if ( $page < 1 ) $page = 1;
 
         Debug::to_log('Delivery locations update. Page: ' . $page, 'locations');
+
+        $total_couriers = 0;
+        if ( $page == 1 ) {
+            $result = LocationsDelivery::update_couriers();
+            $total_couriers = $result['total'];
+        }
         
-        $result = Terminal::update_delivery_locations($page);
+        $result = LocationsDelivery::update($page);
 
         $current_time = current_time("Y-m-d H:i:s");
         $output = self::get_location_result_output($result, $current_time);
         $output['repeat'] = false;
-        $output['total'] = 250 * $page + $result['total'];
+        $output['total'] = $result['total'] + $total_couriers;
 
-        if ($result['total'] >= 250) {
+        if ( $result['total'] >= $max_in_page ) {
             $output['repeat'] = true;
         }
 

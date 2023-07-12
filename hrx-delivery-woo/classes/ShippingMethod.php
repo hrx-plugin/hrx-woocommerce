@@ -214,6 +214,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                     'type' => 'prices_for_countries',
                     'countries' => $method_params['countries'],
                     'top_class' => 'hrx-method-' . $method_key,
+                    'empty_msg' => sprintf(__('The list of delivery locations was not received. Press the "%1$s" button at the "%2$s" parameter and reload the page after the update is complete (%3$s).', 'hrx-delivery'), __('Update locations', 'hrx-delivery'), '<a href="#check_token_button">' . __('Delivery locations', 'hrx-delivery') . '</a>', '<a href="javascript:location.reload();">' . __('Reload now', 'hrx-delivery') . '</a>'),
                 );
                 
                 $first = false;

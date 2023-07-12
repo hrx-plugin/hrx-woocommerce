@@ -13,32 +13,6 @@ use HrxDeliveryWoo\Core;
 
 class Terminal
 {
-    public static function get_list( $country )
-    {
-        if ( empty($country) ) {
-            $country = 'LT';
-        }
-        
-        return Sql::get_multi_rows('delivery', array('country' => $country));
-    }
-
-    public static function add_info_to_list_elems( $terminals_list, $add_info = array(), $allow_override = false )
-    {
-        $changed_list = array();
-        foreach ( $terminals_list as $elem_key => $elem_data ) {
-            $elem = (array)$elem_data;
-            foreach ( $add_info as $info_key => $info_value ) {
-                if ( ! $allow_override && isset($elem[$info_key]) ) {
-                    continue;
-                }
-                $elem[$info_key] = $info_value;
-            }
-            $changed_list[$elem_key] = (object)$elem;
-        }
-
-        return $changed_list;
-    }
-
     public static function prepare_options( $terminals_list, $force_show_id = false )
     {
         $options = array();
@@ -165,126 +139,27 @@ class Terminal
         return $list;
     }
 
-    public static function update_delivery_locations( $page )
+    public static function get_list( $country )
     {
-        if ( $page === false || $page === 1 ) {
-            Sql::update_multi_rows('delivery', array('active' => 0), array());
-        }
-
-        try {
-            $start_page = ($page === false ) ? 1 : $page;
-            $result = self::save_delivery_locations($start_page, ($page === false));
-        } catch (\Exception $e) {
-            $result = array(
-                'status' => 'error',
-                'msg' => __('An unexpected error occurred during the operation', 'hrx-delivery'),
-            );
-        }
-
-        if ( $result['status'] == 'OK' ) {
-            $current_time = current_time("Y-m-d H:i:s");
-            Helper::update_hrx_option('last_sync_delivery_loc', $current_time);
-        }
-
-        return $result;
+        trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
+        
+        return array();
     }
 
-    private static function save_delivery_locations( $page, $self_repeat = false, $protector = 1 )
+    public static function add_info_to_list_elems( $terminals_list, $add_info = array(), $allow_override = false )
     {
-        $api = new Api();
-        $response = $api->get_delivery_locations($page, 250);
-        $available_countries = Helper::get_available_countries();
-        $status = array(
-            'status' => 'OK',
-            'total' => 0,
-            'added' => 0,
-            'updated' => 0,
-            'failed' => 0,
-            'msg' => '',
-        );
-        $max_cycles = 1000;
+        trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
+        
+        return array();
+    }
 
-        if ( $protector > $max_cycles ) {
-            return array(
-                'status' => 'error',
-                'msg' => __('Reached maximum number of cycles', 'hrx-delivery') . ' (' . $max_cycles . ')',
-            );
-        }
-
-        if ( $response['status'] != 'error' ) {
-            $count_all = 0;
-            $count_error = 0;
-            $count_added = 0;
-            $count_updated = 0;
-            foreach ( $response['data'] as $location_data ) {
-                if ( ! in_array($location_data['country'], $available_countries) ) {
-                    continue;
-                }
-                if ( $location_data['latitude'] == '0.0' && $location_data['longitude'] == '0.0' ) {
-                    continue;
-                }
-                $sql_data = array(
-                    'country' => $location_data['country'],
-                    'address' => $location_data['address'],
-                    'city' => $location_data['city'],
-                    'postcode' => $location_data['zip'],
-                    'latitude' => $location_data['latitude'],
-                    'longitude' => $location_data['longitude'],
-                    'active' => 1,
-                    'params' => json_encode(array(
-                        'min_length' => $location_data['min_length_cm'] ?? '',
-                        'min_width' => $location_data['min_width_cm'] ?? '',
-                        'min_height' => $location_data['min_height_cm'] ?? '',
-                        'min_weight' => $location_data['min_weight_kg'] ?? '',
-                        'max_length' => $location_data['max_length_cm'] ?? '',
-                        'max_width' => $location_data['max_width_cm'] ?? '',
-                        'max_height' => $location_data['max_height_cm'] ?? '',
-                        'max_weight' => $location_data['max_weight_kg'] ?? '',
-                        'phone_prefix' => $location_data['recipient_phone_prefix'] ?? '',
-                        'phone_regexp' => $location_data['recipient_phone_regexp'] ?? '',
-                    )),
-                );
-                if ( ! empty(Sql::get_row('delivery', array('location_id' => $location_data['id']))) ) {
-                    $result = Sql::update_row('delivery', $sql_data, array('location_id' => $location_data['id']) );
-                    $count_updated++;
-                } else {
-                    $sql_data['location_id'] = $location_data['id'];
-                    $result = Sql::insert_row('delivery', $sql_data);
-                    $count_added++;
-                }
-
-                if ( $result === false ) {
-                    $count_error++;
-                }
-                
-                $count_all++;
-            }
-
-            if ( $self_repeat && count($response['data']) >= 250 ) {
-                sleep(1);
-                $next_page = self::save_delivery_locations($page + 1, $self_repeat, $protector + 1);
-                if ( $next_page['status'] == 'error' ) {
-                    $status['status'] = 'error';
-                    $status['msg'] = $next_page['msg'];
-                } else {
-                    $count_all += $next_page['total'];
-                    $count_added += $next_page['added'];
-                    $count_updated += $next_page['updated'];
-                    $count_error += $next_page['failed'];
-                }
-            }
-
-            $status['total'] = $count_all;
-            $status['added'] = $count_added;
-            $status['updated'] = $count_updated;
-            $status['failed'] = $count_error;
-
-            return $status;
-        }
-
+    public static function update_delivery_locations( $page )
+    {
+        trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
+        
         return array(
             'status' => 'error',
-            'msg' => __('Request error', 'hrx-delivery') . ' - ' . $response['msg']
+            'msg' => __('Method ' . __METHOD__ . ' is deprecated', 'hrx-delivery'),
         );
     }
 }

@@ -49,6 +49,7 @@ class Debug
         $keywords = array(
             'fail' => 'Error',
             'notice' => 'Notice',
+            'empty' => 'Empty',
             'good' => 'OK',
         );
 

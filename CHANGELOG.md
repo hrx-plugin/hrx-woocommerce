@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Improved
+- Changed get of delivery countries from API instead of code
+
 ## [1.1.0.1] - 2023-07-07
 ### Fixed
 - Fixed delivery locations Update button action
