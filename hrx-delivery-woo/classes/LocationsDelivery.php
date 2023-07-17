@@ -55,8 +55,9 @@ class LocationsDelivery
         $type = 'terminal';
         if ( $page === false || $page === 1 ) {
             Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
-            Helper::delete_hrx_option('countries');
+            //Helper::delete_hrx_option('countries'); //Temporary fix (this line moved out from if). Problem: When executing this function, some subfunctions call Core, where the methods element is created. This results in a large number of reads, deletions and additions of records in the database. Need to fix or somehow cache data, while this function executing.
         }
+        Helper::delete_hrx_option('countries');
 
         try {
             $start_page = ($page === false ) ? 1 : $page;
@@ -175,7 +176,7 @@ class LocationsDelivery
     public static function update_couriers()
     {
         $type = 'courier';
-        
+
         Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
         Helper::delete_hrx_option('countries');
 

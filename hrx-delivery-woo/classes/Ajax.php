@@ -86,7 +86,6 @@ class Ajax
     public static function admin_btn_update_delivery_locations()
     {
         $max_in_page = 250;
-        $all_methods = LocationsDelivery::get_methods();
 
         $page = (int)esc_attr($_POST['page']);
         if ( $page < 1 ) $page = 1;
