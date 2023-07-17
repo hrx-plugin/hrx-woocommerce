@@ -175,10 +175,9 @@ class LocationsDelivery
     public static function update_couriers()
     {
         $type = 'courier';
-        if ( $page === false || $page === 1 ) {
-            Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
-            Helper::delete_hrx_option('countries');
-        }
+        
+        Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
+        Helper::delete_hrx_option('countries');
 
         try {
             $result = self::save_delivery_locations_couriers($type);
