@@ -169,7 +169,7 @@ class LocationsDelivery
 
         return array(
             'status' => 'error',
-            'msg' => __('Request error', 'hrx-delivery') . ' - ' . $response['msg']
+            'msg' => $response['msg']
         );
     }
 

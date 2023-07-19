@@ -189,6 +189,14 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                     ),
                 );
 
+                $fields[$method_key . '_title'] = array(
+                    'title' => __('Method title', 'hrx-delivery'),
+                    'type' => 'select',
+                    'description' => __('Select the name of this shipping method that will be displayed on the Checkout page', 'hrx-delivery'),
+                    'options' => $this->get_shipping_method_title($method_params),
+                    'default' => 'sort',
+                );
+
                 $fields[$method_key . '_default_dimensions'] = array(
                     'title' => __('Default dimensions', 'hrx-delivery'),
                     'type' => 'dimensions',
@@ -316,6 +324,17 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
             return Html::build_debug_plugin($value);
         }
 
+        private function get_shipping_method_title( $method, $get_title = false )
+        {
+            $all_titles = array(
+                'full' => $this->core->title . ' ' . $method['title'],
+                'sort' => 'HRX ' . strtolower($method['title']),
+                'method' => $method['title'],
+            );
+
+            return ($get_title && isset($all_titles[$get_title])) ? $all_titles[$get_title] : $all_titles;
+        }
+
         public function calculate_shipping($package = array())
         {
             $country = $package['destination']['country'];
@@ -357,9 +376,11 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 }
 
                 /* Build rate */
+                $title_key = (! empty($this->settings[$method_key . '_title'])) ? $this->settings[$method_key . '_title'] : 'sort';
+                $rate_title = $this->get_shipping_method_title($method_params, $title_key);
                 $rate = array(
                     'id' => ShipHelper::get_rate_id($method_key),
-                    'label' => $method_params['front_title'],
+                    'label' => $rate_title,
                     'cost' => $current_price,
                 );
 
