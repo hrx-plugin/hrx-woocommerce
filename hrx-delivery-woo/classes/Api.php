@@ -232,7 +232,7 @@ class Api
         $api->setToken($this->config->token)
             ->setTestMode($this->config->test_mode)
             ->setDebug($this->config->debug)
-            ->setTimeout(1);
+            ->setTimeout(40);
         
         return $api;
     }
