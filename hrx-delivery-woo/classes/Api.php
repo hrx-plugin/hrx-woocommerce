@@ -45,6 +45,9 @@ class Api
         } catch (\Exception $e) {
             $output['status'] = 'error';
             $output['msg'] = $this->convert_error_msg($e->getMessage());
+            if ( isset($api) && $this->config->debug ) {
+                $output['debug'] = $api->getDebugData();
+            }
         }
 
         return $output;
@@ -214,17 +217,24 @@ class Api
     {
         $test_mode = (Core::get_instance()->get_settings('test_mode') == 'yes') ? true : false;
         $token = ($test_mode) ? Core::get_instance()->get_settings('api_test_token') : Core::get_instance()->get_settings('api_token');
+        $debug_mode = (Core::get_instance()->get_settings('debug_enable') == 'yes') ? true : false;
         
         return (object) array(
             'token' => $config['token'] ?? $token,
             'test_mode' => $config['test_mode'] ?? $test_mode,
-            'debug' => $config['debug'] ?? false,
+            'debug' => $config['debug'] ?? $debug_mode,
         );
     }
 
     private function load_api()
     {
-        return new HrxLib_Api($this->config->token, $this->config->test_mode, $this->config->debug);
+        $api = new HrxLib_Api();
+        $api->setToken($this->config->token)
+            ->setTestMode($this->config->test_mode)
+            ->setDebug($this->config->debug)
+            ->setTimeout(1);
+        
+        return $api;
     }
 
     private function prepare_output()
