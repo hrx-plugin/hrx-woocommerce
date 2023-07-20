@@ -85,6 +85,8 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
 
         public function init_form_fields()
         {
+            $all_wc_order_status = array_merge(array('' => '- '. __('Do not change', 'hrx-delivery') . ' -'), \wc_get_order_statuses());
+
             $fields = array(
                 'enable' => array(
                     'title' => __('Enable', 'hrx-delivery'),
@@ -228,6 +230,27 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 
                 $first = false;
             }
+
+            $fields['hr_wc_order_status'] = array(
+                'type' => 'hr',
+                'title' => __('Woocommerce Order status', 'hrx-delivery')
+            );
+
+            $fields['wc_status_on_ready'] = array(
+                'title' => __('WC order status when mark "Ready"', 'hrx-delivery'),
+                'type' => 'select',
+                'description' => __('Change WC order status to this, when HRX order is mark as "Ready"', 'hrx-delivery'),
+                'options' => $all_wc_order_status,
+                'default' => '',
+            );
+
+            $fields['wc_status_off_ready'] = array(
+                'title' => __('WC order status when unmark "Ready"', 'hrx-delivery'),
+                'type' => 'select',
+                'description' => __('Change WC order status to this, when HRX order is unmark as "Ready"', 'hrx-delivery'),
+                'options' => $all_wc_order_status,
+                'default' => '',
+            );
 
             /*$fields['hr_settings'] = array( //TODO: Disabled because section is empty
                 'type' => 'hr',

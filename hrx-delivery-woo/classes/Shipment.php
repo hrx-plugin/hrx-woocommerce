@@ -377,6 +377,7 @@ class Shipment
     public static function ready_order( $wc_order, $unmark = false )
     {
         $core = Core::get_instance();
+        $settings = $core->get_settings();
         $status = array(
             'status' => 'error',
             'msg' => '',
@@ -393,14 +394,19 @@ class Shipment
 
         if ( $unmark ) {
             $result = $api->ready_order($hrx_order_id, false);
+            $change_wc_status = (! empty($settings['wc_status_off_ready'])) ? $settings['wc_status_off_ready'] : '';
         } else {
             $result = $api->ready_order($hrx_order_id, true);
+            $change_wc_status = (! empty($settings['wc_status_on_ready'])) ? $settings['wc_status_on_ready'] : '';
         }
 
         if ( $result['status'] == 'OK' ) {
             $hrx_status = 'unknown';
             if ( ! empty($result['data']['status']) ) {
                 $hrx_status = esc_attr($result['data']['status']);
+            }
+            if ( ! empty($change_wc_status) ) {
+                $wc_order->update_status($change_wc_status, '<b>' . $core->title . ':</b> ');
             }
             $wc_order->update_meta_data($core->meta_keys->order_status, $hrx_status);
             $wc_order->save();

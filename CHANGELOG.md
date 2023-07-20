@@ -4,6 +4,9 @@
 ### Improved
 - Changed get of delivery countries from API instead of code
 - Added option to select shipping method title type on Checkout page
+- Changed delivery locations auto update from monthly to weekly
+- Changed warehouse locations auto update from daily to weekly
+- Added a option to change WC order status when HRX order is (un)marked as "Ready"
 
 ### Updated
 - API library to v1.0.3
