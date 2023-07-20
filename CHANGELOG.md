@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.1.1] - 2023-07-20
 ### Improved
 - Changed get of delivery countries from API instead of code
 - Added option to select shipping method title type on Checkout page
