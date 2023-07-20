@@ -10,6 +10,7 @@
 
 ### Updated
 - API library to v1.0.3
+- TerminalMapping library to v1.2.3
 
 ## [1.1.0.1] - 2023-07-07
 ### Fixed
