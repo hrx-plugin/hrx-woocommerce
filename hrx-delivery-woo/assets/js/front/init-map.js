@@ -4,7 +4,7 @@
         lib: null,
         iconsURL: 'https://mijora.ams3.digitaloceanspaces.com/hrx/hrx/',
         init: function( container, terminals ) {
-            this.lib = new HrxMapping();
+            this.lib = new TerminalMappingHrx();
             
             let method_key = container.dataset.method;
             let selected_field = document.getElementById("hrx-method-" + method_key + "-selected");

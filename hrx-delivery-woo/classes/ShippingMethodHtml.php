@@ -247,6 +247,21 @@ class ShippingMethodHtml
         return $html;
     }
 
+    public static function build_custom_message_html( $text, $is_error = true )
+    {
+        $class = ($is_error) ? 'error' : 'updated';
+        ob_start();
+        ?>
+        <div class="<?php echo $class; ?> inline">
+            <p><?php echo $text; ?>
+        </div>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+
+        return $html;
+    }
+
     public static function build_prices_for_countries( $key, $params, $values, $img_dir_url )
     {
         $class = $params['class'] ?? '';
@@ -254,6 +269,7 @@ class ShippingMethodHtml
         $title = $params['title'] ?? '';
         $countries = $params['countries'] ?? array();
         $hide_row = $params['hide'] ?? false;
+        $empty_msg = $params['empty_msg'] ?? __('Could not get a list of countries to which this shipping method can be used', 'hrx-delivery');
 
         $weight_unit = get_option('woocommerce_weight_unit');
 
@@ -267,6 +283,9 @@ class ShippingMethodHtml
             </th>
             <td class="forminp">
                 <fieldset class="field-countries_prices <?php echo $class; ?>">
+                    <?php if ( empty($countries) ) : ?>
+                        <?php echo self::build_custom_message_html($empty_msg); ?>
+                    <?php endif; ?>
                     <?php foreach ( $countries as $country_code ) : ?>
                         <?php $country_key = esc_html($key) . '_' . $country_code; ?>
                         <?php $country_name = esc_html($key) . '[' . $country_code . ']'; ?>
@@ -345,10 +364,10 @@ class ShippingMethodHtml
             foreach ( $check_status['methods'] as $method_key => $method_data ) {
                 $rows['methods'][$method_key] = $method_data['title'] ?? 'Error';
                 $rows['methods'][$method_key] .= '. Available in ';
-                if ( isset($method_data['countries']) ) {
+                if ( ! empty($method_data['countries']) ) {
                     $rows['methods'][$method_key] .= implode(', ', $method_data['countries']);
                 } else {
-                    $rows['methods'][$method_key] .= Debug::status_keywords('notice');
+                    $rows['methods'][$method_key] .= Debug::status_keywords('empty');
                 }
             }
         }

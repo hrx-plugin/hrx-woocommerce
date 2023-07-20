@@ -8,6 +8,7 @@ if ( ! defined('ABSPATH') ) {
 
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Sql;
+use HrxDeliveryWoo\PluginUpdate;
 
 class Core
 {
@@ -49,7 +50,10 @@ class Core
             return;
         }
 
-        $this->methods = ($params['methods']) ?? array();
+        $classPluginUpdate = new PluginUpdate($this->version);
+        $classPluginUpdate->exec_all();
+
+        $this->set_methods(($params['methods']) ?? array());
         $this->pages = ($params['pages']) ?? array();
         $this->meta_keys = $this->get_meta_keys();
         $this->settings = $this->get_settings();
@@ -134,6 +138,56 @@ class Core
         }
 
         return $options;
+    }
+
+    public function set_methods( $methods )
+    {
+        $this->methods = $methods;
+
+        foreach ( $this->methods as $method_key => $method_data ) {
+            $this->methods[$method_key]['countries'] = $this->get_available_countries($method_key);
+        }
+    }
+
+    public function get_available_countries( $get_for_type )
+    {
+        $available_countries = array();
+        $saved_countries = get_option($this->option_prefix . '_countries');
+        
+        if ( ! is_array($saved_countries) ) {
+            $saved_countries = array();
+        }
+
+        if ( empty($saved_countries) || empty($saved_countries[$get_for_type]) ) {
+            $available_countries = $this->refresh_available_countries($get_for_type);
+            $saved_countries[$get_for_type] = $available_countries;
+            update_option($this->option_prefix . '_countries', $saved_countries);
+        } else {
+            $available_countries = $saved_countries[$get_for_type];
+        }
+
+        return $available_countries;
+    }
+
+    public function refresh_available_countries( $get_for_type )
+    {
+        $available_countries = array();
+        $available_countries_sql = Sql::get_columns_unique_values('delivery', 'country', array('type' => $get_for_type, 'active' => 1));
+
+        if ( empty($available_countries_sql) ) {
+            return $available_countries;
+        }
+
+        foreach ( $available_countries_sql as $sql_result_row ) {
+            if ( isset($sql_result_row->country) ) {
+                $available_countries[] = $sql_result_row->country;
+            } elseif ( isset($sql_result_row['country']) ) {
+                $available_countries[] = $sql_result_row['country'];
+            }
+        }
+
+        sort($available_countries);
+        return $available_countries;
     }
 
     /**

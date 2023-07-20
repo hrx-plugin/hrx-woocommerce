@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.1] - 2023-07-20
+### Improved
+- Changed get of delivery countries from API instead of code
+- Added option to select shipping method title type on Checkout page
+- Changed delivery locations auto update from monthly to weekly
+- Changed warehouse locations auto update from daily to weekly
+- Added a option to change WC order status when HRX order is (un)marked as "Ready"
+
+### Updated
+- API library to v1.0.3
+- TerminalMapping library to v1.2.3
+
 ## [1.1.0.1] - 2023-07-07
 ### Fixed
 - Fixed delivery locations Update button action

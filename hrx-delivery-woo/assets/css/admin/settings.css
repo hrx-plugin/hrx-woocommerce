@@ -1,3 +1,7 @@
+.woocommerce table.hrx-settings div.error.inline,
+.woocommerce table.hrx-settings div.error.inline p {
+    margin: 0;
+}
 .woocommerce table.hrx-settings .section_title {
     padding-left: 0;
 }
@@ -213,9 +217,7 @@
 .woocommerce table.hrx-settings .debug-plugin .debug-status-good {
     color: green;
 }
-.woocommerce table.hrx-settings .debug-plugin .debug-status-notice {
+.woocommerce table.hrx-settings .debug-plugin .debug-status-notice,
+.woocommerce table.hrx-settings .debug-plugin .debug-status-empty {
     color: orange;
-}
-.woocommerce table.hrx-settings .debug-plugin .debug-status-fail {
-    color: red;
 }

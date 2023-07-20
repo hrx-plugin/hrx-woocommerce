@@ -31,6 +31,7 @@ class Sql
             $sql = "CREATE TABLE $table_name (
                 id INT(11) NOT NULL auto_increment COMMENT 'Row ID',
                 location_id VARCHAR(50) NOT NULL COMMENT 'Location ID in API',
+                type VARCHAR(20) COMMENT 'Location type',
                 country VARCHAR(10) COMMENT 'Location country code',
                 address VARCHAR(255) COMMENT 'Location address',
                 city VARCHAR(255) COMMENT 'Location city',
@@ -101,12 +102,12 @@ class Sql
         return $wpdb->get_row("SELECT * FROM " . $table_name . " WHERE " . $sql_where);
     }
 
-    public static function get_multi_rows( $table, $where )
+    public static function get_multi_rows( $table, $where, $operation = 'AND' )
     {
         global $wpdb;
 
         $table_name = $wpdb->prefix . self::get_table_name($table);
-        $sql_where = (! empty($where)) ? " WHERE " . self::prepare_where($where) : '';
+        $sql_where = (! empty($where)) ? " WHERE " . self::prepare_where($where, $operation) : '';
 
         return $wpdb->get_results("SELECT * FROM " . $table_name . $sql_where);
     }
@@ -120,6 +121,41 @@ class Sql
         $sql_where = (! empty($where)) ? " WHERE " . self::prepare_where($where) : '';
 
         return $wpdb->query("UPDATE ". $table_name . " SET " . $sql_set . $sql_where);
+    }
+
+    public static function get_columns_unique_values( $table, $columns, $where = '', $group_by = '' )
+    {
+        global $wpdb;
+
+        if ( empty($columns) ) {
+            return false;
+        }
+
+        $table_name = $wpdb->prefix . self::get_table_name($table);
+        if ( ! is_array($columns) ) {
+            $columns = array($columns);
+        }
+        if ( empty($group_by) ) {
+            $group_by = $columns[0];
+        }
+        $sql_columns = implode(',', $columns);
+        $sql_where = (! empty($where)) ? " WHERE " . self::prepare_where($where) : '';
+
+        return $wpdb->get_results("SELECT " . $sql_columns . " FROM " . $table_name . $sql_where . " GROUP BY " . $group_by);
+    }
+
+    public static function add_new_column( $table, $column_name, $column_params )
+    {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . self::get_table_name($table);
+        $check = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name='" . $table_name . "' AND column_name='" . $column_name . "'");
+
+        if( empty($check) ){
+            return $wpdb->query("ALTER TABLE " . $table_name . " ADD " . $column_name . " " . $column_params);
+        }
+
+        return true;
     }
 
     private static function prepare_where( $values, $operation = 'AND' )

@@ -175,6 +175,8 @@
     };
 
     window.hrxAjax = {
+        counter: 0,
+
         execute_button_action: function( button, action, output_to = false ) {
             var button = $(button);
             button.addClass("hrx-loading").prop("disabled", true);
@@ -206,7 +208,8 @@
                             hrxAjax.send_button_action(action, page + 1, button, output_to);
                         }, 100);
                         if ( output_to ) {
-                            $(output_to).html(hrxGlobalVars.txt.locations_progress + "... " + response.total);
+                            hrxAjax.counter = hrxAjax.counter + response.total;
+                            $(output_to).html(hrxGlobalVars.txt.locations_progress + "... " + hrxAjax.counter);
                         }
                     } else {
                         if ( output_to ) {
@@ -221,6 +224,7 @@
                             $(output_to).html(response.msg);
                         }
                         button.removeClass("hrx-loading").prop("disabled", false);
+                        hrxAjax.counter = 0;
                     }
                 },
                 error: function( xhr, status, error ) {
@@ -229,6 +233,7 @@
                         $(output_to).html(hrxGlobalVars.txt.request_error + " - " + error);
                     }
                     button.removeClass("hrx-loading").prop("disabled", false);
+                    hrxAjax.counter = 0;
                 },
                 complete: function() {
                 }
