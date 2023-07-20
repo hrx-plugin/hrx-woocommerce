@@ -16,13 +16,13 @@ class Cronjob
     public $cronjobs = array(
         'hrx_update_warehouses' => array(
             'func' => 'job_update_warehouses',
-            'freq' => 'daily',
+            'freq' => 'weekly',
             'time' => '02:00:00',
         ),
         'hrx_update_delivery_locations' => array(
             'func' => 'job_update_delivery_locs',
-            'freq' => 'monthly',
-            'time' => '03:00:00',
+            'freq' => 'weekly',
+            'time' => '04:00:00',
         ),
         /*'hrx_test' => array( // Activate if you want to test (use function job_test)
             'func' => 'job_test',
