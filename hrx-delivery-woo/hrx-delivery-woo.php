@@ -5,7 +5,7 @@
  * Author: Mijora
  * Author URI: https://www.mijora.dev/
  * Plugin URI: https://www.hrx.eu
- * Version: 1.1.0.1
+ * Version: 1.1.1.0a
  * 
  * Domain Path: /languages
  * Text Domain: hrx-delivery
@@ -38,12 +38,10 @@ $hrx_params['methods'] = array(
     'courier' => array(
         'title' => __('Courier', 'hrx-delivery'),
         'front_title' => _x('HRX courier', 'Shipping method title in checkout', 'hrx-delivery'),
-        'countries' => array('LT', 'LV', 'EE', 'PL', 'FI', 'SE'),
     ),
     'terminal' => array(
         'title' => __('Parcel terminal', 'hrx-delivery'),
         'front_title' => _x('HRX parcel terminal', 'Shipping method title in checkout', 'hrx-delivery'),
-        'countries' => array('LT', 'LV', 'EE', 'PL', 'FI', 'SE'),
         'has_terminals' => true,
     ),
 );

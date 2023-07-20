@@ -93,6 +93,13 @@ class Helper
         return update_option($core->option_prefix . '_' . $option_name, $value);
     }
 
+    public static function delete_hrx_option( $option_name )
+    {
+        $core = Core::get_instance();
+
+        return delete_option($core->option_prefix . '_' . $option_name);
+    }
+
     public static function get_first_value_from_array( $array )
     {
         if ( is_array($array) ) {

@@ -85,7 +85,7 @@ class Order
             'method' => $method_key,
             'has_terminals' => $has_terminal,
             'selected_terminal' => $terminal_id,
-            'all_terminals' => Terminal::get_list($this->get_order_country($order)),
+            'all_terminals' => LocationsDelivery::get_list($method_key, $this->get_order_country($order)),
             'selected_warehouse' => $current_warehouse_id,
             'all_warehouses' => Warehouse::get_list(),
             'tracking_number' => $tracking_number,

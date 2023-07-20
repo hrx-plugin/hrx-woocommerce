@@ -6,12 +6,14 @@ use HrxApi\Helper;
 class API
 {
     /* Main variables */
-    protected $url = "https://woptest.hrx.eu/api/v1/";
     protected $token;
+    protected $timeout = 15;
 
     /* Class variables */
-    private $timeout = 5;
+    private $url_test;
+    private $url_live;
     private $debug_mode = false;
+    private $test_mode = false;
     private $debug_data = [];
 
     /**
@@ -24,19 +26,161 @@ class API
      */
     public function __construct( $token = false, $test_mode = false, $api_debug_mode = false )
     {
+        if ( $token ) {
+            $this->setToken($token);
+        }
+        $this->setDebug($api_debug_mode);
+        $this->setTestMode($test_mode);
+
+        $this->setTestUrl("https://woptest.hrx.eu/api/v1/");
+        $this->setLiveUrl("https://wop.hrx.eu/api/v1/");
+    }
+
+    /**
+     * Set API request timeout value
+     * @since 1.0.3
+     * 
+     * @param (integer) $timeout - Timeout value in seconds
+     * @return (object) - This class
+     */
+    public function setTimeout( $timeout )
+    {
+        $this->timeout = $timeout;
+
+        return $this;
+    }
+
+    /**
+     * Activate debug mode
+     * @since 1.0.3
+     * 
+     * @param (boolean) $activate_debug - Debug mode enable/disable command
+     * @return (object) - This class
+     */
+    public function setDebug( $activate_debug = true )
+    {
+        $this->debug_mode = $activate_debug;
+
+        return $this;
+    }
+
+    /**
+     * Check debug mode
+     * @since 1.0.3
+     * 
+     * @return (boolean) - Debug mode status
+     */
+    public function isDebug()
+    {
+        return (bool) $this->debug_mode;
+    }
+
+    /**
+     * Save debug data (work only if debug is enabled)
+     * @since 1.0.3
+     * 
+     * @param (mixed) $debug_data - Data to be saved
+     */
+    private function setDebugData( $debug_data )
+    {
+        if ( ! $this->isDebug() ) {
+            return;
+        }
+
+        $this->debug_data = $debug_data;
+    }
+
+    /**
+     * Get debug data
+     * @since 1.0.3
+     * 
+     * @return (mixed) - Saved debug data
+     */
+    public function getDebugData()
+    {
+        return $this->debug_data;
+    }
+
+    /**
+     * Activate test mode
+     * @since 1.0.3
+     * 
+     * @param (boolean) $activate_test_mode - Test mode enable/disable command
+     * @return (object) - This class
+     */
+    public function setTestMode( $activate_test_mode = true )
+    {
+        $this->test_mode = $activate_test_mode;
+
+        return $this;
+    }
+
+    /**
+     * Check test mode
+     * @since 1.0.3
+     * 
+     * @return (boolean) - Test mode status
+     */
+    public function isTestMode()
+    {
+        return (bool) $this->test_mode;
+    }
+
+    /**
+     * Set API token
+     * @since 1.0.3
+     * 
+     * @param (string) $token - API token
+     * @return (object) - This class
+     */
+    public function setToken( $token )
+    {
         if ( ! $token) {
             Helper::throwError("User Token is required");
         }
 
         $this->token = $token;
 
-        if ( ! $test_mode) {
-            $this->url = "https://wop.hrx.eu/api/v1/";
-        }
+        return $this;
+    }
 
-        if ( $api_debug_mode ) {
-            $this->debug_mode = $api_debug_mode;
-        }
+    /**
+     * Set API test URL
+     * @since 1.0.3
+     * 
+     * @param (string) $url - API URL
+     * @return (object) - This class
+     */
+    public function setTestUrl( $url )
+    {
+        $this->url_test = $url;
+
+        return $this;
+    }
+
+    /**
+     * Set API live URL
+     * @since 1.0.3
+     * 
+     * @param (string) $url - API URL
+     * @return (object) - This class
+     */
+    public function setLiveUrl( $url )
+    {
+        $this->url_live = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get API URL
+     * @since 1.0.3
+     * 
+     * @return (string) $url - API URL
+     */
+    protected function getUrl( $add_subdirectory = '' )
+    {
+        return ($this->isTestMode()) ? $this->url_test . $add_subdirectory : $this->url_live . $add_subdirectory;
     }
 
     /**
@@ -49,7 +193,7 @@ class API
      */
     public function getPickupLocations( $page = 1, $per_page = 100 )
     {
-        return $this->callApi($this->url . 'pickup_locations', array(), array(
+        return $this->callApi($this->getUrl('pickup_locations'), array(), array(
             'page' => $page,
             'per_page' => $per_page
         ));
@@ -65,7 +209,7 @@ class API
      */
     public function getDeliveryLocations( $page = 1, $per_page = 100 )
     {
-        return $this->callApi($this->url . 'delivery_locations', array(), array(
+        return $this->callApi($this->getUrl('delivery_locations'), array(), array(
             'page' => $page,
             'per_page' => $per_page
         ));
@@ -79,7 +223,7 @@ class API
      */
     public function getCourierDeliveryLocations()
     {
-        return $this->callApi($this->url . 'courier_delivery_locations');
+        return $this->callApi($this->getUrl('courier_delivery_locations'));
     }
 
     /**
@@ -91,7 +235,7 @@ class API
      */
     public function generateOrder( $order_data )
     {
-        return $this->callApi($this->url . 'orders', $order_data);
+        return $this->callApi($this->getUrl('orders'), $order_data);
     }
 
     /**
@@ -104,7 +248,7 @@ class API
      */
     public function getOrders( $page = 1, $per_page = 100 )
     {
-        return $this->callApi($this->url . 'orders', array(), array(
+        return $this->callApi($this->getUrl('orders'), array(), array(
             'page' => $page,
             'per_page' => $per_page
         ));
@@ -119,7 +263,7 @@ class API
      */
     public function getOrder( $order_id )
     {
-        return $this->callApi($this->url . 'orders/' . $order_id);
+        return $this->callApi($this->getUrl('orders/' . $order_id));
     }
 
     /**
@@ -132,7 +276,7 @@ class API
      */
     public function changeOrderReadyState( $order_id, $is_ready )
     {
-        return $this->callApi($this->url . 'orders/' . $order_id . '/update_ready_state', array('id' => $order_id, 'ready' => $is_ready));
+        return $this->callApi($this->getUrl('orders/' . $order_id . '/update_ready_state'), array('id' => $order_id, 'ready' => $is_ready));
     }
 
     /**
@@ -144,7 +288,7 @@ class API
      */
     public function cancelOrder( $order_id )
     {
-        return $this->callApi($this->url . 'orders/' . $order_id .  '/cancel', array('id' => $order_id));
+        return $this->callApi($this->getUrl('orders/' . $order_id .  '/cancel'), array('id' => $order_id));
     }
 
     /**
@@ -156,7 +300,7 @@ class API
      */
     public function getLabel( $order_id )
     {
-        return $this->callApi($this->url . 'orders/' . $order_id . '/label');
+        return $this->callApi($this->getUrl('orders/' . $order_id . '/label'));
     }
 
     /**
@@ -168,7 +312,7 @@ class API
      */
     public function getReturnLabel( $order_id )
     {
-        return $this->callApi($this->url . 'orders/' . $order_id . '/return_label');
+        return $this->callApi($this->getUrl('orders/' . $order_id . '/return_label'));
     }
 
     /**
@@ -180,7 +324,7 @@ class API
      */
     public function getTrackingEvents( $order_id )
     {
-        return $this->callApi($this->url . 'orders/' . $order_id . '/tracking');
+        return $this->callApi($this->getUrl('orders/' . $order_id . '/tracking'));
     }
 
     /**
@@ -192,7 +336,7 @@ class API
      */
     public function getTrackingInformation( $tracking_number )
     {
-        return $this->callApi($this->url . 'public/orders/' . $tracking_number, array(), array(), false);
+        return $this->callApi($this->getUrl('public/orders/' . $tracking_number), array(), array(), false);
     }
 
     /**
@@ -208,7 +352,7 @@ class API
     private function callApi( $url, $data = [], $url_params = [], $use_token = true )
     {
         $ch = curl_init();
-        
+
         $headers = array();
         if ( $use_token ) {
             $headers[] = "Authorization: Bearer " . $this->token;
@@ -230,25 +374,23 @@ class API
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $errorMsg = (curl_errno($ch)) ? curl_error($ch) : '';
 
         curl_close($ch);
 
-        if ( $this->debug_mode ) {
-            Helper::printDebug(
-                array(
-                    'Method' => debug_backtrace()[1]['class'] . '::' . debug_backtrace()[1]['function'] . '()',
-                    'Token' => $this->token,
-                    'Use token' => ($use_token) ? 'Yes' : 'No',
-                    'Post data' => json_encode($data, JSON_PRETTY_PRINT),
-                    'URL params' => json_encode($url_params, JSON_PRETTY_PRINT),
-                    'URL' => $url,
-                    'Response code' => $httpCode,
-                    'Response data' => json_encode(json_decode($response), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
-                )
-            );
-        }
+        $this->setDebugData(array(
+            'Method' => debug_backtrace()[1]['class'] . '::' . debug_backtrace()[1]['function'] . '()',
+            'Token' => $this->token,
+            'Use token' => ($use_token) ? 'Yes' : 'No',
+            'Post data' => json_encode($data, JSON_PRETTY_PRINT),
+            'URL params' => json_encode($url_params, JSON_PRETTY_PRINT),
+            'URL' => $url,
+            'Response code' => $httpCode,
+            'Response data' => json_encode(json_decode($response), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+            'Response error' => $errorMsg,
+        ));
 
-        return $this->handleApiResponse($response, $httpCode);
+        return $this->handleApiResponse($response, $httpCode, $errorMsg);
     }
 
     /**
@@ -259,8 +401,12 @@ class API
      * @param (integer) $httpCode - Response status code
      * @return (mixed) - Object of acceptable response
      */
-    private function handleApiResponse( $response, $httpCode )
+    private function handleApiResponse( $response, $httpCode, $errorMsg )
     {
+        if ( ! empty($errorMsg) ) {
+            Helper::throwError('CURL error: ' . $errorMsg);
+        }
+
         if ( ! Helper::isJson($response) ) {
             Helper::throwError('The response is not in the correct format');
         }

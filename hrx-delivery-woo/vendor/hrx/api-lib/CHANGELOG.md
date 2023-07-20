@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.3] - Better API class control
+### Improved
+- increased timeout time to 15 sec
+- added setTimeout() function to API class
+- improved API class debug control and created debug data output
+- added setTestMode() function to API class
+- added setToken() function to API class
+- added setTestUrl() function to API class
+- added setLiveUrl() function to API class
+
 ## [1.0.2] - Courier shipping
 ### Improved
 - added a function to change order ready state

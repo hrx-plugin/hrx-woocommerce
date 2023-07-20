@@ -56,7 +56,7 @@ class Front
         }
 
         $country = $this->get_customer_shipping_country();
-        $terminals_list = Terminal::get_list($country);
+        $terminals_list = LocationsDelivery::get_list($method_key, $country);
 
         //echo $this->build_terminals_select($terminals_list, $method_key); // Not using
         echo $this->build_terminals_script($terminals_list, $country, $method_key);

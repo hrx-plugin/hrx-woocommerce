@@ -10,6 +10,7 @@ use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\ShippingMethodHelper as ShipHelper;
 use HrxDeliveryWoo\ShippingMethodHtml as Html;
+use HrxDeliveryWoo\LocationsDelivery;
 use HrxDeliveryWoo\Debug;
 
 if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
@@ -161,7 +162,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 'id' => 'upd_delivery_loc',
                 'message' => __('Last update', 'hrx-delivery') . ':',
                 'default' => __('Never', 'hrx-delivery'),
-                'value' => Helper::get_hrx_option('last_sync_delivery_loc', ''),
+                'value' => Helper::get_hrx_option(LocationsDelivery::get_option_name('last_sync_terminal'), ''),
                 'repeat' => '30 days',
             );
 
@@ -186,6 +187,14 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                     'custom_attributes' => array(
                         'data-key' => $method_key,
                     ),
+                );
+
+                $fields[$method_key . '_title'] = array(
+                    'title' => __('Method title', 'hrx-delivery'),
+                    'type' => 'select',
+                    'description' => __('Select the name of this shipping method that will be displayed on the Checkout page', 'hrx-delivery'),
+                    'options' => $this->get_shipping_method_title($method_params),
+                    'default' => 'sort',
                 );
 
                 $fields[$method_key . '_default_dimensions'] = array(
@@ -214,6 +223,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                     'type' => 'prices_for_countries',
                     'countries' => $method_params['countries'],
                     'top_class' => 'hrx-method-' . $method_key,
+                    'empty_msg' => sprintf(__('The list of delivery locations was not received. Press the "%1$s" button at the "%2$s" parameter and reload the page after the update is complete (%3$s).', 'hrx-delivery'), __('Update locations', 'hrx-delivery'), '<a href="#check_token_button">' . __('Delivery locations', 'hrx-delivery') . '</a>', '<a href="javascript:location.reload();">' . __('Reload now', 'hrx-delivery') . '</a>'),
                 );
                 
                 $first = false;
@@ -314,6 +324,17 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
             return Html::build_debug_plugin($value);
         }
 
+        private function get_shipping_method_title( $method, $get_title = false )
+        {
+            $all_titles = array(
+                'full' => $this->core->title . ' ' . $method['title'],
+                'sort' => 'HRX ' . strtolower($method['title']),
+                'method' => $method['title'],
+            );
+
+            return ($get_title && isset($all_titles[$get_title])) ? $all_titles[$get_title] : $all_titles;
+        }
+
         public function calculate_shipping($package = array())
         {
             $country = $package['destination']['country'];
@@ -355,9 +376,11 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 }
 
                 /* Build rate */
+                $title_key = (! empty($this->settings[$method_key . '_title'])) ? $this->settings[$method_key . '_title'] : 'sort';
+                $rate_title = $this->get_shipping_method_title($method_params, $title_key);
                 $rate = array(
                     'id' => ShipHelper::get_rate_id($method_key),
-                    'label' => $method_params['front_title'],
+                    'label' => $rate_title,
                     'cost' => $current_price,
                 );
 

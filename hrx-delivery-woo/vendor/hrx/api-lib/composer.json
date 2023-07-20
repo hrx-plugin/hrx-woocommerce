@@ -2,7 +2,7 @@
   "name": "hrx/api-lib",
   "description": "Library for HRX Api",
   "type": "library",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "authors": [
     {
       "name": "UAB Mijora",
