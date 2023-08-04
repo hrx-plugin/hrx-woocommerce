@@ -13,6 +13,9 @@ use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\Order;
 use HrxDeliveryWoo\Label;
+use HrxDeliveryWoo\WcOrder;
+use HrxDeliveryWoo\WcTools;
+use HrxDeliveryWoo\WcCustom;
 
 class Shipment
 {
@@ -24,15 +27,22 @@ class Shipment
             'msg' => '',
         );
         $core = Core::get_instance();
+        $wc = (object) array(
+            'order' => new WcOrder(),
+            'tools' => new WcTools(),
+            'custom' => new WcCustom(),
+        );
         $api = new Api();
 
-        $wc_order = wc_get_order($wc_order_id);
-        if ( empty($wc_order) ) {
+        $wc_order = $wc->order->get_order($wc_order_id, true);
+        if ( ! $wc_order ) {
             $status['msg'] = __('Failed to get order', 'hrx-delivery');
             return $status;
         }
 
-        $hrx_order_id = $wc_order->get_meta($core->meta_keys->order_id);
+        $hrx_data = $wc->order->get_hrx_data($wc_order->get_id());
+
+        $hrx_order_id = $hrx_data->hrx_order_id;
         if ( ! empty($hrx_order_id) ) {
             if ( ! $allow_regenerate ) {
                 $status['status'] = 'OK';
@@ -50,11 +60,12 @@ class Shipment
         $receiver_email = $wc_order->get_billing_email();
         if ( empty($receiver_email) ) {
             $status['msg'] = __('Recipient email address is required', 'hrx-delivery');
-            update_post_meta($wc_order->get_id(), $core->meta_keys->error_msg, $status['msg']);
+            $wc->order->update_meta($wc_order->get_id(), $core->meta_keys->error_msg, $status['msg']);
+
             return $status;
         }
 
-        $warehouse_id = $wc_order->get_meta($core->meta_keys->warehouse_id);
+        $warehouse_id = $hrx_data->warehouse_id;
         if ( empty($warehouse_id) ) {
             $warehouse_id = Warehouse::get_default_id();
         }
@@ -63,7 +74,7 @@ class Shipment
             return $status;
         }
 
-        $method = $wc_order->get_meta($core->meta_keys->method);
+        $method = $hrx_data->method;
         if ( empty($method) ) {
             $status['msg'] = __('Failed to get selected shipping method', 'hrx-delivery');
             return $status;
@@ -73,19 +84,21 @@ class Shipment
             return $status;
         }
 
-        $classOrder = new Order();
-        $receiver_data = $classOrder->get_order_address($wc_order);
+        $receiver_data = $wc->custom->get_order_address($wc_order);
 
         $receiver_phone = str_replace(' ', '', $receiver_data['phone']);
         $receiver_phone_prefix = '';
         $receiver_phone_regex = '';
+        $receiver_postcode = str_replace(' ', '', $receiver_data['postcode']);;
+        $receiver_postcode_prefix = '';
+        $receiver_postcode_regex = '';
 
         $receiver_city = $receiver_data['city'];
         if ( ! empty($receiver_data['state']) ) {
             $receiver_city .= ', ' . $receiver_data['state'];
         }
 
-        $shipment_dimensions = self::get_dimensions($wc_order);
+        $shipment_dimensions = self::get_dimensions($wc_order->get_id());
      
         $dimensions_limitation = array(
             'min' => Helper::get_empty_dimensions_array(0),
@@ -97,7 +110,7 @@ class Shipment
 
         if ( ! empty($core->methods[$method]['has_terminals']) ) {
             $has_terminals = true;
-            $terminal_id = $wc_order->get_meta($core->meta_keys->terminal_id);
+            $terminal_id = $hrx_data->terminal_id;
             if ( empty($terminal_id) ) {
                 $status['msg'] = __('Failed to get HRX terminal from order', 'hrx-delivery');
                 return $status;
@@ -107,7 +120,7 @@ class Shipment
             if ( empty($terminal_data) ) {
                 $status['msg'] = __('The terminal specified in the order was not found', 'hrx-delivery');
                 $meta_msg = __('Selected terminal not found', 'hrx-delivery');
-                update_post_meta($wc_order->get_id(), $core->meta_keys->error_msg, $meta_msg);
+                $wc->order->update_meta($wc_order->get_id(), $core->meta_keys->error_msg, $meta_msg);
                 return $status;
             }
 
@@ -135,6 +148,8 @@ class Shipment
 
             $receiver_phone_prefix = $selected_country_data['recipient_phone_prefix'];
             $receiver_phone_regex = $selected_country_data['recipient_phone_regexp'];
+            $receiver_postcode_prefix = '';
+            $receiver_postcode_regex = $selected_country_data['delivery_location_zip_regexp'];
 
             $dimensions_limitation['min']['weight'] = $selected_country_data['min_weight_kg'];
             $dimensions_limitation['min']['length'] = $selected_country_data['min_length_cm'];
@@ -146,17 +161,29 @@ class Shipment
             $dimensions_limitation['max']['height'] = $selected_country_data['max_height_cm'];
         }
 
-        if ( ! Helper::check_phone($receiver_phone, $receiver_phone_prefix, $receiver_phone_regex) ) {
+        if ( ! Helper::check_regex($receiver_phone, $receiver_phone_prefix, $receiver_phone_regex) ) {
             $status['msg'] = sprintf(
                 __('The recipient phone (%1$s) does not match the required format for country %2$s', 'hrx-delivery'),
                 $receiver_phone,
-                \WC()->countries->countries[$receiver_data['country']]
+                $wc->tools->get_country_name($receiver_data['country'])
             );
             $meta_msg = __('The phone does not match the required format', 'hrx-delivery');
-            update_post_meta($wc_order->get_id(), $core->meta_keys->error_msg, $meta_msg);
+            $wc->order->update_meta($wc_order->get_id(), $core->meta_keys->error_msg, $meta_msg);
             return $status;
         }
-        $receiver_phone = Helper::remove_phone_prefix($receiver_phone, $receiver_phone_prefix);
+        $receiver_phone = Helper::remove_prefix($receiver_phone, $receiver_phone_prefix);
+
+        if ( ! Helper::check_regex($receiver_postcode, $receiver_postcode_prefix, $receiver_postcode_regex) ) {
+            $status['msg'] = sprintf(
+                __('The recipient postcode (%1$s) does not match the required format for country %2$s (%3$s)', 'hrx-delivery'),
+                $receiver_postcode,
+                $wc->tools->get_country_name($receiver_data['country']),
+                Helper::beautify_regex($receiver_postcode_regex)
+            );
+            $meta_msg = __('The postcode does not match the required format', 'hrx-delivery');
+            $wc->order->update_meta($wc_order->get_id(), $core->meta_keys->error_msg, $meta_msg);
+            return $status;
+        }
 
         $check_dimensions = array('weight', 'length', 'width', 'height');
         $check_limitations = array('min', 'max');
@@ -191,7 +218,7 @@ class Shipment
         $prepared_receiver = array(
             'name' => $receiver_data['first_name'] . ' ' . $receiver_data['last_name'],
             'email' => $receiver_email,
-            'phone' => Helper::remove_phone_prefix($receiver_phone, $receiver_phone_prefix),
+            'phone' => Helper::remove_prefix($receiver_phone, $receiver_phone_prefix),
             'phone_regex' => $receiver_phone_regex,
             'address' => $receiver_data['address_1'],
             'postcode' => $receiver_data['postcode'],
@@ -220,46 +247,107 @@ class Shipment
             'order' => $prepared_order,
         ));
 
-        delete_post_meta($wc_order->get_id(), $core->meta_keys->error_msg);
+        $wc->order->delete_meta($wc_order->get_id(), $core->meta_keys->error_msg);
 
         if ( $result['status'] == 'OK' ) {
-            update_post_meta($wc_order->get_id(), $core->meta_keys->order_id, $result['data']['id']);
-            $wc_order = wc_get_order($wc_order_id);
-            $info = $classOrder->update_hrx_order_info($wc_order);
+            $wc->order->update_meta($wc_order->get_id(), $core->meta_keys->order_id, $result['data']['id']);
+            $classOrder = new Order();
+            $info = $classOrder->update_hrx_order_info($wc_order->get_id());
 
             $status['status'] = 'OK';
             $status['status_code'] = 'registered';
             $status['msg'] = $result['msg'];
         } else {
             $status['msg'] = __('Unable to register order due to error', 'hrx-delivery') . ":\n" . $result['msg'];
-            update_post_meta($wc_order->get_id(), $core->meta_keys->error_msg, $result['msg']);
+            $wc->order->update_meta($wc_order->get_id(), $core->meta_keys->error_msg, $result['msg']);
         }
 
         return $status;
     }
 
-    public static function get_dimensions( $wc_order, $method = '' )
+    public static function get_dimensions( $wc_order_id, $method = '' )
     {
         $core = Core::get_instance();
-        $method = (empty($method)) ? $wc_order->get_meta($core->meta_keys->method) : $method;
-        
-        $classOrder = new Order();
-        $order_weight = $classOrder->get_order_weight($wc_order);
-        $products_dimensions = $classOrder->get_order_products_dimensions($wc_order); // TODO: Make box size calculation
-        
-        $order_dimensions = $wc_order->get_meta($core->meta_keys->dimensions);
-        if ( ! empty($order_dimensions['weight']) ) {
-            $order_weight = $order_dimensions['weight'];
+        $wc = (object) array(
+            'order' => new WcOrder(),
+        );
+
+        $wc_order = $wc->order->get_order($wc_order_id, true);
+        $hrx_data = $wc->order->get_hrx_data($wc_order->get_id());
+        $method = (empty($method)) ? $hrx_data->method : $method;
+        $order_weight = $wc->order->count_total_weight($wc_order->get_id());
+        $shipment_dimensions = self::calc_total_dimension($wc->order->get_items($wc_order->get_id()));
+       
+        $order_dimensions = $hrx_data->dimensions;
+        if ( ! empty($order_dimensions['length'])
+          || ! empty($order_dimensions['width'])
+          || ! empty($order_dimensions['height'])
+        ) {
+            $shipment_dimensions = array(
+                'length' => (! empty($order_dimensions['length'])) ? $order_dimensions['length'] : 0,
+                'width' => (! empty($order_dimensions['width'])) ? $order_dimensions['width'] : 0,
+                'height' => (! empty($order_dimensions['height'])) ? $order_dimensions['height'] : 0,
+            );
         }
 
-        $shipment_dimensions = array(
-            'length' => (! empty($order_dimensions['length'])) ? $order_dimensions['length'] : '',
-            'width' => (! empty($order_dimensions['width'])) ? $order_dimensions['width'] : '',
-            'height' => (! empty($order_dimensions['height'])) ? $order_dimensions['height'] : '',
-            'weight' => (! empty($order_weight)) ? $order_weight : '',
-        );
+        if ( ! empty($order_dimensions['weight']) ) {
+            $shipment_dimensions['weight'] = $order_dimensions['weight'];
+        }
         
         return Helper::use_current_or_default_dimmension($method, $shipment_dimensions);
+    }
+
+    private static function calc_total_dimension( $products )
+    {
+        $total_dimension = array(
+            'length' => 0,
+            'width' => 0,
+            'height' => 0,
+        );
+        $total_weight = 0;
+
+        foreach ( $products as $product ) {
+            $total_weight += $product->weight * $product->quantity;
+            for ( $i = 0; $i < $product->quantity; $i++ ) {
+                $total_dimension = self::add_to_box($total_dimension, $product);
+            }
+        }
+        $total_dimension['weight'] = $total_weight;
+        
+        return $total_dimension;
+    }
+
+    private static function add_to_box( $box, $product, $edge_thickness = 0 ) //TODO: Make box size calculation
+    {
+        $total_size = array(
+            'length' => 0,
+            'width' => 0,
+            'height' => 0,
+        );
+
+        $shortest_edge_key = '';
+        $shortest_edge_value = 0;
+        foreach ( $box as $edge => $value ) {
+            if ( $value <= $shortest_edge_value ) {
+                $shortest_edge_value = $value;
+                $shortest_edge_key = $edge;
+            }
+        }
+
+        foreach ( $total_size as $edge => $value ) {
+            $prod_value = $product->{$edge};
+            if ( $edge == $shortest_edge_key ) {
+                $total_size[$edge] += $prod_value;
+            } else if ( $total_size[$edge] < $prod_value ) {
+                $total_size[$edge] = $prod_value;
+            }
+        }
+
+        foreach ( $total_size as $edge => $value ) {
+            $total_size[$edge] += $edge_thickness;
+        }
+
+        return $total_size;
     }
 
     private static function check_dimension( $order_id, $meta_key, $dimmension_type, $current_value, $compare_value, $compare_symbol = '<' )
@@ -322,7 +410,8 @@ class Shipment
         }
 
         if ( $check_msg ) {
-            update_post_meta($order_id, $meta_key, esc_attr($check_msg));
+            $wcOrder = new WcOrder();
+            $wcOrder->update_meta($order_id, $meta_key, esc_attr($check_msg));
         }
 
         return $status_msg;
@@ -337,14 +426,19 @@ class Shipment
             'label_path' => '',
         );
         $core = Core::get_instance();
+        $wc = (object) array(
+            'order' => new WcOrder(),
+        );
 
-        $wc_order = wc_get_order($wc_order_id);
-        if ( empty($wc_order) ) {
+        $wc_order = $wc->order->get_order($wc_order_id);
+        if ( ! $wc_order ) {
             $status['msg'] = __('Failed to get order', 'hrx-delivery');
             return $status;
         }
 
-        $hrx_order_id = $wc_order->get_meta($core->meta_keys->order_id);
+        $hrx_data = $wc->order->get_hrx_data($wc_order_id);
+
+        $hrx_order_id = $hrx_data->hrx_order_id;
         if ( empty($hrx_order_id) ) {
             $status['msg'] = __('Failed to get HRX order ID from order', 'hrx-delivery');
             return $status;
@@ -374,16 +468,25 @@ class Shipment
         return $status;
     }
 
-    public static function ready_order( $wc_order, $unmark = false )
+    public static function ready_order( $wc_order_id, $unmark = false )
     {
         $core = Core::get_instance();
+        $wc = (object) array(
+            'order' => new WcOrder(),
+        );
         $settings = $core->get_settings();
         $status = array(
             'status' => 'error',
             'msg' => '',
         );
 
-        $hrx_order_id = $wc_order->get_meta($core->meta_keys->order_id);
+        $wc_order = $wc->order->get_order($wc_order_id, true);
+        if ( ! $wc_order ) {
+            $status['msg'] = __('Failed to get order', 'hrx-delivery');
+            return $status;
+        }
+
+        $hrx_order_id = $wc->order->get_meta($wc_order_id, $core->meta_keys->order_id);
         if ( empty($hrx_order_id) ) {
             $status['msg'] = __('Failed to get HRX order ID from order', 'hrx-delivery');
             
@@ -406,10 +509,9 @@ class Shipment
                 $hrx_status = esc_attr($result['data']['status']);
             }
             if ( ! empty($change_wc_status) ) {
-                $wc_order->update_status($change_wc_status, '<b>' . $core->title . ':</b> ');
+                $wc->order->update_status($wc_order_id, $change_wc_status, '<b>' . $core->title . ':</b> ');
             }
-            $wc_order->update_meta_data($core->meta_keys->order_status, $hrx_status);
-            $wc_order->save();
+            $wc->order->update_meta($wc_order_id, $core->meta_keys->order_status, $hrx_status);
 
             $status['status'] = 'OK';
             $status['msg'] = __('Order status changed successfully', 'hrx-delivery');
@@ -419,20 +521,23 @@ class Shipment
 
         $status['msg'] = __('Failed to change HRX order status', 'hrx-delivery') . ":\n" . $result['msg'];
         $classOrder = new Order();
-        $classOrder->update_hrx_order_info($wc_order);
+        $classOrder->update_hrx_order_info($wc_order_id);
 
         return $status;
     }
 
-    public static function get_status( $wc_order )
+    public static function get_status( $wc_order_id )
     {
         $core = Core::get_instance();
+        $wc = (object) array(
+            'order' => new WcOrder(),
+        );
 
-        $order_status = $wc_order->get_meta($core->meta_keys->order_status);
+        $order_status = $wc->order->get_meta($wc_order_id, $core->meta_keys->order_status);
 
         if ( empty($order_status) ) {
             $classOrder = new Order();
-            $order_data = $classOrder->update_hrx_order_info($wc_order);
+            $order_data = $classOrder->update_hrx_order_info($wc_order_id);
             $order_status = $order_data['status'];
         }
 

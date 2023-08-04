@@ -13,15 +13,24 @@ use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\PagesHtml as Html;
 use HrxDeliveryWoo\Order;
 use HrxDeliveryWoo\Shipment;
+use HrxDeliveryWoo\WcOrder;
+use HrxDeliveryWoo\WcTools;
+use HrxDeliveryWoo\WcCustom;
 
 class Pages
 {
     private $core;
+    private $wc;
     private $default_per_page = 25;
 
     public function __construct()
     {
         $this->core = Core::get_instance();
+        $this->wc = (object) array(
+            'order' => new WcOrder(),
+            'tools' => new WcTools(),
+            'custom' => new WcCustom(),
+        );
     }
 
     public function init()
@@ -30,6 +39,11 @@ class Pages
         add_action('admin_menu', array($this, 'register_menu_pages'));
 
         add_filter('woocommerce_order_data_store_cpt_get_orders_query', array($this, 'handle_custom_query_vars'), 10, 2);
+    }
+
+    public function build_page_id( $page_key )
+    {
+        return $this->core->option_prefix . '-' . $page_key;
     }
 
     public function register_menu_pages()
@@ -41,7 +55,7 @@ class Pages
                     $page['title'], // Page title
                     $page['title'], // Menu title
                     $page['rights'], // Capability
-                    $this->core->id . '_' . $page_key, // Menu_slug
+                    $this->build_page_id($page_key), // Menu_slug
                     $page['output'], // Callback
                     $page['position'] // Position
                 );
@@ -105,7 +119,7 @@ class Pages
 
         foreach ( $this->get_subpages() as $section => $pages ) {
             foreach ( $pages as $page_key => $page ) {
-                if ( $hook == $section . '_page_' . $this->core->id . '_' . $page_key ) {
+                if ( $hook == $section . '_page_' . $this->build_page_id($page_key) ) {
                     $css_file_name = 'page-' . $page_key . '.css';
                     $css_script_id = $this->core->id . '_page_' . $page_key;
                     if ( file_exists($this->core->structure->path . $css_dir . $css_file_name) ) {
@@ -234,9 +248,6 @@ class Pages
 
     public function get_available_table_columns()
     {
-        $wc_countries = new \WC_Countries();
-        $countries = $wc_countries->get_countries();
-
         return array(
             'cb' => array(
                 'manage' => true,
@@ -303,7 +314,7 @@ class Pages
                 'filter' => 'select',
                 'filter_label' => __('Country', 'hrx-delivery'),
                 'filter_key' => 'country',
-                'filter_options' => $countries,
+                'filter_options' => $this->wc->tools->get_all_countries(),
             ),
             'city' => array(
                 'title' => __('City', 'hrx-delivery'),
@@ -350,27 +361,17 @@ class Pages
 
     private function get_order_customer_fullname( $wc_order )
     {
-        $classOrder = new Order();
-
-        $fullname = $classOrder->get_shipping_fullname($wc_order);
-        if ( empty(str_replace(' ', '', $fullname)) ) {
-            $fullname = $classOrder->get_billing_fullname($wc_order);
-        }
-
-        return $fullname;
+        return $this->wc->custom->get_customer_fullname($wc_order);
     }
 
     private function get_order_status_text( $wc_order )
     {
-        $classOrder = new Order();
-
-        return $classOrder->get_formated_status($wc_order);
+        return $this->wc->custom->get_formated_status($wc_order);
     }
 
     private function get_shipping_address_text( $order )
     {
-        $classOrder = new Order();
-        $address = $classOrder->get_order_address($order);
+        $address = $this->wc->custom->get_order_address($order);
 
         $output = $address['address_1'] . ', ' . $address['city'];
         if ( ! empty($address['state']) ) {
@@ -379,7 +380,7 @@ class Pages
         if ( ! empty($address['postcode']) ) {
             $output .= ', ' . $address['postcode'];
         }
-        $output .= ', ' . \WC()->countries->countries[$address['country']];
+        $output .= ', ' . $this->wc->tools->get_country_name($address['country']);
         
         return $output;
     }
@@ -387,7 +388,7 @@ class Pages
     private function get_tracking_number_text( $order, $for = 'shipping', $on_empty = '—' )
     {
         $classOrder = new Order();
-        $tracking_number = $classOrder->get_track_number($order, $for);
+        $tracking_number = $classOrder->get_track_number($order->get_id(), $for);
 
         return (! empty($tracking_number)) ? $tracking_number : $on_empty;
     }
@@ -395,18 +396,20 @@ class Pages
     private function build_hrx_status_text( $wc_order )
     {
         $output = '';
+        $units = $this->wc->tools->get_units();
+        $hrx_data = $this->wc->order->get_hrx_data($wc_order->get_id());
 
-        $order_status = $wc_order->get_meta($this->core->meta_keys->order_status);
+        $order_status = $hrx_data->hrx_order_status;
         if ( ! empty($order_status) ) {
             $output .= Html::build_info_row('status', __('Status', 'hrx-delivery'), Shipment::get_status_title($order_status), $order_status);
         }
 
-        $order_dimensions = Shipment::get_dimensions($wc_order);
+        $order_dimensions = Shipment::get_dimensions($wc_order->get_id());
         if ( ! empty($order_dimensions) ) {
-            $dims_text = (float)$order_dimensions['weight'] . ' kg<br/>'
+            $dims_text = (float)$order_dimensions['weight'] . ' ' . $units->weight . '<br/>'
                 . (float)$order_dimensions['width'] . '×'
                 . (float)$order_dimensions['height'] . '×'
-                . (float)$order_dimensions['length'] . ' cm';
+                . (float)$order_dimensions['length'] . ' ' . $units->dimension;
             $output .= Html::build_info_row('dims', __('Package', 'hrx-delivery'), $dims_text);
         }
 
@@ -415,7 +418,7 @@ class Pages
             $output .= Html::build_info_row('track_no', __('Tracking number', 'hrx-delivery'), $shipping_number );
         }
 
-        $error_msg = $wc_order->get_meta($this->core->meta_keys->error_msg);
+        $error_msg = $hrx_data->error;
         if ( ! empty($error_msg) ) {
             $output .= Html::build_info_row('error', __('Error', 'hrx-delivery'), $error_msg );
         }
@@ -453,8 +456,8 @@ class Pages
             'status' => array('wc-processing', 'wc-on-hold', 'wc-pending'),
             'not_' . $this->core->meta_keys->order_status => array('ready', 'cancelled'),
         );
-        $total_orders = count(wc_get_orders($args));
+        $total_orders = count($this->wc->order->get_orders($args));
         
-        $this->show_submenu_count('woocommerce', $this->core->id . '_management', $total_orders);
+        $this->show_submenu_count('woocommerce', $this->build_page_id('management'), $total_orders);
     }
 }

@@ -7,18 +7,15 @@ if ( ! defined('ABSPATH') ) {
 }
 
 use HrxDeliveryWoo\Api;
-use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Helper;
-use HrxDeliveryWoo\Core;
-use HrxDeliveryWoo\Order;
-use HrxDeliveryWoo\OrderHelper;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\LocationsDelivery;
 use HrxDeliveryWoo\Label;
 use HrxDeliveryWoo\Shipment;
-use HrxDeliveryWoo\Pdf;
 use HrxDeliveryWoo\Debug;
+use HrxDeliveryWoo\WcOrder;
+use HrxDeliveryWoo\WcTools;
 
 class Ajax
 {
@@ -49,7 +46,8 @@ class Ajax
     public static function front_add_terminal_to_session()
     {
         if ( ! empty($_POST['terminal_id']) ) {
-            WC()->session->set(Core::get_instance()->id . '_terminal', $_POST['terminal_id']);
+            $wcTools = new WcTools();
+            $wcTools->set_session('terminal', $_POST['terminal_id']);
         }
 
         wp_die();
@@ -239,16 +237,15 @@ class Ajax
     public static function admin_btn_ready_hrx_order()
     {
         $status = self::prepare_status();
-        $meta_keys = Core::get_instance()->meta_keys;
 
         if ( empty($_POST['order_id']) ) {
             self::output_status_on_error($status, __('Order ID not received', 'hrx-delivery'), true);
         }
 
-        $wc_order = self::get_wc_order(esc_attr($_POST['order_id']));
+        $wc_order_id = esc_attr($_POST['order_id']);
         $mark_ready = (! empty($_POST['ready'])) ? filter_var(esc_attr($_POST['ready']), FILTER_VALIDATE_BOOLEAN) : true;
 
-        $result = Shipment::ready_order($wc_order, (!$mark_ready));
+        $result = Shipment::ready_order($wc_order_id, (!$mark_ready));
         $status['status'] = $result['status'];
         $status['msg'] = $result['msg'];
 
@@ -265,7 +262,10 @@ class Ajax
         $status = self::prepare_status(array('file' => ''));
         $output_file = false;
 
-        $meta_keys = Core::get_instance()->meta_keys;
+        $wc = (object) array(
+            'order' => new WcOrder(),
+            'tools' => new WcTools(),
+        );
 
         if ( empty($_POST['mass_action']) ) {
             self::output_status_on_error($status, __('Failed to get what action to perform', 'hrx-delivery'), true);
@@ -283,14 +283,15 @@ class Ajax
                 continue;
             }
             
-            $wc_order = wc_get_order((int)$order_id);
+            $wc_order_id = (int)$order_id;
+            $wc_order = $wc->order->get_order($wc_order_id, true);
             if ( ! $wc_order ) {
                 unset($selected_orders[$key]);
                 continue;
             }
 
-            $hrx_order_status = Shipment::get_status($wc_order);
-            $wc_order_status = OrderHelper::get_status($wc_order);
+            $hrx_order_status = Shipment::get_status($wc_order_id);
+            $wc_order_status = $wc->order->get_status($wc_order_id);
 
             $converted_action = Shipment::convert_allowed_order_action_from_mass($action);
             if ( ! Shipment::check_specific_allowed_order_action($converted_action, $hrx_order_status, $wc_order_status) ) {
@@ -346,8 +347,7 @@ class Ajax
         if ( $action == 'mark_ready' ) {
             $successes = array();
             foreach ( $selected_orders as $wc_order_id ) {
-                $wc_order = self::get_wc_order($wc_order_id);
-                $result = Shipment::ready_order($wc_order);
+                $result = Shipment::ready_order($wc_order_id);
                 if ( $result['status'] == 'OK' ) {
                     $successes[] = '#' . $wc_order_id;
                 } else {
@@ -365,8 +365,7 @@ class Ajax
         if ( $action == 'unmark_ready' ) {
             $successes = array();
             foreach ( $selected_orders as $wc_order_id ) {
-                $wc_order = self::get_wc_order($wc_order_id);
-                $result = Shipment::ready_order($wc_order, true);
+                $result = Shipment::ready_order($wc_order_id, true);
                 if ( $result['status'] == 'OK' ) {
                     $successes[] = '#' . $wc_order_id;
                 } else {
@@ -412,15 +411,19 @@ class Ajax
             wp_die();
         }
 
-        $wc_order_id = esc_attr($_POST['wc_order_id']);
-        $wc_order = wc_get_order($wc_order_id);
+        $wc = (object) array(
+            'order' => new WcOrder(),
+            'tools' => new WcTools(),
+        );
 
+        $wc_order_id = esc_attr($_POST['wc_order_id']);
+        $wc_order = $wc->order->get_order($wc_order_id, true);
         if ( ! $wc_order ) {
             wp_die();
         }
 
-        $meta_keys = Core::get_instance()->meta_keys;
-        $hrx_method = $wc_order->get_meta($meta_keys->method);
+        $hrx_data = $wc->order->get_hrx_data($wc_order_id);
+        $units = $wc->tools->get_units();
 
         $billing_address = $wc_order->get_billing_address_1();
         if ( ! empty($wc_order->get_billing_address_2()) ) {
@@ -440,33 +443,32 @@ class Ajax
         }
 
         $terminal_title = '—';
-        if ( Helper::method_has_terminals($hrx_method) ) {
-            $terminal_id = $wc_order->get_meta($meta_keys->terminal_id);
+        if ( Helper::method_has_terminals($hrx_data->method) ) {
+            $terminal_id = $hrx_data->terminal_id;
             $terminal_title = Terminal::get_name_by_id($terminal_id);
         }
-        $tracking_number = $wc_order->get_meta($meta_keys->track_number);
+        $tracking_number = $hrx_data->track_number;
         if ( empty($tracking_number) ) {
             $tracking_number = '—';
         }
-        $warehouse_id = $wc_order->get_meta($meta_keys->warehouse_id);
+        $warehouse_id = $hrx_data->warehouse_id;
 
-        $order_dimensions = Shipment::get_dimensions($wc_order);
-        $decimal_separator = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : '.';
-        $weight_text = number_format((float)$order_dimensions['weight'], 3, $decimal_separator, '') . ' kg';
+        $order_dimensions = Shipment::get_dimensions($wc_order_id);
+        $decimal_separator = $wc->tools->get_price_decimal_separator();
+        $weight_text = number_format((float)$order_dimensions['weight'], 3, $decimal_separator, '') . ' ' . $units->weight;
         $dimensions_text = (float)$order_dimensions['width'] . '×'
             . (float)$order_dimensions['height'] . '×'
-            . (float)$order_dimensions['length'] . ' cm';
+            . (float)$order_dimensions['length'] . ' ' . $units->dimension;
 
         $products = array();
-        foreach ( $wc_order->get_items() as $item_id => $item ) {
-            $product = $item->get_product();
+        foreach ( $wc->order->get_items($wc_order_id) as $item_id => $item_data ) {
             $products[] = array(
-                'id' => $item->get_product_id(),
-                'name' => $item->get_name(),
-                'sku' => $product->get_sku(),
-                'price' => wc_price($product->get_price()),
-                'qty' => $item->get_quantity(),
-                'total' => wc_price($item->get_total()),
+                'id' => $item_data->product_id,
+                'name' => $item_data->title,
+                'sku' => $item_data->sku,
+                'price' => wc_price($item_data->price_product),
+                'qty' => $item_data->quantity,
+                'total' => wc_price($item_data->price_total),
             );
         }
 
@@ -475,10 +477,10 @@ class Ajax
                 'id' => $wc_order_id,
                 'number' => $wc_order->get_order_number(),
                 'status' => $wc_order->get_status(),
-                'status_text' => wc_get_order_status_name($wc_order->get_status()),
+                'status_text' => $wc->tools->get_status_title($wc_order->get_status()),
                 'payment' => array(
                     'title' => $wc_order->get_payment_method_title(),
-                    'currency' => get_woocommerce_currency_symbol(),
+                    'currency' => $units->currency_symbol,
                     'products' => wc_price($wc_order->get_subtotal()),
                     'shipping' => wc_price($wc_order->get_shipping_total()),
                     'tax' => wc_price($wc_order->get_total_tax()),
@@ -491,7 +493,7 @@ class Ajax
                     'city' => $billing_city,
                     'postcode' => $wc_order->get_billing_postcode(),
                     'country' => $wc_order->get_billing_country(),
-                    'country_name' => \WC()->countries->countries[$wc_order->get_billing_country()],
+                    'country_name' => $wc->tools->get_country_name($wc_order->get_billing_country()),
                     'email' => $wc_order->get_billing_email(),
                     'phone' => $wc_order->get_billing_phone(),
                 ),
@@ -502,7 +504,7 @@ class Ajax
                     'city' => $shipping_city,
                     'postcode' => $wc_order->get_shipping_postcode(),
                     'country' => $wc_order->get_shipping_country(),
-                    'country_name' => \WC()->countries->countries[$wc_order->get_shipping_country()],
+                    'country_name' => $wc->tools->get_country_name($wc_order->get_shipping_country()),
                     'phone' => $wc_order->get_shipping_phone(),
                 ),
                 'shipment' => array(
@@ -519,25 +521,6 @@ class Ajax
 
         echo json_encode($data);
         wp_die();
-    }
-
-    /**
-     * Get Woocommerce order by ID
-     * @since 1.0.0
-     * 
-     * @param (integer) $order_id - WC Order ID
-     * @return (object) - WC Order
-     */
-    private static function get_wc_order( $order_id )
-    {
-        $status = self::prepare_status();
-        $wc_order = wc_get_order($order_id);
-
-        if ( empty($wc_order) ) {
-            self::output_status_on_error($status, __('Failed to get order information', 'hrx-delivery'), true);
-        }
-
-        return $wc_order;
     }
 
     /**
@@ -592,22 +575,5 @@ class Ajax
             
         echo json_encode($status);
         wp_die();
-    }
-
-    /**
-     * Fix phone number
-     * @since 1.0.0
-     * 
-     * @param (string) $phone - Phone number
-     * @param (string) $prefix - Phone number prefix which need remove
-     * @return (string) - Fixed phone number
-     */
-    private static function fix_phone( $phone, $prefix )
-    {
-        if ( substr($phone, 0, strlen($prefix)) === $prefix ) {
-            $phone = substr($phone, strlen($prefix));
-        }
-
-        return $phone;
     }
 }

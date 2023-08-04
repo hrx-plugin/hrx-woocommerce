@@ -239,6 +239,8 @@ class LocationsDelivery
                         'max_weight' => $location_data['max_weight_kg'] ?? '',
                         'phone_prefix' => $location_data['recipient_phone_prefix'] ?? '',
                         'phone_regexp' => $location_data['recipient_phone_regexp'] ?? '',
+                        'zip_prefix' => '',//$location_data[''] ?? '',
+                        'zip_regex' => $location_data['delivery_location_zip_regexp'] ?? '',
                     )),
                 );
                 $id = $type . '-' . $location_data['country'];

@@ -7,6 +7,7 @@ if ( ! defined('ABSPATH') ) {
 }
 
 use HrxDeliveryWoo\Core;
+use HrxDeliveryWoo\WcTools;
 
 class ShippingMethodHelper
 {
@@ -41,6 +42,7 @@ class ShippingMethodHelper
     public static function get_cart_products_weight( $products )
     {
         $weight = 0;
+        $wcTools = new WcTools();
 
         foreach ( $products as $item_id => $item_values ) {
             $product = $item_values['data'];
@@ -49,7 +51,7 @@ class ShippingMethodHelper
             }
         }
 
-        return wc_get_weight($weight, 'kg');
+        return $wcTools->convert_weight($weight, 'kg');
     }
 
     public static function get_price_by_weight( $prices_list, $current_weight )

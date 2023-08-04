@@ -10,6 +10,7 @@ use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Core;
+use HrxDeliveryWoo\WcTools;
 
 class Terminal
 {
@@ -35,12 +36,14 @@ class Terminal
 
     public static function build_name( $terminal_data )
     {
+        $wcTools = new WcTools();
+
         $name = (! empty($terminal_data->address)) ? $terminal_data->address : '—';
         $name .= ', ' . $terminal_data->city;
         if ( ! empty($terminal_data->postcode) ) {
             $name .= ', ' . $terminal_data->postcode;
         }
-        $name .= ', ' . \WC()->countries->countries[$terminal_data->country];
+        $name .= ', ' . $wcTools->get_country_name($terminal_data->country);
 
         return $name;
     }
