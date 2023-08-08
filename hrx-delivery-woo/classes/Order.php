@@ -37,12 +37,15 @@ class Order
     {
         add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_admin_order_block'), 10, 2);
         add_action('save_post', array($this, 'save_admin_order_block'));
+        add_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos'));
         add_action('admin_notices', array($this, 'show_bulk_actions_notice'), 10);
         add_action('woocommerce_order_details_after_order_table', array($this, 'display_terminal_information'), 10, 1);
         add_action('woocommerce_email_after_order_table', array($this, 'display_terminal_information'), 10, 1);
 
         add_filter('bulk_actions-edit-shop_order', array($this, 'register_bulk_actions'), 20);
         add_filter('handle_bulk_actions-edit-shop_order', array($this, 'handle_bulk_actions'), 20, 3);
+        add_filter('bulk_actions-woocommerce_page_wc-orders', array($this, 'register_bulk_actions'), 20); //HPOS
+        add_filter('handle_bulk_actions-woocommerce_page_wc-orders', array($this, 'handle_bulk_actions'), 20, 3); //HPOS
     }
 
     public function display_admin_order_block( $order )
@@ -75,7 +78,7 @@ class Order
         $order_size = Shipment::get_dimensions($order->get_id());
 
         $tracking_number = $this->get_track_number($order->get_id());
-        $hrx_order_status = Shipment::get_status($order); //TODO: Pakeisti į order_id padavimą kai bus funkcija pertvarkyta (HPOS)
+        $hrx_order_status = Shipment::get_status($order->get_id());
         $hrx_order_status_text = Shipment::get_status_title($hrx_order_status);
 
         $no_more_editable = false;
@@ -127,6 +130,19 @@ class Order
         if ( isset($_POST['hrx_dimensions']) ) {
             $this->wc->order->update_meta($post_id, $this->core->meta_keys->dimensions, $_POST['hrx_dimensions']);
         }
+    }
+
+    public function save_admin_order_block_hpos( $post_id )
+    {
+        if ( ! is_admin() || ! $this->wc->tools->is_available_screen('admin_order_edit') ) {
+            return $post_id;
+        }
+
+        remove_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos')); //Temporary fix to avoid infinity loop
+
+        $this->save_admin_order_block($post_id);
+
+        add_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos')); //Restore hook
     }
 
     public function register_bulk_actions( $bulk_actions )
@@ -199,49 +215,6 @@ class Order
         }
 
         echo Helper::build_admin_message($message, 'error', $this->core->title);
-    }
-
-    public function get_order_weight( $order ) //TODO: Istrinti kai bus nebenaudojama (HPOS)
-    {
-        $total_weight = 0;
-
-        foreach ( $order->get_items() as $item_id => $item ) {
-            $qty = (int)$item->get_quantity();
-            $prod = $item->get_product();
-            $prod_weight = (float)$prod->get_weight();
-            $total_weight += floatval($prod_weight * $qty);
-        }
-
-        return wc_get_weight($total_weight, 'kg');
-    }
-
-    public function get_order_products_dimensions( $order ) //TODO: Istrinti kai bus nebenaudojama (HPOS)
-    {
-        $products_dimensions = array();
-
-        $counter = 0;
-        foreach ( $order->get_items() as $item_id => $item ) {
-            $counter++;
-            $qty = (int)$item->get_quantity();
-            $prod = $item->get_product();
-
-            $prod_dims = array(
-                'length' => 0,
-                'width' => 0,
-                'height' => 0,
-                'weight' => wc_get_weight((float)$prod->get_weight(), 'kg'),
-            );
-
-            if ( $prod->has_dimensions() ) {
-                $prod_dims['length'] = (float)$prod->get_length();
-                $prod_dims['width'] = (float)$prod->get_width();
-                $prod_dims['height'] = (float)$prod->get_height();
-            }
-
-            $products_dimensions[$counter . '_' . $item_id] = $prod_dims;
-        }
-
-        return $products_dimensions;
     }
 
     public function get_track_number( $order_id, $tracking_type = 'shipping' )
@@ -355,5 +328,17 @@ class Order
         }
 
         return $this->wc->order->get_meta($order_id, $this->core->meta_keys->method);
+    }
+
+    public function get_order_weight( $order )
+    {
+        trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
+        return 0;
+    }
+
+    public function get_order_products_dimensions( $order )
+    {
+        trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
+        return array();
     }
 }

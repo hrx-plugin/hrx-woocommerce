@@ -150,12 +150,30 @@ class Pages
 
     public function handle_custom_query_vars( $query, $query_vars )
     {
-        foreach ( $this->core->meta_keys as $meta_key ) {
+        $query['meta_query'] = Pages::build_meta_query(array(), $query_vars);
+        
+        return $query;
+    }
+
+    public static function build_meta_query( $meta_query, $query_vars )
+    {
+        foreach ( Core::get_instance()->meta_keys as $meta_key ) {
             if ( ! empty($query_vars[$meta_key]) ) {
-                $query['meta_query'][] = array(
-                    'key' => $meta_key,
-                    'value' => $query_vars[$meta_key],
-                );
+                $query_var_values = (is_array($query_vars[$meta_key])) ? $query_vars[$meta_key] : array($query_vars[$meta_key]);
+                $build_subquery = array();
+                foreach ( $query_var_values as $query_var ) {
+                    $build_subquery[] = array(
+                        'key' => $meta_key,
+                        'compare' => 'LIKE',
+                        'value' => $query_var,
+                    );
+                }
+                if ( count($build_subquery) > 1 ) {
+                    $build_subquery['relation'] = 'OR';
+                    $meta_query[] = $build_subquery;
+                } else if ( count($build_subquery) == 1 ) {
+                    $meta_query[] = $build_subquery[0];
+                }
             }
 
             if ( isset($query_vars['not_' . $meta_key]) ) {
@@ -168,7 +186,6 @@ class Pages
                     array(
                         'key' => $meta_key,
                         'compare' => 'NOT EXISTS',
-                        'value' => '',
                     ),
                 );
                 $build_subquery = array();
@@ -183,11 +200,11 @@ class Pages
                     $build_subquery['relation'] = 'AND';
                 }
                 $build_query[] = $build_subquery;
-                $query['meta_query'][] = $build_query;
+                $meta_query[] = $build_query;
             }
         }
 
-        if ( ! empty($query_vars['customer_fullname']) ) {
+        if ( ! empty($query_vars['customer_fullname']) ) { //TODO: May not work on HPOS
             $check_keys = array(
                 'ship_first' => '_shipping_first_name',
                 'ship_last' => '_shipping_last_name',
@@ -236,14 +253,14 @@ class Pages
                     }
                 }
             }
-            $query['meta_query'][] = $meta_params;
+            $meta_query[] = $meta_params;
         }
 
-        if ( count($query['meta_query']) > 1 ) {
-            $query['meta_query']['relation'] = 'AND';
+        if ( count($meta_query) > 1 ) {
+            $meta_query['relation'] = 'AND';
         }
 
-        return $query;
+        return $meta_query;
     }
 
     public function get_available_table_columns()
