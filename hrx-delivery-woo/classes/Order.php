@@ -6,42 +6,58 @@ if ( ! defined('ABSPATH') ) {
     exit;
 }
 
+use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\OrderHtml as Html;
-use HrxDeliveryWoo\OrderHelper as WcHelper;
 use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\Label;
 use HrxDeliveryWoo\Shipment;
+use HrxDeliveryWoo\WcOrder;
+use HrxDeliveryWoo\WcTools;
+use HrxDeliveryWoo\WcCustom;
 
 class Order
 {
     private $core;
+    private $wc;
 
     public function __construct()
     {
         $this->core = Core::get_instance();
+        $this->wc = (object) array(
+            'order' => new WcOrder(),
+            'tools' => new WcTools(),
+            'custom' => new WcCustom(),
+        );
     }
 
     public function init()
     {
         add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_admin_order_block'), 10, 2);
         add_action('save_post', array($this, 'save_admin_order_block'));
+        add_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos'));
         add_action('admin_notices', array($this, 'show_bulk_actions_notice'), 10);
         add_action('woocommerce_order_details_after_order_table', array($this, 'display_terminal_information'), 10, 1);
         add_action('woocommerce_email_after_order_table', array($this, 'display_terminal_information'), 10, 1);
 
         add_filter('bulk_actions-edit-shop_order', array($this, 'register_bulk_actions'), 20);
         add_filter('handle_bulk_actions-edit-shop_order', array($this, 'handle_bulk_actions'), 20, 3);
+        add_filter('bulk_actions-woocommerce_page_wc-orders', array($this, 'register_bulk_actions'), 20); //HPOS
+        add_filter('handle_bulk_actions-woocommerce_page_wc-orders', array($this, 'handle_bulk_actions'), 20, 3); //HPOS
     }
 
     public function display_admin_order_block( $order )
-    {
-        $method_key = $this->check_hrx_shipping_method($order);
+    {    
+        $method_key = $this->check_hrx_shipping_method($order->get_id());
         if ( ! $method_key ) {
             return;
         }
+
+        $this->wc->order->set_tmp_order($order); //Cache the order to avoid unnecessary database access
+
+        $hrx_data = $this->wc->order->get_hrx_data($order->get_id());
 
         echo Html::build_order_block_title(array(
             'title' => $this->core->title
@@ -50,19 +66,19 @@ class Order
         $has_terminal = $this->core->methods[$method_key]['has_terminals'] ?? false;
         $terminal_id = '';
         if ( $has_terminal ) {
-            $terminal_id = get_post_meta($order->get_id(), $this->core->meta_keys->terminal_id, true);
+            $terminal_id = $hrx_data->terminal_id;
         }
 
-        $current_warehouse_id = get_post_meta($order->get_id(), $this->core->meta_keys->warehouse_id, true);
+        $current_warehouse_id = $hrx_data->warehouse_id;
         if ( empty($current_warehouse_id) ) {
             $current_warehouse_id = Warehouse::get_default_id();
         }
 
-        $order_weight = $this->get_order_weight($order);
-        $order_size = Shipment::get_dimensions($order);
+        $order_weight = $this->wc->order->count_total_weight($order->get_id());
+        $order_size = Shipment::get_dimensions($order->get_id());
 
-        $tracking_number = $this->get_track_number($order);
-        $hrx_order_status = Shipment::get_status($order);
+        $tracking_number = $this->get_track_number($order->get_id());
+        $hrx_order_status = Shipment::get_status($order->get_id());
         $hrx_order_status_text = Shipment::get_status_title($hrx_order_status);
 
         $no_more_editable = false;
@@ -85,7 +101,7 @@ class Order
             'method' => $method_key,
             'has_terminals' => $has_terminal,
             'selected_terminal' => $terminal_id,
-            'all_terminals' => LocationsDelivery::get_list($method_key, $this->get_order_country($order)),
+            'all_terminals' => LocationsDelivery::get_list($method_key, $this->wc->custom->get_order_country($order)),
             'selected_warehouse' => $current_warehouse_id,
             'all_warehouses' => Warehouse::get_list(),
             'tracking_number' => $tracking_number,
@@ -93,25 +109,40 @@ class Order
             'size' => $order_size,
             'all_disabled' => $no_more_editable,
         ));
+
+        $this->wc->order->set_tmp_order(); //Clear order cache
     }
 
     public function save_admin_order_block( $post_id )
     {
-        if ( ! WcHelper::is_order_page() ) {
+        if ( ! is_admin() || ! $this->wc->tools->is_available_screen('admin_order_edit') ) {
             return $post_id;
         }
 
         if ( isset($_POST['hrx_terminal']) ) {
-            update_post_meta($post_id, $this->core->meta_keys->terminal_id, wc_clean($_POST['hrx_terminal']));
+            $this->wc->order->update_meta($post_id, $this->core->meta_keys->terminal_id, $_POST['hrx_terminal'], true);
         }
 
         if ( isset($_POST['hrx_warehouse']) ) {
-            update_post_meta($post_id, $this->core->meta_keys->warehouse_id, wc_clean($_POST['hrx_warehouse']));
+            $this->wc->order->update_meta($post_id, $this->core->meta_keys->warehouse_id, $_POST['hrx_warehouse'], true);
         }
 
         if ( isset($_POST['hrx_dimensions']) ) {
-            update_post_meta($post_id, $this->core->meta_keys->dimensions, $_POST['hrx_dimensions']);
+            $this->wc->order->update_meta($post_id, $this->core->meta_keys->dimensions, $_POST['hrx_dimensions']);
         }
+    }
+
+    public function save_admin_order_block_hpos( $post_id )
+    {
+        if ( ! is_admin() || ! $this->wc->tools->is_available_screen('admin_order_edit') ) {
+            return $post_id;
+        }
+
+        remove_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos')); //Temporary fix to avoid infinity loop
+
+        $this->save_admin_order_block($post_id);
+
+        add_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos')); //Restore hook
     }
 
     public function register_bulk_actions( $bulk_actions )
@@ -186,93 +217,16 @@ class Order
         echo Helper::build_admin_message($message, 'error', $this->core->title);
     }
 
-    public function get_order_weight( $order )
-    {
-        $total_weight = 0;
-
-        foreach ( $order->get_items() as $item_id => $item ) {
-            $qty = (int)$item->get_quantity();
-            $prod = $item->get_product();
-            $prod_weight = (float)$prod->get_weight();
-            $total_weight += floatval($prod_weight * $qty);
-        }
-
-        return wc_get_weight($total_weight, 'kg');
-    }
-
-    public function get_order_products_dimensions( $order )
-    {
-        $products_dimensions = array();
-
-        $counter = 0;
-        foreach ( $order->get_items() as $item_id => $item ) {
-            $counter++;
-            $qty = (int)$item->get_quantity();
-            $prod = $item->get_product();
-
-            $prod_dims = array(
-                'length' => 0,
-                'width' => 0,
-                'height' => 0,
-                'weight' => wc_get_weight((float)$prod->get_weight(), 'kg'),
-            );
-
-            if ( $prod->has_dimensions() ) {
-                $prod_dims['length'] = (float)$prod->get_length();
-                $prod_dims['width'] = (float)$prod->get_width();
-                $prod_dims['height'] = (float)$prod->get_height();
-            }
-
-            $products_dimensions[$counter . '_' . $item_id] = $prod_dims;
-        }
-
-        return $products_dimensions;
-    }
-
-    public function get_billing_fullname( $order )
-    {
-        return $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
-    }
-
-    public function get_shipping_fullname( $order )
-    {
-        return $order->get_shipping_first_name() . ' ' . $order->get_shipping_last_name();
-    }
-
-    public function get_order_country( $order, $default = 'LT' )
-    {
-        $country = $order->get_shipping_country();
-        if ( empty($country) ) {
-            $country = $order->get_billing_country();
-        }
-
-        return (! empty($country)) ? $country : $default;
-    }
-
-    public function get_order_address( $order )
-    {
-        $address = $order->get_address('shipping');
-        if ( empty($address['address_1']) && empty($address['city']) && empty($address['postcode']) ) {
-            $address = $order->get_address();
-        }
-
-        if ( empty($address['phone']) && ! empty($order->get_billing_phone()) ) {
-            $address['phone'] = $order->get_billing_phone();
-        }
-
-        return $address;
-    }
-
-    public function get_track_number( $order, $tracking_type = 'shipping' )
+    public function get_track_number( $order_id, $tracking_type = 'shipping' )
     {
         $hrx_track_number = '';
         $hrx_track_url = '';
 
         if ( $tracking_type == 'shipping' ) {
-            $hrx_track_number = $order->get_meta($this->core->meta_keys->track_number);
+            $hrx_track_number = $this->wc->order->get_meta($order_id, $this->core->meta_keys->track_number);
             
             if ( empty($hrx_track_number) ) {
-                $updated_order = $this->update_hrx_order_info($order);
+                $updated_order = $this->update_hrx_order_info($order_id);
                 $hrx_track_number = $updated_order['track_number'];
             }
         }
@@ -284,7 +238,7 @@ class Order
         return $hrx_track_number;
     }
 
-    public function update_hrx_order_info( $order )
+    public function update_hrx_order_info( $order_id )
     {
         $hrx_order_data = array(
             'track_number' => '',
@@ -292,7 +246,9 @@ class Order
             'status' => 'unknown',
         );
 
-        $hrx_order_id = $order->get_meta($this->core->meta_keys->order_id);
+        $this->wc->order->load_order($order_id, true); //Cache the order to avoid unnecessary database access
+     
+        $hrx_order_id = $this->wc->order->get_meta($order_id, $this->core->meta_keys->order_id);
 
         if ( ! empty($hrx_order_id) ) {
             $api = new Api();
@@ -302,56 +258,50 @@ class Order
                 if ( ! empty($hrx_order['data']['tracking_number']) ) {
                     $hrx_order_data['track_number'] = $hrx_order['data']['tracking_number'];
                 }
-                if ( ! empty($hrx_order['data']['track_url']) ) {
+                if ( ! empty($hrx_order['data']['tracking_url']) ) {
                     $hrx_order_data['track_url'] = $hrx_order['data']['tracking_url'];
                 }
                 if ( ! empty($hrx_order['data']['status']) ) {
                     $hrx_order_data['status'] = $hrx_order['data']['status'];
                 }
 
-                update_post_meta($order->get_id(), $this->core->meta_keys->track_number, wc_clean($hrx_order_data['track_number']));
-                update_post_meta($order->get_id(), $this->core->meta_keys->track_url, esc_url($hrx_order_data['track_url']));
-                update_post_meta($order->get_id(), $this->core->meta_keys->order_status, wc_clean($hrx_order_data['status']));
+                $this->wc->order->update_hrx_data($order_id, array(
+                    'track_number' => $this->wc->tools->clean($hrx_order_data['track_number']),
+                    'track_url' => esc_url($hrx_order_data['track_url']),
+                    'hrx_order_status' => $this->wc->tools->clean($hrx_order_data['status']),
+                ));
             }
         }
+
+        $this->wc->order->set_tmp_order(); //Clear order cache
 
         return $hrx_order_data;
     }
 
-    public function get_track_url( $order )
-    {
-        return $order->get_meta($this->core->meta_keys->track_url);
-    }
-
-    public function get_formated_status( $order )
-    {
-        $order_status = $order->get_status();
-        $order_status_name = wc_get_order_status_name($order_status);
-
-        return '<mark class="order-status status-' . $order_status . '"><span>' . $order_status_name . '</span></mark>';
-    }
-
     public function display_terminal_information( $order )
     {
+        $this->wc->order->set_tmp_order($order); //Cache the order to avoid unnecessary database access
         $html_rows = array();
 
-        $method_key = $this->check_hrx_shipping_method($order);
+        $method_key = $this->check_hrx_shipping_method($order->get_id());
         if ( ! $method_key ) {
             return;
         }
 
+        $hrx_data = $this->wc->order->get_hrx_data($order->get_id());
+
         $has_terminal = $this->core->methods[$method_key]['has_terminals'] ?? false;
         $terminal_id = '';
         if ( $has_terminal ) {
-            $terminal_id = get_post_meta($order->get_id(), $this->core->meta_keys->terminal_id, true);
+            $terminal_id = $hrx_data->terminal_id;
         }
 
         if ( ! empty($terminal_id) ) {
             $html_rows[] = '<b>' . sprintf(__('Selected %s', 'hrx-delivery'), $this->core->methods[$method_key]['front_title']) . ':</b><br/>' . Terminal::get_name_by_id($terminal_id);
         }
 
-        $tracking_number = $this->get_track_number($order);
-        $tracking_url = $this->get_track_url($order);
+        $tracking_number = $this->get_track_number($order->get_id());
+        $tracking_url = $hrx_data->track_url;
 
         if ( ! empty($tracking_number) ) {
             $tracking_html = '<b>' . __('You can track your shipment with this number', 'hrx-delivery') . ':</b><br/>';
@@ -364,23 +314,31 @@ class Order
         }
 
         echo (! empty($html_rows)) ? '<p class="hrx-info">' . implode('<br/>', $html_rows) . '</p>' : '';
+
+        $this->wc->order->set_tmp_order(); //Clear order cache
     }
 
-    private function check_hrx_shipping_method( $admin_order )
+    private function check_hrx_shipping_method( $order_id )
     {
-        $all_shipping_methods = array();
-        $wc_order = wc_get_order((int)$admin_order->get_id());
-
-        foreach ( $wc_order->get_items('shipping') as $item_id => $shipping_item_obj ) {
-            $all_shipping_methods[] = $shipping_item_obj->get_method_id();
-        }
-
+        $all_shipping_methods = $this->wc->order->get_shipping_methods($order_id);
         $shipping_method = Helper::get_first_value_from_array($all_shipping_methods);
 
         if ( $shipping_method != $this->core->id ) {
             return false;
         }
 
-        return get_post_meta($admin_order->get_id(), $this->core->meta_keys->method, true);
+        return $this->wc->order->get_meta($order_id, $this->core->meta_keys->method);
+    }
+
+    public function get_order_weight( $order )
+    {
+        trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
+        return 0;
+    }
+
+    public function get_order_products_dimensions( $order )
+    {
+        trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
+        return array();
     }
 }

@@ -11,16 +11,23 @@ use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\ShippingMethodHelper as ShipHelper;
+use HrxDeliveryWoo\WcOrder;
+use HrxDeliveryWoo\WcTools;
 
 class Front
 {
     private $core;
+    private $wc;
     private $terminal_field;
 
     public function __construct()
     {
         $this->core = Core::get_instance();
         $this->terminal_field = $this->core->id . '_terminal';
+        $this->wc = (object) array(
+            'order' => new WcOrder(),
+            'tools' => new WcTools(),
+        );
     }
 
     public function init()
@@ -51,7 +58,7 @@ class Front
         }
 
         /* Not execute if selectedd method is not this */
-        if ( Helper::get_first_value_from_array(\WC()->session->get('chosen_shipping_methods')) != $method->get_id() ) {
+        if ( Helper::get_first_value_from_array($this->wc->tools->get_session('chosen_shipping_methods', false)) != $method->get_id() ) {
             return;
         }
 
@@ -68,20 +75,24 @@ class Front
             return;
         }
 
+        $save_data = array();
+
         if ( isset($_POST[$this->terminal_field]) ) {
-            update_post_meta($order_id, $this->core->meta_keys->terminal_id, esc_attr($_POST[$this->terminal_field]));
+            $save_data['terminal_id'] = esc_attr($_POST[$this->terminal_field]);
         }
 
         if ( isset($_POST['shipping_method']) ) {
             $selected_method = Helper::get_first_value_from_array($_POST['shipping_method']);
-            update_post_meta($order_id, $this->core->meta_keys->method, $this->remove_id_from_method_name($selected_method));
+            $save_data['method'] = $this->remove_id_from_method_name($selected_method);
         }
+
+        $this->wc->order->update_hrx_data($order_id, $save_data);
     }
 
     public function validate_order( $fields )
     {
         if ( empty($fields['shipping_method']) ) {
-            $chosen_methods = \WC()->session->get('chosen_shipping_methods');
+            $chosen_methods = $this->wc->tools->get_session('chosen_shipping_methods', false);
         } else {
             $chosen_methods = $fields['shipping_method'];
         }
@@ -106,10 +117,10 @@ class Front
 
             if ( empty($_POST[$this->terminal_field]) ) {
                 $message = sprintf(__('Please choose %s', 'hrx-delivery'), '<b>' . $this->core->methods[$hrx_method_key]['front_title'] . '</b>');
-                $messageType = 'error';
+                $message_type = 'error';
 
-                if ( ! empty($fields) && ! wc_has_notice($message, $messageType) ) {
-                    wc_add_notice($message, $messageType);
+                if ( ! empty($fields) ) {
+                    $this->wc->tools->add_notice($message, $message_type);
                 }
             }
         }
@@ -118,7 +129,7 @@ class Front
     private function get_customer_shipping_country()
     {
         $country = false;
-        $customer = WC()->session->get('customer');
+        $customer = $this->wc->tools->get_session('customer', false);
 
         if ( ! empty($customer['shipping_country']) ) {
             $country = $customer['shipping_country'];
@@ -140,7 +151,7 @@ class Front
         $output .= Terminal::build_select_field(array(
             'name' => $this->core->id . '_' . $method_key,
             'all_terminals' => $terminals_list,
-            'selected_id' => WC()->session->get($this->core->id . '_terminal'),
+            'selected_id' => $this->wc->tools->get_session('terminal'),
         ));
         $output .= '</div>';
 
@@ -150,7 +161,7 @@ class Front
     private function build_terminals_script( $terminals_list, $country, $method_key )
     {
         $output = '<div class="hrx-terminal-container hrx-show-map hrx-method-' . $method_key . '">';
-        $output .= '<input type="hidden" id="hrx-method-' . $method_key . '-selected" name="' . $this->core->id . '_' . $method_key . '" value="' . WC()->session->get($this->core->id . '_terminal') . '"/>';
+        $output .= '<input type="hidden" id="hrx-method-' . $method_key . '-selected" name="' . $this->core->id . '_' . $method_key . '" value="' . $this->wc->tools->get_session('terminal') . '"/>';
         $output .= '<div id="hrx-method-' . $method_key . '-map" class="hrx-map map-' . $method_key . '" data-method="' . $method_key .'" data-country="' . $country . '"></div>';
         $output .= Terminal::build_list_in_script(array(
             'method' => $method_key,

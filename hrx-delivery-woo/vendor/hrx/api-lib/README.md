@@ -23,7 +23,29 @@ Any function starting with `add` or `set` returns its class so functions can be 
 ## Authentication
 
 Uses supplied user `$token`. It is called during API object creation.
-- Initialize new API library using: `$api = new API($token);`
+- Initialize new API library using: `$api = new API();`
+- Set API token using: `$api->setToken($token);`
+
+## API additional commands
+
+After initializing the API class, some parameters can be changed.
+- Change timeout value: `$api->setTimeout(60);`
+- Enable debug data return: `$api->setDebug(true);`
+- Enable connection to the test endpoint (only works with a testing token): `$api->setTestMode(true);`
+- Change test endpoint: `$api->setTestUrl($url);`
+- Change live endpoint: `$api->setLiveUrl($url);`
+
+Simple example:
+```php
+$api = new API();
+$api
+    ->setToken($token) // Different tokens are used for test and live endpoints
+    ->setTimeout(60) // If want change timeout value
+    ->setDebug(true) // If want get debug data with function $api->getDebugData()
+    ->setTestMode(false) // If want switch between Test/Live mode
+    ->setTestUrl($url_test) // If want change test endpoint
+    ->setLiveUrl($url_live); // If want change live endpoint
+```
 
 ## Getting locations
 
@@ -113,7 +135,8 @@ use HrxApi\Receiver;
 use HrxApi\Shipment;
 use HrxApi\Order;
 
-$api = new API($token);
+$api = new API();
+$api->setToken($token);
 
 $pickup_locations = $api->getPickupLocations(1, 10);
 $delivery_locations = $api->getDeliveryLocations(1, 10); // Required when shipping to delivery location
@@ -155,7 +178,8 @@ use HrxApi\Receiver;
 use HrxApi\Shipment;
 use HrxApi\Order;
 
-$api = new API($token);
+$api = new API();
+$api->setToken($token);
 
 $pickup_locations = $api->getPickupLocations(1, 10);
 $delivery_locations = $api->getCourierDeliveryLocations();
@@ -249,6 +273,23 @@ $order_ready = $api->changeOrderReadyState('e161c889-782b-4ba2-a691-13dc4baf7b62
 
 ```php
 $canceled_order = $api->cancelOrder('e161c889-782b-4ba2-a691-13dc4baf7b62'); // Order ID
+```
+
+## Debug
+
+If problems are encountered with API requests, debugging information can be obtained to determine the problem.
+First need to activate debug mode after the initialization of the API class and after executing some query, debugging information can be obtained.
+```php
+$api = new API();
+$api->setToken($token)
+    ->setDebug(true); // Enable debug mode
+
+try {
+  $response = $api->getOrders(1, 100); // Any request
+  $debug_data = $api->getDebugData(); // Debug data if response success
+} catch (\Exception $e) {
+  $debug_data = $api->getDebugData(); // Debug data if response fail
+}
 ```
 
 ## Examples

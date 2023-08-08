@@ -65,6 +65,16 @@ class Sql
         }
     }
 
+    public static function if_table_exists( $table )
+    {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . self::get_table_name($table);
+        $query = $wpdb->prepare('SHOW TABLES LIKE %s', $table_name);
+
+        return ($wpdb->get_var($query) === $table_name);
+    }
+
     public static function insert_row( $table, $data )
     {
         global $wpdb;

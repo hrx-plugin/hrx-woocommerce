@@ -5,6 +5,7 @@ if ( ! defined('ABSPATH') ) {
 }
 
 use HrxDeliveryWoo\Debug;
+use HrxDeliveryWoo\Pages;
 use HrxDeliveryWoo\PagesHtml;
 use HrxDeliveryWoo\PagesFilter;
 use HrxDeliveryWoo\Helper;
@@ -91,7 +92,7 @@ if ( $page_current_tab == 'warehouses' ) {
         $tab_data[$warehouse->id] = array(
             'warehouse_id' => $warehouse->location_id,
             'warehouse_name' => $warehouse->name,
-            'country' => \WC()->countries->countries[$warehouse->country],
+            'country' => $this->wc->tools->get_country_name($warehouse->country),
             'city' => $warehouse->city,
             'zip' => $warehouse->postcode,
             'address' => $warehouse->address,
@@ -109,24 +110,41 @@ if ( $page_current_tab == 'warehouses' ) {
         'limit' => $per_page,
         'paged' => $page_current_no,
         'hrx_delivery_method' => array_keys($this->core->methods),
+        'meta_query' => array(
+            'relation' => 'AND',
+            array(
+                'key' => 'hrx_delivery_method',
+                'value' => array_keys($this->core->methods),
+            )
+        ),
     );
+
 
     if ( $page_current_tab == 'new_orders' ) {
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending');
         // Not show HRX statuses
         $args['not_' . $this->core->meta_keys->order_status] = array('ready', 'cancelled', 'in_delivery', 'delivered', 'in_return');
+        $args['meta_query'] = Pages::build_meta_query($args['meta_query'], array(
+            'not_' . $this->core->meta_keys->order_status => array('ready', 'cancelled', 'in_delivery', 'delivered', 'in_return'),
+        ));
     }
     if ( $page_current_tab == 'send_orders' ) {
         $show_mass_buttons = array('unmark_ready', 'ship_label', 'return_label');
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending');
         // Show HRX statuses
         $args[$this->core->meta_keys->order_status] = array('ready', 'in_delivery', 'delivered', 'in_return');
+        $args['meta_query'] = Pages::build_meta_query($args['meta_query'], array(
+            $this->core->meta_keys->order_status => array('ready', 'in_delivery', 'delivered', 'in_return'),
+        ));
     }
     if ( $page_current_tab == 'cancelled_orders' ) {
         $show_mass_buttons = array('regenerate_orders', 'ship_label', 'return_label');
         $args['status'] = array('wc-processing', 'wc-on-hold', 'wc-pending', 'wc-completed');
         // Show HRX statuses
         $args[$this->core->meta_keys->order_status] = array('cancelled');
+        $args['meta_query'] = Pages::build_meta_query($args['meta_query'], array(
+            $this->core->meta_keys->order_status => array('cancelled'),
+        ));
     }
     if ( $page_current_tab == 'completed_orders' ) {
         $show_mass_buttons = array('mark_ready', 'ship_label', 'return_label');
@@ -142,32 +160,33 @@ if ( $page_current_tab == 'warehouses' ) {
     $results = false;
 
     if ( ! empty($page_current_filters['id']) ) {
-        $filtered_order = wc_get_order((int)$page_current_filters['id']);
+        $filtered_order = $filtered_order = $this->wc->order->get_order((int)$page_current_filters['id']);
         $orders = (! empty($filtered_order)) ? array($filtered_order) : array();
     } else {
-        $results = wc_get_orders($args);
+        $results = $this->wc->order->get_orders($args);
         $orders = $results->orders;
     }
 
     foreach ( $orders as $order ) {
-        $hrx_order_status = Shipment::get_status($order);
+        $this->wc->order->set_tmp_order($order);
+        $hrx_order_status = Shipment::get_status($order->get_id());
         if ( ($page_current_tab == 'new_orders' && $hrx_order_status == 'ready')
             || ($page_current_tab == 'send_orders' && $hrx_order_status != 'ready') ) {
             continue;
         }
 
-        $order_method = $order->get_meta($this->core->meta_keys->method);
+        $order_method = $this->wc->order->get_meta($order->get_id(), $this->core->meta_keys->method);
 
         $deliver_to = $this->get_shipping_address_text($order);
         if ( Helper::method_has_terminals($order_method) ) {
-            $terminal_id = $order->get_meta($this->core->meta_keys->terminal_id);
+            $terminal_id = $this->wc->order->get_meta($order->get_id(), $this->core->meta_keys->terminal_id);
             $deliver_to = Terminal::get_name_by_id($terminal_id);
         }
 
-        $warehouse_id = $order->get_meta($this->core->meta_keys->warehouse_id);
+        $warehouse_id = $this->wc->order->get_meta($order->get_id(), $this->core->meta_keys->warehouse_id);
         if ( empty($warehouse_id) ) {
             $warehouse_id = Warehouse::get_default_id();
-            update_post_meta($order->get_id(), $this->core->meta_keys->warehouse_id, wc_clean($warehouse_id));
+            $this->wc->order->update_meta($order->get_id(), $this->core->meta_keys->warehouse_id, $warehouse_id, true);
         }
 
         $hrx_status_text = $this->build_hrx_status_text($order);
@@ -184,7 +203,7 @@ if ( $page_current_tab == 'warehouses' ) {
         );
 
         $selected_values['actions'][$order->get_id()] = array(
-            'hrx_order_id' => $order->get_meta($this->core->meta_keys->order_id),
+            'hrx_order_id' => $this->wc->order->get_meta($order->get_id(), $this->core->meta_keys->order_id),
             'hrx_order_status' => $hrx_order_status,
         );
     }

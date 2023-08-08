@@ -188,13 +188,13 @@ class Helper
             'weight' => (! empty($default_values[3])) ? $default_values[3] : 0,
         );
 
-        if ( empty($current_dimensions['weight']) && $current_dimensions['weight'] != '0' ) {
+        if ( empty($current_dimensions['weight']) && $current_dimensions['weight'] !== '0' ) {
             $current_dimensions['weight'] = $default_dimensions['weight'];
         }
 
-        if ( (empty($current_dimensions['width']) && $current_dimensions['width'] != '0')
-            || (empty($current_dimensions['height']) && $current_dimensions['height'] != '0')
-            || (empty($current_dimensions['length']) && $current_dimensions['length'] != '0') ) {
+        if ( (empty($current_dimensions['width']) && $current_dimensions['width'] !== '0')
+            || (empty($current_dimensions['height']) && $current_dimensions['height'] !== '0')
+            || (empty($current_dimensions['length']) && $current_dimensions['length'] !== '0') ) {
             $current_dimensions['width'] = $default_dimensions['width'];
             $current_dimensions['height'] = $default_dimensions['height'];
             $current_dimensions['length'] = $default_dimensions['length'];
@@ -203,27 +203,52 @@ class Helper
         return $current_dimensions;
     }
 
-    public static function check_phone( $full_phone, $prefix, $regex )
+    public static function check_regex( $org_value, $prefix, $regex )
     {
-        $phone = self::remove_phone_prefix( $full_phone, $prefix );
+        $value = self::remove_prefix( $org_value, $prefix );
 
-        if ( ! preg_match('/' . $regex . '/', $phone) ) {
+        if ( ! preg_match('/' . $regex . '/', $value) ) {
             return false;
         }
 
-        if ( $full_phone == $prefix . $phone || $full_phone == $phone ) {
+        if ( $org_value == $prefix . $value || $org_value == $value ) {
             return true;
         }
 
         return false;
     }
 
-    public static function remove_phone_prefix( $phone, $prefix )
+    public static function remove_prefix( $value, $prefix )
     {
-        if ( substr($phone, 0, strlen($prefix)) === $prefix ) {
-            $phone = substr($phone, strlen($prefix));
+        if ( substr($value, 0, strlen($prefix)) === $prefix ) {
+            $value = substr($value, strlen($prefix));
         }
 
-        return $phone;
+        return $value;
+    }
+
+    public static function beautify_regex( $regex )
+    {
+        $regex = str_replace('^', '', $regex);
+        $regex = str_replace('$', '', $regex);
+
+        if ( str_contains($regex, '\d') ) {
+            preg_match_all('/d{(.*?)}/', $regex, $numbers);
+            foreach ( $numbers[1] as $number ) {
+                $regex = str_replace('\d{' . $number . '}', str_repeat('0',(int)$number), $regex);
+            }
+        }
+        if ( str_contains($regex, '\s') ) {
+            preg_match_all('/s{(.*?)}/', $regex, $spaces);
+            foreach ( $spaces[1] as $space ) {
+                $space_exploded = explode(',', $space);
+                if ( count($space_exploded) != 2 ) {
+                    continue;
+                }
+                $regex = str_replace('\s{' . $space . '}', str_repeat(' ',(int)$space_exploded[1] - $space_exploded[0]), $regex);
+            }
+        }
+
+        return $regex;
     }
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.0] - 2023-08-08
+### Improved
+- The plugin is adapted to work with Woocommerce HPOS (prepared for Woocommerce 8)
+
 ## [1.1.1] - 2023-07-20
 ### Improved
 - Changed get of delivery countries from API instead of code
