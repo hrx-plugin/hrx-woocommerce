@@ -51,7 +51,7 @@ class PluginUpdate
     {
         $this->last_version = get_option($this->option_names['version']);
         if ( empty($this->last_version) ) {
-            $this->last_version = '1.1.0.0'; // This class created from this version
+            $this->last_version = '1.1.0.0'; // This class created from version 1.1.0
         }
     }
 

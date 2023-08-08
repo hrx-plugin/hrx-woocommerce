@@ -172,6 +172,9 @@ class Core
     public function refresh_available_countries( $get_for_type )
     {
         $available_countries = array();
+        if ( ! Sql::if_table_exists('delivery') ) {
+            return $available_countries;
+        }
         $available_countries_sql = Sql::get_columns_unique_values('delivery', 'country', array('type' => $get_for_type, 'active' => 1));
 
         if ( empty($available_countries_sql) ) {

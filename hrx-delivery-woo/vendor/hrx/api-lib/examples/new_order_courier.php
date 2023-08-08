@@ -27,7 +27,10 @@ require('../vendor/autoload.php');
 $token = ''; // API token required for execution of this file
 
 try {
-    $api = new API($token, true, false);
+    $api = new API();
+    $api->setToken($token);
+    $api->setTestMode(true);
+    $api->setDebug(true);
 
     /*** Pickup locations ***/
     echo 'Getting pickup locations...';
@@ -119,6 +122,9 @@ try {
 
 } catch (Exception $e) {
     echo '<b>Error:</b> ' . $e->getMessage();
+    if (isset($api)) {
+        echo '</br><b>Debug data:</b> <pre>' . print_r($api->getDebugData(), true) . '</pre>';
+    }
 }
 
 function debug_element($title, $element, $print_r = true)

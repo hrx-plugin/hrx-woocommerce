@@ -10,6 +10,7 @@ use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Core;
+use HrxDeliveryWoo\WcTools;
 
 class Terminal
 {
@@ -35,12 +36,14 @@ class Terminal
 
     public static function build_name( $terminal_data )
     {
+        $wcTools = new WcTools();
+
         $name = (! empty($terminal_data->address)) ? $terminal_data->address : '—';
         $name .= ', ' . $terminal_data->city;
         if ( ! empty($terminal_data->postcode) ) {
             $name .= ', ' . $terminal_data->postcode;
         }
-        $name .= ', ' . \WC()->countries->countries[$terminal_data->country];
+        $name .= ', ' . $wcTools->get_country_name($terminal_data->country);
 
         return $name;
     }
@@ -142,21 +145,18 @@ class Terminal
     public static function get_list( $country )
     {
         trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
-        
         return array();
     }
 
     public static function add_info_to_list_elems( $terminals_list, $add_info = array(), $allow_override = false )
     {
         trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
-        
         return array();
     }
 
     public static function update_delivery_locations( $page )
     {
         trigger_error('Method ' . __METHOD__ . ' is deprecated', E_USER_DEPRECATED);
-        
         return array(
             'status' => 'error',
             'msg' => __('Method ' . __METHOD__ . ' is deprecated', 'hrx-delivery'),

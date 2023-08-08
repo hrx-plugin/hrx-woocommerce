@@ -7,6 +7,7 @@ if ( ! defined('ABSPATH') ) {
 }
 
 use HrxDeliveryWoo\Helper;
+use HrxDeliveryWoo\WcTools;
 use HrxDeliveryWoo\Debug;
 
 class ShippingMethodHtml
@@ -136,20 +137,20 @@ class ShippingMethodHtml
         $top_class = $params['top_class'] ?? '';
         $title = $params['title'] ?? '';
         $hide_row = $params['hide'] ?? false;
+
+        $wcTools = new WcTools();
+        $units = $wcTools->get_units();
         
         $dim_values = ($value !== '') ? $value : array();
         if ( is_string($dim_values) && Helper::is_json($dim_values) ) {
             $dim_values = json_decode($value, true);
         }
 
-        $dim_unit = get_option('woocommerce_dimension_unit');
-        $weight_unit = get_option('woocommerce_weight_unit');
-
         $fields = array(
             'width' => array('title' => __('Width', 'hrx-delivery'), 'unit' => 'x'),
             'height' => array('title' => __('Height', 'hrx-delivery'), 'unit' => 'x'),
-            'lenght' => array('title' => __('Lenght', 'hrx-delivery'), 'unit' => $dim_unit),
-            'weight' => array('title' => __('Weight', 'hrx-delivery'), 'unit' => $weight_unit),
+            'lenght' => array('title' => __('Lenght', 'hrx-delivery'), 'unit' => $units->dimension),
+            'weight' => array('title' => __('Weight', 'hrx-delivery'), 'unit' => $units->weight),
         );
 
         $row_style = ($hide_row) ? 'display:none;' : '';
@@ -209,6 +210,8 @@ class ShippingMethodHtml
         $show_symbol = $params['show_symbol'] ?? true;
         $hide_row = $params['hide'] ?? false;
 
+        $wcTools = new WcTools();
+
         if ( $value == '' ) {
             $value = $params['default'] ?? '';
         }
@@ -232,7 +235,7 @@ class ShippingMethodHtml
                         'max' => $max,
                     )); ?>
                     <?php if ( $show_symbol ) : ?>
-                        <span class="symbol"><?php echo get_woocommerce_currency_symbol(); ?></span>
+                        <span class="symbol"><?php echo $wcTools->get_units()->currency_symbol; ?></span>
                     <?php endif; ?>
                     <?php if ( ! empty($params['description']) ) : ?>
                         <p class="description"><?php echo $params['description']; ?></p>
@@ -271,7 +274,7 @@ class ShippingMethodHtml
         $hide_row = $params['hide'] ?? false;
         $empty_msg = $params['empty_msg'] ?? __('Could not get a list of countries to which this shipping method can be used', 'hrx-delivery');
 
-        $weight_unit = get_option('woocommerce_weight_unit');
+        $wcTools = new WcTools();
 
         $row_style = ($hide_row) ? 'display:none;' : '';
 
@@ -294,7 +297,7 @@ class ShippingMethodHtml
                             <div class="box-header">
                                 <div class="title">
                                     <img src="<?php echo $img_dir_url . strtolower($country_code) . '.png'; ?>" alt="[<?php echo $country_code; ?>]"/>
-                                    <span><?php echo \WC()->countries->countries[$country_code]; ?></span>
+                                    <span><?php echo $wcTools->get_country_name($country_code); ?></span>
                                 </div>
                                 <?php echo self::build_switcher(array(
                                     'id' => $country_key . '_enable',
@@ -521,8 +524,8 @@ class ShippingMethodHtml
             return '<b>' . __('Block error', 'hrx-delivery') . '!</b> ' . __('Not received fields key', 'hrx-delivery') . '.';
         }
 
-        $currency_unit = get_woocommerce_currency_symbol();
-        $weight_unit = get_option('woocommerce_weight_unit');
+        $wcTools = new WcTools();
+        $units = $wcTools->get_units();
 
         ob_start();
         ?>
@@ -539,7 +542,7 @@ class ShippingMethodHtml
                             'min' => 0,
                         )); ?>
                     </td>
-                    <td class="range-col-unit"><?php echo $currency_unit; ?></td>
+                    <td class="range-col-unit"><?php echo $units->currency_symbol; ?></td>
                 </tr>
                 <tr class="range-row-weight_range">
                     <td class="range-col-title"><?php _e('Weight range', 'hrx-delivery'); ?></td>
@@ -565,7 +568,7 @@ class ShippingMethodHtml
                         )); ?>
                         </div>
                     </td>
-                    <td class="range-col-unit"><?php echo $weight_unit; ?></td>
+                    <td class="range-col-unit"><?php echo $units->weight; ?></td>
                 </tr>
                 <tr class="range-row-actions">
                     <td class="range-col-title"></td>

@@ -7,6 +7,7 @@ if ( ! defined('ABSPATH') ) {
 }
 
 use HrxDeliveryWoo\Core;
+use HrxDeliveryWoo\Pages;
 
 class PagesFilter
 {
@@ -38,6 +39,9 @@ class PagesFilter
 
         if ( ! empty($active_filters['client']) ) {
             $args['customer_fullname'] = $active_filters['client'];
+            $args['meta_query'] = Pages::build_meta_query($args['meta_query'], array(
+                'customer_fullname' => $active_filters['client'],
+            ));
         }
 
         if ( ! empty($active_filters['status']) ) {
@@ -46,10 +50,16 @@ class PagesFilter
 
         if ( ! empty($active_filters['warehouse']) ) {
             $args[$core->meta_keys->warehouse_id] = array($active_filters['warehouse']);
+            $args['meta_query'] = Pages::build_meta_query($args['meta_query'], array(
+                $core->meta_keys->warehouse_id => array($active_filters['warehouse']),
+            ));
         }
 
         if ( ! empty($active_filters['track_no']) ) {
             $args[$core->meta_keys->track_number] = array($active_filters['track_no']);
+            $args['meta_query'] = Pages::build_meta_query($args['meta_query'], array(
+                $core->meta_keys->track_number => array($active_filters['track_no']),
+            ));
         }
 
         return $args;

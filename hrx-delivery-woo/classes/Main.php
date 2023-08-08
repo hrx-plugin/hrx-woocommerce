@@ -144,6 +144,7 @@ class Main
             return; // Skip hooks loading if WooCommerce not actived
         }
 
+        add_action('before_woocommerce_init', array($this, 'woocommerce_compatibility'));
         add_action('wp_enqueue_scripts', array($this, 'load_front_scripts'));
         add_action('admin_enqueue_scripts', array($this, 'load_admin_scripts'));
 
@@ -156,6 +157,13 @@ class Main
     {
         $methods[$this->core->id] = 'HrxDeliveryWoo\ShippingMethod';
         return $methods;
+    }
+
+    public function woocommerce_compatibility()
+    {
+        if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', WP_PLUGIN_DIR . '/' . $this->core->structure->basename, true);
+        }
     }
 
     private function init_plugin_classes()

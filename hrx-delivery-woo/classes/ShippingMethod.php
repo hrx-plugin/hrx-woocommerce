@@ -11,6 +11,8 @@ use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\ShippingMethodHelper as ShipHelper;
 use HrxDeliveryWoo\ShippingMethodHtml as Html;
 use HrxDeliveryWoo\LocationsDelivery;
+use HrxDeliveryWoo\WcOrder;
+use HrxDeliveryWoo\WcTools;
 use HrxDeliveryWoo\Debug;
 
 if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
@@ -18,10 +20,15 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
     class ShippingMethod extends \WC_Shipping_Method
     {
         private $core;
+        private $wc;
 
         public function __construct( $instance_id = 0 )
         {
-            $this->core = $this->get_core();
+            $this->core = Core::get_instance();
+            $this->wc = (object) array(
+                //'order' => new WcOrder(), //Not using
+                'tools' => new WcTools(),
+            );
 
             parent::__construct($instance_id);
 
@@ -55,11 +62,6 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
             $this->title = isset($this->settings['title']) ? $this->settings['title'] : $this->core->title;
         }
 
-        public function get_core()
-        {
-            return Core::get_instance();
-        }
-
         public function init()
         {
             $this->init_form_fields();
@@ -85,7 +87,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
 
         public function init_form_fields()
         {
-            $all_wc_order_status = array_merge(array('' => '- '. __('Do not change', 'hrx-delivery') . ' -'), \wc_get_order_statuses());
+            $all_wc_order_status = array_merge(array('' => '- '. __('Do not change', 'hrx-delivery') . ' -'), $this->wc->tools->get_all_statuses());
 
             $fields = array(
                 'enable' => array(
