@@ -99,6 +99,7 @@ class Shipment
         }
 
         $shipment_dimensions = self::get_dimensions($wc_order->get_id());
+        $shipment_dimensions = $wc->custom->convert_all_dimensions($shipment_dimensions, 'kg', 'cm');
      
         $dimensions_limitation = array(
             'min' => Helper::get_empty_dimensions_array(0),

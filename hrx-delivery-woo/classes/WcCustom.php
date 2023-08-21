@@ -120,4 +120,23 @@ class WcCustom
 
         return '<mark class="order-status status-' . $order_status . '"><span>' . $order_status_name . '</span></mark>';
     }
+
+    public function convert_all_dimensions( $dimensions, $to_unit_weight, $to_unit_dimension )
+    {
+        if ( ! is_array($dimensions) ) {
+            return false;
+        }
+        
+        $wcTools = new WcTools();
+
+        foreach ( $dimensions as $dim_key => $dim_value ) {
+            if ( $dim_key == 'weight' ) {
+                $dimensions[$dim_key] = $wcTools->convert_weight($dimensions[$dim_key], $to_unit_weight);
+            } else {
+                $dimensions[$dim_key] = $wcTools->convert_dimension($dimensions[$dim_key], $to_unit_dimension);
+            }
+        }
+
+        return $dimensions;
+    }
 }

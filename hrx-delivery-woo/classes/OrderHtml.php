@@ -121,6 +121,7 @@ class OrderHtml
         $tracking_number = $params['tracking_number'] ?? '';
         $weight = $params['weight'] ?? 0;
         $size = $params['size'] ?? array();
+        $units = $params['units'] ?? (object)array('weight' => 'kg', 'dimension' => 'cm');
         $all_disabled = $params['all_disabled'] ?? false;
 
         if ( empty($method_key) ) {
@@ -160,7 +161,7 @@ class OrderHtml
                 'value' => $weight,
                 'name' => 'hrx_dimensions[weight]',
                 'id' => 'hrx_weight',
-                'title' => __('Weight', 'hrx-delivery') . ' (kg)',
+                'title' => __('Weight', 'hrx-delivery') . ' (' . $units->weight . ')',
                 'min' => 0,
                 'step' => 0.001,
                 'disabled' => $all_disabled,
@@ -176,7 +177,7 @@ class OrderHtml
                     'value' => (! empty($size[$dim_key])) ? $size[$dim_key] : 0,
                     'name' => 'hrx_dimensions[' . $dim_key . ']',
                     'id' => 'hrx_' . $dim_key,
-                    'title' => $dim_title . ' (cm)',
+                    'title' => $dim_title . ' (' . $units->dimension . ')',
                     'min' => 0,
                     'disabled' => $all_disabled,
                 ));

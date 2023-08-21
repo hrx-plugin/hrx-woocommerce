@@ -413,7 +413,6 @@ class Pages
     private function build_hrx_status_text( $wc_order )
     {
         $output = '';
-        $units = $this->wc->tools->get_units();
         $hrx_data = $this->wc->order->get_hrx_data($wc_order->get_id());
 
         $order_status = $hrx_data->hrx_order_status;
@@ -422,11 +421,12 @@ class Pages
         }
 
         $order_dimensions = Shipment::get_dimensions($wc_order->get_id());
+        $order_dimensions = $this->wc->custom->convert_all_dimensions($order_dimensions, 'kg', 'cm');
         if ( ! empty($order_dimensions) ) {
-            $dims_text = (float)$order_dimensions['weight'] . ' ' . $units->weight . '<br/>'
+            $dims_text = (float)$order_dimensions['weight'] . ' kg<br/>'
                 . (float)$order_dimensions['width'] . '×'
                 . (float)$order_dimensions['height'] . '×'
-                . (float)$order_dimensions['length'] . ' ' . $units->dimension;
+                . (float)$order_dimensions['length'] . ' cm';
             $output .= Html::build_info_row('dims', __('Package', 'hrx-delivery'), $dims_text);
         }
 
