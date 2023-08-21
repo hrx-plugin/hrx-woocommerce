@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Fixed
 - Fixed the units conversion
+- Fixed error when plugin installing first time
 
 ### Improved
 - Added a more informative message about locations being updated
