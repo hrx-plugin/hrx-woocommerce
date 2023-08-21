@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.0.1] - 2023-08-21
 ### Fixed
 - Fixed the units conversion
 - Fixed error when plugin installing first time
