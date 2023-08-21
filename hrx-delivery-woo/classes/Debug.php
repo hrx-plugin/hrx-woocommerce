@@ -51,6 +51,7 @@ class Debug
             'notice' => 'Notice',
             'empty' => 'Empty',
             'good' => 'OK',
+            'not' => 'Not applicable',
         );
 
         if ( ! empty($get_only) && isset($keywords[$get_only]) ) {

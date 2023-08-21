@@ -352,6 +352,7 @@ class ShippingMethodHtml
             'dirs_img' => __('Images', 'hrx-delivery'),
             'dirs_temp' => __('Temporary files', 'hrx-delivery'),
             'methods' => __('Shipping methods', 'hrx-delivery'),
+            'locations' => __('Total locations', 'hrx-delivery'),
         );
 
         $check_status = Debug::check_plugin();
@@ -361,6 +362,9 @@ class ShippingMethodHtml
         $rows['title'] = $check_status['title'] ?? Debug::status_keywords('fail');
         $rows['version'] = $check_status['version'] ?? Debug::status_keywords('fail');
         $rows['changes'] = $check_status['changes'] ?? array();
+        if ( empty($rows['changes']) ) {
+            $rows['changes'] = Debug::status_keywords('not');
+        }
         $rows['dirs'] = $check_status['dirs'] ?? array();
         $rows['methods'] = array();
         if ( isset($check_status['methods']) ) {
@@ -372,6 +376,26 @@ class ShippingMethodHtml
                 } else {
                     $rows['methods'][$method_key] .= Debug::status_keywords('empty');
                 }
+            }
+        }
+        $rows['locations'] = array();
+        $rows['locations']['pickup'] = __('Warehouses', 'hrx-delivery') . ': ';
+        $locations_pickup = Sql::get_columns_unique_values('pickup', 'COUNT(*) AS total_rows', array('active' => 1), false);
+        if ( isset($locations_pickup[0]) && isset($locations_pickup[0]->total_rows) ) {
+            $rows['locations']['pickup'] .= $locations_pickup[0]->total_rows;
+        } else {
+            $rows['locations']['pickup'] .= 'Error';
+        }
+        $locations_delivery = Sql::get_columns_unique_values('delivery', 'type, COUNT(*) AS total_rows', array('active' => 1), 'type');
+        if ( empty($locations_delivery) ) {
+            $rows['locations']['delivery'] = __('Delivery', 'hrx-delivery') . ': Error';
+        } else {
+            foreach ( $locations_delivery as $loc_type ) {
+                if ( ! isset($loc_type->type) ) {
+                    $rows['locations']['delivery_type'] .= __('Type', 'hrx-delivery') . ': Failed to get';
+                    continue;
+                }
+                $rows['locations']['delivery_' . $loc_type->type] = ucfirst($loc_type->type) . ': ' . $loc_type->total_rows;
             }
         }
 
