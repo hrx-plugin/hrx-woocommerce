@@ -221,3 +221,6 @@
 .woocommerce table.hrx-settings .debug-plugin .debug-status-empty {
     color: orange;
 }
+.woocommerce table.hrx-settings .debug-plugin .debug-status-not {
+    color: #ccc;
+}

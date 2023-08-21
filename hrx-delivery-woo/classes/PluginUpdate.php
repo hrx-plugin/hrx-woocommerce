@@ -114,9 +114,11 @@ class PluginUpdate
     {
         $version = $this->get_version_from_method_name(__FUNCTION__);
         try {
-            $result = Sql::add_new_column('delivery', 'type', "VARCHAR(20) COMMENT 'Location type'");
-            if ( ! $result ) {
-                throw new Exception(__('Failed to add SQL table column','hrx-delivery'));
+            if ( Sql::if_table_exists('delivery') ) { //Temporary fix to avoid error when installing plugin first time. Need find better solution
+                $result = Sql::add_new_column('delivery', 'type', "VARCHAR(20) COMMENT 'Location type'");
+                if ( ! $result ) {
+                    throw new Exception(__('Failed to add SQL table column','hrx-delivery'));
+                }
             }
         } catch( Exception $e ) {
             throw new Exception(sprintf(__('Error when executing update %1$s. Error: %2$s.','hrx-delivery'), $version, $e->getMessage()));

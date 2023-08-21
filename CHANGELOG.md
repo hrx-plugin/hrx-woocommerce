@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0.1] - 2023-08-21
+### Fixed
+- Fixed the units conversion
+- Fixed error when plugin installing first time
+
+### Improved
+- Added a more informative message about locations being updated
+
 ## [1.2.0] - 2023-08-08
 ### Improved
 - The plugin is adapted to work with Woocommerce HPOS (prepared for Woocommerce 8)
