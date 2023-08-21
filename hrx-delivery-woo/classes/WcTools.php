@@ -53,6 +53,11 @@ class WcTools
         return wc_get_weight($value, $to_unit, $from_unit);
     }
 
+    public function convert_dimension( $value, $to_unit, $from_unit = '' )
+    {
+        return wc_get_dimension($value, $to_unit, $from_unit);
+    }
+
     public function get_current_screen_id()
     {
         $screen = get_current_screen();

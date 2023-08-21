@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Fixed the units conversion
+
 ## [1.2.0] - 2023-08-08
 ### Improved
 - The plugin is adapted to work with Woocommerce HPOS (prepared for Woocommerce 8)

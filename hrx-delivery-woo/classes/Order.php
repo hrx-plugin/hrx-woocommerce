@@ -76,6 +76,8 @@ class Order
 
         $order_weight = $this->wc->order->count_total_weight($order->get_id());
         $order_size = Shipment::get_dimensions($order->get_id());
+        $preview_order_weight = $this->wc->tools->convert_weight($order_weight, 'kg');
+        $preview_order_size = $this->wc->custom->convert_all_dimensions($order_size, 'kg', 'cm');
 
         $tracking_number = $this->get_track_number($order->get_id());
         $hrx_order_status = Shipment::get_status($order->get_id());
@@ -93,8 +95,8 @@ class Order
             'terminal_id' => $terminal_id,
             'warehouse_id' => $current_warehouse_id,
             'tracking_number' => $tracking_number,
-            'weight' => (! empty($order_size['weight'])) ? $order_size['weight'] : $order_weight,
-            'size' => $order_size,
+            'weight' => (! empty($preview_order_size['weight'])) ? $preview_order_size['weight'] : $preview_order_weight,
+            'size' => $preview_order_size,
         ));
 
         echo Html::build_order_block_edit(array(
@@ -107,6 +109,7 @@ class Order
             'tracking_number' => $tracking_number,
             'weight' => (! empty($order_size['weight'])) ? $order_size['weight'] : $order_weight,
             'size' => $order_size,
+            'units' => $this->wc->tools->get_units(),
             'all_disabled' => $no_more_editable,
         ));
 
