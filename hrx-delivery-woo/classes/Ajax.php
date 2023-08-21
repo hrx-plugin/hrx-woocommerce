@@ -149,7 +149,7 @@ class Ajax
             $output['msg'] = $msg;
             Debug::to_log($result, 'locations');
         } else {
-            $msg = $current_time;
+            $msg = sprintf(__('The update is complete in %s', 'hrx-delivery'), $current_time);
             /*if ( $result['added'] > 0 ) {
                 $msg .= '. ' . __('Total added', 'hrx-delivery') . ': ' . $result['added'];
             }

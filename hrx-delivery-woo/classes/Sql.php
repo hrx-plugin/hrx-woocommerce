@@ -145,13 +145,12 @@ class Sql
         if ( ! is_array($columns) ) {
             $columns = array($columns);
         }
-        if ( empty($group_by) ) {
-            $group_by = $columns[0];
-        }
+
         $sql_columns = implode(',', $columns);
         $sql_where = (! empty($where)) ? " WHERE " . self::prepare_where($where) : '';
+        $sql_group_by = ($group_by !== false) ? " GROUP BY " . (empty($group_by) ? $columns[0] : $group_by) : '';
 
-        return $wpdb->get_results("SELECT " . $sql_columns . " FROM " . $table_name . $sql_where . " GROUP BY " . $group_by);
+        return $wpdb->get_results("SELECT " . $sql_columns . " FROM " . $table_name . $sql_where . $sql_group_by);
     }
 
     public static function add_new_column( $table, $column_name, $column_params )
