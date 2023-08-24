@@ -13,16 +13,27 @@ use HrxDeliveryWoo\Debug;
 
 class Cronjob
 {
+    /**
+     * List of cronjobs
+     * 
+     * Cronjob array params:
+     * @param func - (Required) Job function
+     * @param freq - (Required) How often the job is performed
+     * @param time - (Optional) Static time of day when to activate the job. Use current time if not exists
+     * @param random_time - (Optional) Interval with hours when to activate the job. A random value from interval is taken and written to the hours place of the static time
+     **/
     public $cronjobs = array(
         'hrx_update_warehouses' => array(
             'func' => 'job_update_warehouses',
             'freq' => 'weekly',
             'time' => '02:00:00',
+            'random_time' => [0, 1],
         ),
         'hrx_update_delivery_locations' => array(
             'func' => 'job_update_delivery_locs',
             'freq' => 'weekly',
             'time' => '04:00:00',
+            'random_time' => [2, 6],
         ),
         /*'hrx_test' => array( // Activate if you want to test (use function job_test)
             'func' => 'job_test',
@@ -43,6 +54,7 @@ class Cronjob
     {
         add_filter('cron_schedules', array($this, 'add_frequency'));
 
+        $this->random_jobs_time();
         foreach ( $this->cronjobs as $job_key => $job_data ) {
             add_action($job_key, array($this, $job_data['func']));
         }
@@ -71,6 +83,21 @@ class Cronjob
         );
         
         return $schedules;
+    }
+
+    public function random_jobs_time()
+    {
+        foreach ( $this->cronjobs as $job_key => $job_data ) {
+            if ( ! isset($job_data['random_time']) ) {
+                continue;
+            }
+            if ( ! isset($job_data['time'])  ) {
+                $job_data['time'] = '00:00:00';
+            }
+
+            $random_time = rand($job_data['random_time'][0], $job_data['random_time'][1]);
+            $this->cronjobs[$job_key]['time'] = sprintf("%02d", $random_time) . substr($job_data['time'], 2);
+        }
     }
 
     public function activation()
