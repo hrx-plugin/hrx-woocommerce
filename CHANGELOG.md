@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.1] - 2023-08-28
 ### Improved
 - Made it possible to use random time when registering cronjob
 
