@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.1] - 2023-08-28
+### Improved
+- Made it possible to use random time when registering cronjob
+
 ## [1.2.0.1] - 2023-08-21
 ### Fixed
 - Fixed the units conversion
