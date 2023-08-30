@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Fixed a bug which stopping receive of delivery locations
+
 ## [1.2.1] - 2023-08-28
 ### Improved
 - Made it possible to use random time when registering cronjob
