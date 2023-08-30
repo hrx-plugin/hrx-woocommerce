@@ -105,6 +105,8 @@ class LocationsDelivery
             $count_updated = 0;
             foreach ( $response['data'] as $location_data ) {
                 if ( $location_data['latitude'] == '0.0' && $location_data['longitude'] == '0.0' ) {
+                    $count_error++;
+                    $count_all++;
                     continue;
                 }
                 $sql_data = array(
