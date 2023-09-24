@@ -63,7 +63,7 @@
         },
 
         prices_add_new_row: function( button ) {
-            var container = $(button).closest(".box-content");
+            var container = $(button).closest(".section-price_by_weight");
             var first_elem = $(container).find(".prices_range.first");
             var new_elem = $(first_elem).clone();
             var key = $(new_elem).data("key");
@@ -113,7 +113,7 @@
 
         prices_remove_row: function( button ) {
             var button = $(button);
-            var container = button.closest(".box-content");
+            var container = button.closest(".section-price_by_weight");
             var this_elem = button.closest(".prices_range");
             var other_rows = $(this_elem).siblings(".prices_range");
 

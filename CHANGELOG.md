@@ -4,6 +4,10 @@
 ### Fixed
 - Fixed a bug which stopping receive of delivery locations
 
+### Improved
+- Created a "free delivery from the cart amount" option for every country
+- Added price block hiding when country is disabled
+
 ## [1.2.1] - 2023-08-28
 ### Improved
 - Made it possible to use random time when registering cronjob
