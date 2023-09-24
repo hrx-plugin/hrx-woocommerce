@@ -251,4 +251,32 @@ class Helper
 
         return $regex;
     }
+
+    public static function compare_values( $value_1, $value_2, $action = '=' )
+    {
+        if ( ! is_numeric($value_1) || ! is_numeric($value_2) ) {
+            return false;
+        }
+
+        if ( $action == '=' && $value_1 == $value_2 ) {
+            return true;
+        }
+        if ( $action == '!=' && $value_1 != $value_2 ) {
+            return true;
+        }
+        if ( $action == '>=' && $value_1 >= $value_2 ) {
+            return true;
+        }
+        if ( $action == '<=' && $value_1 <= $value_2 ) {
+            return true;
+        }
+        if ( $action == '>' && $value_1 > $value_2 ) {
+            return true;
+        }
+        if ( $action == '<' && $value_1 < $value_2 ) {
+            return true;
+        }
+
+        return false;
+    }
 }

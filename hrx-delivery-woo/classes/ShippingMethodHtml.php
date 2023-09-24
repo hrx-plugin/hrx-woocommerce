@@ -275,6 +275,7 @@ class ShippingMethodHtml
         $empty_msg = $params['empty_msg'] ?? __('Could not get a list of countries to which this shipping method can be used', 'hrx-delivery');
 
         $wcTools = new WcTools();
+        $units = $wcTools->get_units();
 
         $row_style = ($hide_row) ? 'display:none;' : '';
 
@@ -292,7 +293,12 @@ class ShippingMethodHtml
                     <?php foreach ( $countries as $country_code ) : ?>
                         <?php $country_key = esc_html($key) . '_' . $country_code; ?>
                         <?php $country_name = esc_html($key) . '[' . $country_code . ']'; ?>
-                        <?php $country_values = $values[$country_code] ?? array(); ?>
+                        <?php
+                        $country_values = $values[$country_code] ?? array();
+                        if ( ! isset($country_values['other']) ) {
+                            $country_values['other'] = array();
+                        }
+                        ?>
                         <div class="country_box">
                             <div class="box-header">
                                 <div class="title">
@@ -310,17 +316,32 @@ class ShippingMethodHtml
                                 )); ?>
                             </div>
                             <div class="box-content">
-                                <?php $country_prices = $country_values['prices'] ?? array(array()); ?>
-                                <?php $country_prices = array_values($country_prices); //Fix array keys ?>
-                                <?php for ( $i = 0; $i < count($country_prices); $i++ ) : ?>
-                                    <?php echo self::build_price_row(array(
-                                        'key' => $country_key . '_prices',
-                                        'name' => $country_name . '[prices]',
-                                        'row_number' => $i,
-                                        'values' => $country_prices[$i],
-                                        'hide_add' => (count($country_prices) > 1 && $i != count($country_prices) - 1),
-                                    )); ?>
-                                <?php endfor; ?>
+                                <div class="section-price_by_weight">
+                                    <?php $country_prices = $country_values['prices'] ?? array(array()); ?>
+                                    <?php $country_prices = array_values($country_prices); //Fix array keys ?>
+                                    <?php for ( $i = 0; $i < count($country_prices); $i++ ) : ?>
+                                        <?php echo self::build_price_by_weight_row(array(
+                                            'key' => $country_key . '_prices',
+                                            'name' => $country_name . '[prices]',
+                                            'row_number' => $i,
+                                            'values' => $country_prices[$i],
+                                            'hide_add' => (count($country_prices) > 1 && $i != count($country_prices) - 1),
+                                        )); ?>
+                                    <?php endfor; ?>
+                                </div>
+                                <div class="section-other">
+                                    <?php echo self::build_sample_number_row(array(
+                                        'title' => __('Free from', 'hrx-delivery'),
+                                        'key' => $country_key . '_other_free_from',
+                                        'name' => $country_name . '[other][free_from]',
+                                        'value' => $country_values['other']['free_from'] ?? '',
+                                        'step' => 0.01,
+                                        'min' => 0,
+                                        'unit' => $units->currency_symbol,
+                                        'tip' => __('Make this shipping free if the cart amount is equal or more than this value. Leave blank if dont want use this.', 'hrx-delivery')
+                                    ));
+                                    ?>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -536,7 +557,59 @@ class ShippingMethodHtml
         return $html;
     }
 
-    private static function build_price_row( $params )
+    private static function build_sample_number_row( $params )
+    {
+        $key = $params['key'] ??  '';
+        $name = $params['name'] ??  '';
+        $title = $params['title'] ??  '';
+        $value = $params['value'] ?? '';
+        $description = $params['desc'] ?? '';
+        $tip = $params['tip'] ?? '';
+        $step = $params['step'] ?? '';
+        $min = $params['min'] ?? '';
+        $max = $params['max'] ?? '';
+        $unit = $params['unit'] ?? '';
+
+        if ( empty(esc_html($key)) ) {
+            return '<b>' . __('Block row error', 'hrx-delivery') . '!</b> ' . __('Not received field key', 'hrx-delivery') . '.';
+        }
+
+        $wcTools = new WcTools();
+
+        ob_start();
+        ?>
+        <div class="section-row row-sample row_key-<?php echo esc_attr($key); ?>">
+            <div class="row_item-title <?php echo (!empty($tip)) ? 'has_tip' : ''; ?>">
+                <label for="<?php echo esc_attr($key); ?>"><?php echo esc_html($title); ?></label>
+                <?php if ( ! empty($tip) ) : ?>
+                    <?php echo $wcTools->add_help_tip($tip); ?>
+                <?php endif; ?>
+            </div>
+            <div class="row_item-value <?php echo (!empty($unit)) ? 'has_unit' : ''; ?>">
+                <?php echo self::field_number(array(
+                    'name' => esc_attr($name),
+                    'id' => esc_attr($key),
+                    'value' => $value,
+                    'step' => $step,
+                    'min' => $min,
+                    'max' => $max,
+                )); ?>
+                <?php if ( ! empty($unit) ) : ?>
+                    <span class="unit_value"><?php echo $unit; ?></span>
+                <?php endif; ?>
+                <?php if ( ! empty($description) ) : ?>
+                    <p class="description"><?php echo $description; ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+
+        return $html;
+    }
+
+    private static function build_price_by_weight_row( $params )
     {
         $row_number = $params['row_number'] ?? 0;
         $key = $params['key'] ??  '';
