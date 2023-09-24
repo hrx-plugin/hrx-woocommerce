@@ -83,18 +83,25 @@
     vertical-align: middle;
 }
 .woocommerce table.hrx-settings .field-countries_prices {
-    display: flex;
+    /*display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-start;*/
+    column-count: 3;
+    column-gap: 10px;
 }
 .woocommerce table.hrx-settings .field-countries_prices .country_box {
     background: #fff;
     padding: 10px;
     box-shadow: 0px 0px 2px 0px #666;
-    margin: 0 0 10px;
-    flex: 0 0 32%;
     box-sizing: border-box;
+    /*margin: 0 0 10px;*/
+    /*flex: 0 0 32%;*/
+    margin: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    margin-bottom: 10px;
+    break-inside: avoid;
 }
 .woocommerce table.hrx-settings .field-countries_prices .box-header {
     display: flex;
@@ -269,12 +276,20 @@
 .woocommerce table.hrx-settings .debug-plugin .debug-status-not {
     color: #ccc;
 }
+@media only screen and (max-width: 1550px) {
+    .woocommerce table.hrx-settings .field-countries_prices {
+        column-count: 2;
+    }
+}
 @media only screen and (max-width: 1400px) {
     .woocommerce table.hrx-settings .field-countries_prices .country_box {
         flex-basis: 49%;
     }
 }
 @media only screen and (max-width: 1100px) {
+    .woocommerce table.hrx-settings .field-countries_prices {
+        column-count: 1;
+    }
     .woocommerce table.hrx-settings .field-countries_prices .country_box {
         flex-basis: 100%;
     }
