@@ -6,6 +6,7 @@
 - Fixed a bug that caused admin functions to activate in the front page
 - Fixed "HRX delivery" menu item counter when entered to Order edit page
 - Fixed HRX metadata adding when in Order selected not HRX shipping method
+- Fixed meta_query when getting HRX Orders list
 
 ### Improved
 - Created a "free delivery from the cart amount" option for every country

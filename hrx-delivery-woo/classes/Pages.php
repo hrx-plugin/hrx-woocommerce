@@ -172,7 +172,7 @@ class Pages
                 foreach ( $query_var_values as $query_var ) {
                     $build_subquery[] = array(
                         'key' => $meta_key,
-                        'compare' => 'LIKE',
+                        'compare' => '=',
                         'value' => $query_var,
                     );
                 }
