@@ -276,12 +276,20 @@
 .woocommerce table.hrx-settings .debug-plugin .debug-status-not {
     color: #ccc;
 }
+@media only screen and (max-width: 1550px) {
+    .woocommerce table.hrx-settings .field-countries_prices {
+        column-count: 2;
+    }
+}
 @media only screen and (max-width: 1400px) {
     .woocommerce table.hrx-settings .field-countries_prices .country_box {
         flex-basis: 49%;
     }
 }
 @media only screen and (max-width: 1100px) {
+    .woocommerce table.hrx-settings .field-countries_prices {
+        column-count: 1;
+    }
     .woocommerce table.hrx-settings .field-countries_prices .country_box {
         flex-basis: 100%;
     }
