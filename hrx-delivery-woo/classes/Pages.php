@@ -35,6 +35,10 @@ class Pages
 
     public function init()
     {
+        if ( ! is_admin() ) {
+            return;
+        }
+
         add_action('admin_enqueue_scripts', array($this, 'load_scripts'));
         add_action('admin_menu', array($this, 'register_menu_pages'));
 
@@ -140,8 +144,12 @@ class Pages
     {
         global $submenu;
 
+        if ( ! isset($submenu[$submenu_section]) ) {
+            return;
+        }
+
         foreach ( $submenu[$submenu_section] as $key => $menu_item ) {
-            if ( strpos($menu_item[2], $item_id) === 0 ) {
+            if ( strpos($menu_item[2], $item_id) === 0 && ! str_contains($submenu[$submenu_section][$key][0], 'processing-count') ) {
                 $submenu[$submenu_section][$key][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr($count_value) . '"><span class="processing-count">' . number_format_i18n($count_value) . '</span></span>'; // WPCS: override ok.
                 break;
             }
