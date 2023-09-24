@@ -35,12 +35,18 @@ class Order
 
     public function init()
     {
+        add_action('woocommerce_order_details_after_order_table', array($this, 'display_terminal_information'), 10, 1);
+        add_action('woocommerce_email_after_order_table', array($this, 'display_terminal_information'), 10, 1);
+
+        /* Load only admin hooks */
+        if ( ! is_admin() ) {
+            return;
+        }
+
         add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_admin_order_block'), 10, 2);
         add_action('save_post', array($this, 'save_admin_order_block'));
         add_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos'));
         add_action('admin_notices', array($this, 'show_bulk_actions_notice'), 10);
-        add_action('woocommerce_order_details_after_order_table', array($this, 'display_terminal_information'), 10, 1);
-        add_action('woocommerce_email_after_order_table', array($this, 'display_terminal_information'), 10, 1);
 
         add_filter('bulk_actions-edit-shop_order', array($this, 'register_bulk_actions'), 20);
         add_filter('handle_bulk_actions-edit-shop_order', array($this, 'handle_bulk_actions'), 20, 3);

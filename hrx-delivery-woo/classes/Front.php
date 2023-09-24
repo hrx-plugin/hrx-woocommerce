@@ -75,6 +75,14 @@ class Front
             return;
         }
 
+        if ( isset($_POST['shipping_method']) ) {
+            $selected_method = Helper::get_first_value_from_array($_POST['shipping_method']);
+        }
+
+        if ( ! ShipHelper::is_hrx_rate($selected_method) ) {
+            return;
+        }
+
         $save_data = array();
 
         if ( isset($_POST[$this->terminal_field]) ) {
@@ -82,7 +90,6 @@ class Front
         }
 
         if ( isset($_POST['shipping_method']) ) {
-            $selected_method = Helper::get_first_value_from_array($_POST['shipping_method']);
             $save_data['method'] = $this->remove_id_from_method_name($selected_method);
         }
 
