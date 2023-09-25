@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.2] - 2023-09-25
 ### Fixed
 - Fixed a bug which stopping receive of delivery locations
 - Fixed a bug that caused admin functions to activate in the front page
