@@ -11,9 +11,9 @@
  * Text Domain: hrx-delivery
  * 
  * Requires at least: 5.1
- * Tested up to: 6.3
+ * Tested up to: 6.3.1
  * WC requires at least: 5.0.0
- * WC tested up to: 8.0.2
+ * WC tested up to: 8.1.1
  * Requires PHP: 7.2
  */
 
