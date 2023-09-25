@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.4] - Repeat request on error
+### Improved
+- repeat CURL request when got CURL error "Connection reset by peer" (56)
+
 ## [1.0.3] - Better API class control
 ### Improved
 - increased timeout time to 15 sec
