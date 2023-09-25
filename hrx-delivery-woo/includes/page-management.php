@@ -115,6 +115,7 @@ if ( $page_current_tab == 'warehouses' ) {
             array(
                 'key' => 'hrx_delivery_method',
                 'value' => array_keys($this->core->methods),
+                'compare' => 'IN'
             )
         ),
     );

@@ -140,4 +140,9 @@ class WcTools
 
         wc_add_notice($message, $message_type);
     }
+
+    public function add_help_tip( $text, $allow_html = false )
+    {
+        return wc_help_tip($text, $allow_html);
+    }
 }

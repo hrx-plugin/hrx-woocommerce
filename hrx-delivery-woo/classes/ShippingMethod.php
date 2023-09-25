@@ -218,7 +218,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 $fields[$method_key . '_free_from'] = array(
                     'title' => __('Free delivery from price', 'hrx-delivery'),
                     'type' => 'price',
-                    'description' => __('Cart amount from which this shipping becomes free', 'hrx-delivery') . '. ' . __('Leave blank to turn off', 'hrx-delivery') . '.',
+                    'description' => __('Cart amount from which this shipping becomes free', 'hrx-delivery') . '. ' . sprintf(__('This value only applies if the selected country does not have specified the "%s" value', 'hrx-delivery'), __('Free from', 'hrx-delivery')) . '. ' . __('Leave blank to turn off', 'hrx-delivery') . '.',
                     'top_class' => 'hrx-method-' . $method_key,
                 );
 
@@ -382,21 +382,21 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                     continue;
                 }
 
-                $prices = json_decode($this->settings[$method_key . '_prices'], true);
-
-                /* Check if shipping method is enabled for selected country */
-                if ( empty($prices[$country]['enable']) ) {
+                $prices = $this->prepare_prices_array($method_key, $country);
+                if ( ! $prices ) {
                     continue;
                 }
 
                 /* Get shipping price */
-                $current_price = ShipHelper::get_price_by_weight($prices[$country]['prices'], $cart_weigth);
+                $current_price = ShipHelper::get_price_by_weight($prices['prices'], $cart_weigth);
                 if ( $current_price === false ) {
                     $current_price = (! empty($this->settings[$method_key . '_default_price'])) ? (float)$this->settings[$method_key . '_default_price'] : 0;
                 }
 
                 /* Check if shipping is free */
-                if ( ! empty($this->settings[$method_key . '_free_from']) && $cart_amount >= $this->settings[$method_key . '_free_from'] ) {
+                if ( isset($prices['other']['free_from']) && Helper::compare_values($cart_amount, $prices['other']['free_from'], '>=') ) {
+                    $current_price = 0;
+                } else if ( isset($this->settings[$method_key . '_free_from']) && Helper::compare_values($cart_amount, $this->settings[$method_key . '_free_from'], '>=') ) {
                     $current_price = 0;
                 }
 
@@ -411,6 +411,23 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
 
                 $this->add_rate($rate);
             }
+        }
+
+        private function prepare_prices_array( $method_key, $country )
+        {
+            $prices = json_decode($this->settings[$method_key . '_prices'], true);
+            if ( ! isset($prices[$country]) ) {
+                return false;
+            }
+
+            if ( empty($prices[$country]['enable']) ) {
+                return false;
+            }
+
+            if ( ! isset($prices[$country]['prices']) ) $prices[$country]['prices'] = array();
+            if ( ! isset($prices[$country]['other']) ) $prices[$country]['other'] = array();
+
+            return $prices[$country];
         }
     }
 

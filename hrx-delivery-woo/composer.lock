@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "hrx/api-lib",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hrx-plugin/hrx-api.git",
-                "reference": "91a66d098ce9ecc4c5e482d5ec7690e03968545d"
+                "reference": "931b058382e0ec3bd170b1ac9d7a54723dead02b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hrx-plugin/hrx-api/zipball/91a66d098ce9ecc4c5e482d5ec7690e03968545d",
-                "reference": "91a66d098ce9ecc4c5e482d5ec7690e03968545d",
+                "url": "https://api.github.com/repos/hrx-plugin/hrx-api/zipball/931b058382e0ec3bd170b1ac9d7a54723dead02b",
+                "reference": "931b058382e0ec3bd170b1ac9d7a54723dead02b",
                 "shasum": ""
             },
             "require": {
@@ -41,10 +41,10 @@
             ],
             "description": "Library for HRX Api",
             "support": {
-                "source": "https://github.com/hrx-plugin/hrx-api/tree/v1.0.3",
+                "source": "https://github.com/hrx-plugin/hrx-api/tree/v1.0.4",
                 "issues": "https://github.com/hrx-plugin/hrx-api/issues"
             },
-            "time": "2023-07-19T11:17:26+00:00"
+            "time": "2023-09-25T07:55:56+00:00"
         },
         {
             "name": "setasign/fpdf",
