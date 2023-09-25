@@ -12,6 +12,9 @@
 - Created a "free delivery from the cart amount" option for every country
 - Added price block hiding when country is disabled
 
+### Updated
+- API library to v1.0.4
+
 ## [1.2.1] - 2023-08-28
 ### Improved
 - Made it possible to use random time when registering cronjob
