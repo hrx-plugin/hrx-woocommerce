@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Fixed a bug when getting WC Order status
+
 ## [1.2.2] - 2023-09-25
 ### Fixed
 - Fixed a bug which stopping receive of delivery locations

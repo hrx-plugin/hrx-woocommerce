@@ -233,7 +233,7 @@ class WcOrder
             return false;
         }
 
-        return $order->get_status();
+        return $wc_order->get_status();
     }
 
     public function update_status( $wc_order_id, $status, $note_msg = '' )
