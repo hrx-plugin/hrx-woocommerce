@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.2.1] - 2023-10-04
 ### Fixed
 - Fixed a bug when getting WC Order status
 
