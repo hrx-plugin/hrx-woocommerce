@@ -389,6 +389,11 @@ class Pages
         return $this->wc->custom->get_customer_fullname($wc_order);
     }
 
+    private function get_order_customer_name_or_company( $wc_order )
+    {
+        return $this->wc->custom->get_customer_company_with_name($wc_order);
+    }
+
     private function get_order_status_text( $wc_order )
     {
         return $this->wc->custom->get_formated_status($wc_order);

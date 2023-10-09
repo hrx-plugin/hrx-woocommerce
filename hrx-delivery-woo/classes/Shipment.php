@@ -85,6 +85,7 @@ class Shipment
         }
 
         $receiver_data = $wc->custom->get_order_address($wc_order);
+        $receiver_name = $wc->custom->get_customer_company_with_name($wc_order);
 
         $receiver_phone = str_replace(' ', '', $receiver_data['phone']);
         $receiver_phone_prefix = '';
@@ -217,7 +218,7 @@ class Shipment
         }
 
         $prepared_receiver = array(
-            'name' => $receiver_data['first_name'] . ' ' . $receiver_data['last_name'],
+            'name' => $receiver_name,
             'email' => $receiver_email,
             'phone' => Helper::remove_prefix($receiver_phone, $receiver_phone_prefix),
             'phone_regex' => $receiver_phone_regex,
