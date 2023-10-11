@@ -470,7 +470,7 @@ class Shipment
         return $status;
     }
 
-    public static function ready_order( $wc_order_id, $unmark = false )
+    public static function ready_order( $wc_order_id, $unmark = false, $allow_status_change = true )
     {
         $core = Core::get_instance();
         $wc = (object) array(
@@ -510,7 +510,7 @@ class Shipment
             if ( ! empty($result['data']['status']) ) {
                 $hrx_status = esc_attr($result['data']['status']);
             }
-            if ( ! empty($change_wc_status) ) {
+            if ( ! empty($change_wc_status) && $allow_status_change ) {
                 $wc->order->update_status($wc_order_id, $change_wc_status, '<b>' . $core->title . ':</b> ');
             }
             $wc->order->update_meta($wc_order_id, $core->meta_keys->order_status, $hrx_status);

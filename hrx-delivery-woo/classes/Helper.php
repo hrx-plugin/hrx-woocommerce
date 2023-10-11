@@ -31,9 +31,9 @@ class Helper
     public static function show_admin_message( $message, $type = 'warning', $prefix = false, $dismissible = false )
     {
         $message = self::build_admin_message($message, $type, $prefix, $dismissible);
-        add_action( 'admin_notices', function() use ( $message ) {
+        add_action('admin_notices', function() use ( $message ) {
             echo $message;
-        }, 10 );
+        }, 10);
     }
 
     public static function get_plugin_information( $path_to_main_file )
@@ -98,6 +98,21 @@ class Helper
         $core = Core::get_instance();
 
         return delete_option($core->option_prefix . '_' . $option_name);
+    }
+
+    public static function is_settings_checkbox_marked( $checkbox_key )
+    {
+        $core = Core::get_instance();
+
+        if ( ! isset($core->settings[$checkbox_key]) ) {
+            return null;
+        }
+
+        if ( $core->settings[$checkbox_key] == 'yes' ) {
+            return true;
+        }
+
+        return false;
     }
 
     public static function get_first_value_from_array( $array )
