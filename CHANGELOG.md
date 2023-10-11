@@ -5,6 +5,7 @@
 - Fixed error message display when shipping method countries list is empty
 
 ### Improved
+- Added the option to write the company name on the label
 - Improved to avoid saving the same information multiple times when editing an order
 - Added parameter to activate automatically mark HRX order as ready when WC order status is changed to "Completed"
 
