@@ -73,7 +73,7 @@ class WcTools
         $classPages = new Pages();
         
         $all_screen_ids = array(
-            'admin_order_edit' => array('shop_order', 'woocommerce_page_wc-orders'),
+            'admin_order_edit' => array('shop_order', 'edit-shop_order', 'woocommerce_page_wc-orders'),
             'admin_hrx_pages' => array(),
         );
 
