@@ -349,7 +349,7 @@ class API
      * @param (boolean) $use_token - Execute as a public or as a private request
      * @return (mixed) - Received response to the request
      */
-    private function callApi( $url, $data = [], $url_params = [], $use_token = true, $repeated = false )
+    private function callApi( $url, $data = [], $url_params = [], $use_token = true, $retry = 0 )
     {
         $ch = curl_init();
 
@@ -391,8 +391,8 @@ class API
             'Response error' => $errorMsg,
         ));
 
-        if ( ! $repeated && $errorNo == 56 ) {
-            return $this->callApi($url, $data, $url_params, $use_token, true);
+        if ( $retry < 5 && $errorNo == 56 ) {
+            return $this->callApi($url, $data, $url_params, $use_token, $retry + 1);
         }
 
         return $this->handleApiResponse($response, $httpCode, $errorMsg);

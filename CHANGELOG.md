@@ -9,6 +9,9 @@
 - Improved to avoid saving the same information multiple times when editing an order
 - Added parameter to activate automatically mark HRX order as ready when WC order status is changed to "Completed"
 
+### Updated
+- API library to v1.0.5
+
 ## [1.2.2.1] - 2023-10-04
 ### Fixed
 - Fixed a bug when getting WC Order status
