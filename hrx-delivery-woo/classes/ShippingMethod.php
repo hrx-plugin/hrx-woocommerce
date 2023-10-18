@@ -254,6 +254,13 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 'default' => '',
             );
 
+            $fields['mark_ready_on_completed'] = array(
+                'title' => __('Mark as ready on Completed', 'hrx-delivery'),
+                'type' => 'checkbox',
+                'description' => sprintf(__('Mark Order as Ready, when changing WC Order status to %s', 'hrx-delivery'), $this->wc->tools->get_status_title('wc-completed')),
+                'default' => 'no',
+            );
+
             /*$fields['hr_settings'] = array( //TODO: Disabled because section is empty
                 'type' => 'hr',
                 'title' => __('Additional settings', 'hrx-delivery')

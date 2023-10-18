@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "hrx/api-lib",
-            "version": "1.0.4",
+            "version": "1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hrx-plugin/hrx-api.git",
-                "reference": "931b058382e0ec3bd170b1ac9d7a54723dead02b"
+                "reference": "6c505b75b3b07c56718a17eb4462638f34511ce1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hrx-plugin/hrx-api/zipball/931b058382e0ec3bd170b1ac9d7a54723dead02b",
-                "reference": "931b058382e0ec3bd170b1ac9d7a54723dead02b",
+                "url": "https://api.github.com/repos/hrx-plugin/hrx-api/zipball/6c505b75b3b07c56718a17eb4462638f34511ce1",
+                "reference": "6c505b75b3b07c56718a17eb4462638f34511ce1",
                 "shasum": ""
             },
             "require": {
@@ -41,10 +41,10 @@
             ],
             "description": "Library for HRX Api",
             "support": {
-                "source": "https://github.com/hrx-plugin/hrx-api/tree/v1.0.4",
+                "source": "https://github.com/hrx-plugin/hrx-api/tree/v1.0.5",
                 "issues": "https://github.com/hrx-plugin/hrx-api/issues"
             },
-            "time": "2023-09-25T07:55:56+00:00"
+            "time": "2023-10-18T10:48:51+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -91,16 +91,16 @@
         },
         {
             "name": "setasign/fpdi",
-            "version": "v2.4.1",
+            "version": "v2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Setasign/FPDI.git",
-                "reference": "f4ba73e5bc053ccc90b81717c5df1cb2ea7bae7b"
+                "reference": "ecf0459643ec963febfb9a5d529dcd93656006a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Setasign/FPDI/zipball/f4ba73e5bc053ccc90b81717c5df1cb2ea7bae7b",
-                "reference": "f4ba73e5bc053ccc90b81717c5df1cb2ea7bae7b",
+                "url": "https://api.github.com/repos/Setasign/FPDI/zipball/ecf0459643ec963febfb9a5d529dcd93656006a4",
+                "reference": "ecf0459643ec963febfb9a5d529dcd93656006a4",
                 "shasum": ""
             },
             "require": {
@@ -155,7 +155,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-07-27T08:12:09+00:00"
+            "time": "2023-09-28T10:46:27+00:00"
         }
     ],
     "packages-dev": [],

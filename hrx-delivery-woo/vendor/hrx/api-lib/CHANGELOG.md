@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.5] - Repeat request up to 5 times
+### Fixed
+- increased CURL request repeat times to 5
+
 ## [1.0.4] - Repeat request on error
 ### Improved
 - repeat CURL request when got CURL error "Connection reset by peer" (56)

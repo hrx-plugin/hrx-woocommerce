@@ -194,7 +194,7 @@ if ( $page_current_tab == 'warehouses' ) {
 
         $tab_data[$order->get_id()] = array(
             'order_id' => '<a href="' . $order->get_edit_order_url() . '">#' . $order->get_order_number() . '</a>' . PagesHtml::build_order_preview_link(),
-            'customer' => $this->get_order_customer_fullname($order),
+            'customer' => $this->get_order_customer_name_or_company($order),
             'order_status' => $order->get_status(),
             'order_status_text' => $this->get_order_status_text($order),
             'order_date' => $order->get_date_created()->format('Y-m-d H:i:s'),

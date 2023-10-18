@@ -47,6 +47,7 @@ class Order
         add_action('save_post', array($this, 'save_admin_order_block'));
         add_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos'));
         add_action('admin_notices', array($this, 'show_bulk_actions_notice'), 10);
+        add_action('woocommerce_order_status_changed', array($this, 'on_wc_order_status_change'));
 
         add_filter('bulk_actions-edit-shop_order', array($this, 'register_bulk_actions'), 20);
         add_filter('handle_bulk_actions-edit-shop_order', array($this, 'handle_bulk_actions'), 20, 3);
@@ -143,15 +144,15 @@ class Order
 
     public function save_admin_order_block_hpos( $post_id )
     {
+        if ( did_action('woocommerce_update_order') > 1 ) {
+            return $post_id;
+        }
+
         if ( ! is_admin() || ! $this->wc->tools->is_available_screen('admin_order_edit') ) {
             return $post_id;
         }
 
-        remove_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos')); //Temporary fix to avoid infinity loop
-
         $this->save_admin_order_block($post_id);
-
-        add_action('woocommerce_update_order', array($this, 'save_admin_order_block_hpos')); //Restore hook
     }
 
     public function register_bulk_actions( $bulk_actions )
@@ -337,6 +338,26 @@ class Order
         }
 
         return $this->wc->order->get_meta($order_id, $this->core->meta_keys->method);
+    }
+
+    public function on_wc_order_status_change( $post_id )
+    {
+        if ( ! is_admin() || ! $this->wc->tools->is_available_screen('admin_order_edit') ) {
+            return;
+        }
+
+        $new_status = $this->wc->order->get_status($post_id);
+        if ( $new_status == 'completed' ) {
+            if ( Helper::is_settings_checkbox_marked('mark_ready_on_completed') ) {
+                $hrx_order_id = $this->wc->order->get_meta($post_id, $this->core->meta_keys->order_id);
+                if ( ! empty($hrx_order_id) ) {
+                    $result = Shipment::ready_order($post_id, false, false);
+                    if ( $result['status'] == 'error' ) {
+                        // Hook woocommerce_order_status_changed cant return messages
+                    }
+                }
+            }
+        }
     }
 
     public function get_order_weight( $order )

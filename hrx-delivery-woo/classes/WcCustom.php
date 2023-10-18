@@ -72,6 +72,36 @@ class WcCustom
         return $fullname;
     }
 
+    public function get_customer_company_with_name( $wc_order = false )
+    {
+        $wc_order = $this->get_order($wc_order);
+        if ( ! $wc_order ) {
+            return '';
+        }
+
+        $customer_name = $wc_order->get_shipping_first_name();
+        $customer_surname = $wc_order->get_shipping_last_name();
+        $customer_company = $wc_order->get_shipping_company();
+        if ( empty($customer_company) && empty($customer_surname) ) {
+            $customer_name = $wc_order->get_billing_first_name();
+            $customer_surname = $wc_order->get_billing_last_name();
+            $customer_company = $wc_order->get_billing_company();
+        }
+
+        if ( empty($customer_company) ) {
+            return $customer_name . ' ' . $customer_surname;
+        }
+
+        $customer_company = str_replace('"', "'", $customer_company);
+
+        $customer_name_short = trim(mb_substr($customer_name, 0, 1));
+        if ( ! empty($customer_name_short) ) {
+            $customer_name_short .= '.';
+        }
+
+        return $customer_company . ' ' . $customer_name_short . $customer_surname;
+    }
+
     public function get_order_country( $wc_order = false, $default = 'LT' )
     {
         $wc_order = $this->get_order($wc_order);
