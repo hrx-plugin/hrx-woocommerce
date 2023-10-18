@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.3] - 2023-10-18
 ### Fixed
 - Fixed error message display when shipping method countries list is empty
 
