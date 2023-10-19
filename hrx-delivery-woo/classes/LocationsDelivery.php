@@ -10,6 +10,7 @@ use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Helper;
+use HrxDeliveryWoo\Debug;
 
 class LocationsDelivery
 {
@@ -79,6 +80,9 @@ class LocationsDelivery
 
     private static function save_delivery_locations( $type, $page, $self_repeat = false, $protector = 1 )
     {
+        $debug = Debug::is_enabled();
+        if ($debug) Debug::to_log('Executing update (page ' . $page . ')...', 'locations_update');
+
         $api = new Api();
         $response = $api->get_delivery_locations($page, 250);
         $status = array(
@@ -92,6 +96,7 @@ class LocationsDelivery
         $max_cycles = 1000;
 
         if ( $protector > $max_cycles ) {
+            if ($debug) Debug::to_log('Max number of cycles (' . $protector . ' > ' . $max_cycles . ')', 'locations_update');
             return array(
                 'status' => 'error',
                 'msg' => __('Reached maximum number of cycles', 'hrx-delivery') . ' (' . $max_cycles . ')',
@@ -147,6 +152,8 @@ class LocationsDelivery
                 $count_all++;
             }
 
+            if ($debug) Debug::to_log(sprintf('Completed. Added: %1$s, Updated: %2$s, Error: %3$s.', $count_added, $count_updated, $count_error), 'locations_update');
+
             if ( $self_repeat && count($response['data']) >= 250 ) {
                 sleep(1);
                 $next_page = self::save_delivery_locations($type, $page + 1, $self_repeat, $protector + 1);
@@ -169,6 +176,7 @@ class LocationsDelivery
             return $status;
         }
 
+        if ($debug) Debug::to_log('Failed. Error: ' . $response['msg'], 'locations_update');
         return array(
             'status' => 'error',
             'msg' => $response['msg']

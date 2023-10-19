@@ -193,6 +193,10 @@
             hrxAjax.execute_button_action(this, this.value, "#upd_delivery_loc_span");
         });
 
+        $(document).on("click", "#dev_tool_action_button", function() {
+            hrxAjax.execute_button_action(this, this.value, false, true);
+        });
+
         $(document).on("change", ".global-enable", function() {
             hrxHelper.toggle_class_by_cb(this, $(this).closest("tr").siblings("tr"), "row-disabled", false);
         });

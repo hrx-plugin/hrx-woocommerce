@@ -76,6 +76,7 @@ class ShippingMethodHtml
     {
         $class = $params['class'] ?? '';
         $top_class = $params['top_class'] ?? '';
+        $span_class = $params['span_class'] ?? '';
         $title = $params['title'] ?? '';
         $id = $params['id'] ?? '';
         $label = $params['label'] ?? '';
@@ -113,8 +114,8 @@ class ShippingMethodHtml
                         <?php echo esc_html($label); ?>
                     </button>
                     <span class="action-txt-title"><?php echo $message; ?></span>
-                    <?php $span_class = ($need_repeat) ? 'value-old' : ''; ?>
-                    <?php $span_class = (empty($value)) ? 'value-empty' : $span_class; ?>
+                    <?php $span_class = ($need_repeat || $span_class == 'old') ? 'value-old' : ''; ?>
+                    <?php $span_class = (empty($value) || $span_class == 'empty') ? 'value-empty' : $span_class; ?>
                     <?php $span_id = esc_html($id) . '_span'; ?>
                     <?php $span_content = (empty($value)) ? $default : $value; ?>
                     <span id="<?php echo $span_id; ?>" class="action-txt-value <?php echo $span_class; ?>"><?php echo $span_content; ?></span>
