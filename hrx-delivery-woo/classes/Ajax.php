@@ -37,6 +37,7 @@ class Ajax
         add_action('wp_ajax_hrx_ready_order', $this_class . 'admin_btn_ready_hrx_order');
         add_action('wp_ajax_hrx_table_mass_action', $this_class . 'admin_btn_table_mass_action');
         add_action('wp_ajax_hrx_get_wc_order_data', $this_class . 'admin_hrx_get_wc_order_data');
+        add_action('wp_ajax_hrx_dev_action_cron_delivery_locs', $this_class . 'admin_btn_execute_dev_tool_action');
     }
 
     /**
@@ -518,6 +519,19 @@ class Ajax
                 'products' => $products,
             )
         );
+
+        echo json_encode($data);
+        wp_die();
+    }
+
+    public static function admin_btn_execute_dev_tool_action()
+    {
+        $data = array(
+            'status' => 'OK',
+            'msg' => __('Action in progress', 'hrx-delivery')
+        );
+
+        Debug::launch_cron_manualy('update_delivery_locs');
 
         echo json_encode($data);
         wp_die();

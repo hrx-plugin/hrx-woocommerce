@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+### Improved
+- Added a abiblity to manualy launch cronjob
+- Added delivery locations update logging when debug mode is enabled
+
 ## [1.2.3] - 2023-10-18
 ### Fixed
 - Fixed error message display when shipping method countries list is empty

@@ -88,6 +88,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
         public function init_form_fields()
         {
             $all_wc_order_status = array_merge(array('' => '- '. __('Do not change', 'hrx-delivery') . ' -'), $this->wc->tools->get_all_statuses());
+            $cron_progress_delivery_locs = Helper::get_hrx_option('cron_progress_delivery_locs', '');
 
             $fields = array(
                 'enable' => array(
@@ -301,6 +302,17 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 'title' => '',
                 'type' => 'debug_plugin',
                 'top_class' => 'debug-toggle',
+            );
+
+            $fields['debug_dev_cron_delivery_locs'] = array(
+                'type' => 'action_button',
+                'label' => sprintf(__('Execute cronjob: %s', 'hrx-delivery'), __('Delivery locations', 'hrx-delivery')),
+                'action' => 'dev_action_cron_delivery_locs',
+                'id' => 'dev_tool_action',
+                'value' => (! empty($cron_progress_delivery_locs)) ? sprintf(__('Action in progress. Started %s', 'hrx-delivery'), $cron_progress_delivery_locs) : '',
+                'span_class' => (! empty($cron_progress_delivery_locs)) ? 'old' : '',
+                'top_class' => 'debug-toggle',
+                'description' => __('We do not recommend pressing this button unless necessary, as it will slow down your website and disrupt the display of HRX delivery methods', 'hrx-delivery'),
             );
 
             $this->form_fields = $fields;
