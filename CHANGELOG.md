@@ -1,9 +1,14 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Fixed PHP warning in courier locations update function
+- Fixed memory leak when updating locations
+
 ### Improved
 - Added a abiblity to manualy launch cronjob
 - Added delivery locations update logging when debug mode is enabled
+- Changed getting locations from 250 to 10000 per request
 
 ## [1.2.3] - 2023-10-18
 ### Fixed
