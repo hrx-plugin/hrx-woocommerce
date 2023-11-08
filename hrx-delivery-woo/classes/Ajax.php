@@ -166,7 +166,6 @@ class Ajax
             }*/
             $output['status'] = 'OK';
             $output['msg'] = $msg;
-            Debug::to_log('Successful location request. Added: ' . $result['added'] . ' Updated: ' . $result['updated'] . ' Errors: ' . $result['failed'], 'locations');
         }
 
         return $output;
