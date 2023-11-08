@@ -89,6 +89,23 @@
             }
 
             return true;
+        },
+
+        animate_number: function( element, start, end, delay = 10, step = 1 ) {
+            let current = start;
+            let interval = null;
+
+            element.innerText = start;
+
+            interval = setInterval(() => {
+                current += step;
+                element.innerText = current;
+              
+                if (current === end) {
+                    clearInterval(interval);
+                    interval = null;
+                }
+            }, delay);
         }
     };
 
@@ -187,7 +204,7 @@
             }
 
             setTimeout(function (){
-                hrxAjax.send_button_action(action, 1, button, output_to, async);
+                hrxAjax.send_button_action(action, 0, button, output_to, async);
             }, 100);
         },
 

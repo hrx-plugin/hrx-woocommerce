@@ -9,6 +9,7 @@
 - Added a abiblity to manualy launch cronjob
 - Added delivery locations update logging when debug mode is enabled
 - Changed getting locations from 250 to 10000 per request
+- Changed request timeout time from 40 to 60 seconds
 
 ## [1.2.3] - 2023-10-18
 ### Fixed
