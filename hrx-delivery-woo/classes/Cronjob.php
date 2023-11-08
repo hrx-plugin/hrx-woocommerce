@@ -7,6 +7,7 @@ if ( ! defined('ABSPATH') ) {
 }
 
 use HrxDeliveryWoo\Core;
+use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\LocationsDelivery;
 use HrxDeliveryWoo\Debug;
