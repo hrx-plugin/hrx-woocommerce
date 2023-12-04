@@ -10,6 +10,7 @@ use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\Sql;
 use HrxDeliveryWoo\Api;
 use HrxDeliveryWoo\Helper;
+use HrxDeliveryWoo\Debug;
 
 class LocationsDelivery
 {
@@ -55,9 +56,7 @@ class LocationsDelivery
         $type = 'terminal';
         if ( $page === false || $page === 1 ) {
             Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
-            //Helper::delete_hrx_option('countries'); //Temporary fix (this line moved out from if). Problem: When executing this function, some subfunctions call Core, where the methods element is created. This results in a large number of reads, deletions and additions of records in the database. Need to fix or somehow cache data, while this function executing.
         }
-        Helper::delete_hrx_option('countries');
 
         try {
             $start_page = ($page === false ) ? 1 : $page;
@@ -74,13 +73,31 @@ class LocationsDelivery
             Helper::update_hrx_option(self::get_option_name('last_sync_' . $type), $current_time);
         }
 
+        Helper::delete_hrx_option('countries');
+        
         return $result;
     }
 
     private static function save_delivery_locations( $type, $page, $self_repeat = false, $protector = 1 )
     {
+        $max_cycles = 1000;
+        $per_page = 10000;
+
+        $debug = Debug::is_enabled();
+        $debug_file = 'locations_update_terminals';
+
+        if ($debug) Debug::to_log('Executing update (page ' . $page . ')...', $debug_file);
+
+        if ( $protector > $max_cycles ) {
+            if ($debug) Debug::to_log('Max number of cycles (' . $protector . ' > ' . $max_cycles . ')', $debug_file);
+            return array(
+                'status' => 'error',
+                'msg' => __('Reached maximum number of cycles', 'hrx-delivery') . ' (' . $max_cycles . ')',
+            );
+        }
+
         $api = new Api();
-        $response = $api->get_delivery_locations($page, 250);
+        $response = $api->get_delivery_locations($page, $per_page);
         $status = array(
             'status' => 'OK',
             'total' => 0,
@@ -89,14 +106,6 @@ class LocationsDelivery
             'failed' => 0,
             'msg' => '',
         );
-        $max_cycles = 1000;
-
-        if ( $protector > $max_cycles ) {
-            return array(
-                'status' => 'error',
-                'msg' => __('Reached maximum number of cycles', 'hrx-delivery') . ' (' . $max_cycles . ')',
-            );
-        }
 
         if ( $response['status'] != 'error' ) {
             $count_all = 0;
@@ -147,7 +156,10 @@ class LocationsDelivery
                 $count_all++;
             }
 
-            if ( $self_repeat && count($response['data']) >= 250 ) {
+            if ($debug) Debug::to_log(sprintf('Completed. Added: %1$s, Updated: %2$s, Error: %3$s.', $count_added, $count_updated, $count_error), $debug_file);
+
+            if ( $self_repeat && count($response['data']) >= $per_page ) {
+                $response = NULL; // Frees up memory as this variable will no longer be needed (fixed memory leak)
                 sleep(1);
                 $next_page = self::save_delivery_locations($type, $page + 1, $self_repeat, $protector + 1);
                 if ( $next_page['status'] == 'error' ) {
@@ -169,6 +181,9 @@ class LocationsDelivery
             return $status;
         }
 
+        if ($debug) {
+            Debug::to_log('Failed. Error: ' . $response['msg'] . PHP_EOL . 'Response: ' . PHP_EOL . print_r($response['debug'], true), $debug_file);
+        }
         return array(
             'status' => 'error',
             'msg' => $response['msg']
@@ -180,7 +195,6 @@ class LocationsDelivery
         $type = 'courier';
 
         Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
-        Helper::delete_hrx_option('countries');
 
         try {
             $result = self::save_delivery_locations_couriers($type);
@@ -196,11 +210,28 @@ class LocationsDelivery
             Helper::update_hrx_option(self::get_option_name('last_sync_' . $type), $current_time);
         }
 
+        Helper::delete_hrx_option('countries');
+
         return $result;
     }
 
-    private static function save_delivery_locations_couriers( $type, $protector = 1 )
+    private static function save_delivery_locations_couriers( $type, $self_repeat = false, $protector = 1 )
     {
+        $max_cycles = 20;
+
+        $debug = Debug::is_enabled();
+        $debug_file = 'locations_update_couriers';
+
+        if ($debug) Debug::to_log('Executing update...', $debug_file);
+
+        if ( $protector > $max_cycles ) {
+            if ($debug) Debug::to_log('Max number of cycles (' . $protector . ' > ' . $max_cycles . ')', $debug_file);
+            return array(
+                'status' => 'error',
+                'msg' => __('Reached maximum number of cycles', 'hrx-delivery') . ' (' . $max_cycles . ')',
+            );
+        }
+
         $api = new Api();
         $response = $api->get_courier_delivery_locations();
         $status = array(
@@ -211,14 +242,6 @@ class LocationsDelivery
             'failed' => 0,
             'msg' => '',
         );
-        $max_cycles = 1000;
-
-        if ( $protector > $max_cycles ) {
-            return array(
-                'status' => 'error',
-                'msg' => __('Reached maximum number of cycles', 'hrx-delivery') . ' (' . $max_cycles . ')',
-            );
-        }
 
         if ( $response['status'] != 'error' ) {
             $count_all = 0;
@@ -262,9 +285,11 @@ class LocationsDelivery
                 $count_all++;
             }
 
-            if ( $self_repeat && count($response['data']) >= 250 ) {
+            if ($debug) Debug::to_log(sprintf('Completed. Added: %1$s, Updated: %2$s, Error: %3$s.', $count_added, $count_updated, $count_error), $debug_file);
+
+            if ( $self_repeat ) {
                 sleep(1);
-                $next_page = self::save_delivery_locations_couriers($type, $protector + 1);
+                $next_page = self::save_delivery_locations_couriers($type, $self_repeat, $protector + 1);
                 if ( $next_page['status'] == 'error' ) {
                     $status['status'] = 'error';
                     $status['msg'] = $next_page['msg'];
@@ -284,6 +309,9 @@ class LocationsDelivery
             return $status;
         }
 
+        if ($debug) {
+            Debug::to_log('Failed. Error: ' . $response['msg'] . PHP_EOL . 'Response: ' . PHP_EOL . print_r($response['debug'], true), $debug_file);
+        }
         return array(
             'status' => 'error',
             'msg' => __('Request error', 'hrx-delivery') . ' - ' . $response['msg']

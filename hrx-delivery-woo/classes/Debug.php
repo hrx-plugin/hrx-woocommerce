@@ -7,9 +7,16 @@ if ( ! defined('ABSPATH') ) {
 }
 
 use HrxDeliveryWoo\Core;
+use HrxDeliveryWoo\Cronjob;
 
 class Debug
 {
+    public static function is_enabled()
+    {
+        $core = Core::get_instance();
+        return (!empty($core->settings['debug_enable']) && $core->settings['debug_enable'] == 'yes');
+    }
+
     public static function develop( $variable, $echo = true )
     {
         $output = '<style>
@@ -89,16 +96,32 @@ class Debug
 
     public static function to_log( $data, $log_file_name = 'debug', $debug_always = false )
     {
-        $core = Core::get_instance();
-        $core->prepare_temp_dirs();
-
-        if ( ! $debug_always && (empty($core->settings['debug_enable']) || $core->settings['debug_enable'] != 'yes') ) {
+        if ( ! $debug_always && ! self::is_enabled() ) {
             return;
         }
+
+        $core = Core::get_instance();
+        $core->prepare_temp_dirs();
 
         $file_path = self::get_log_path($log_file_name);
 
         file_put_contents($file_path, self::build_log_text(print_r($data, true)), FILE_APPEND);
+    }
+
+    public static function launch_cron_manualy( $cron_key )
+    {
+        $classCronjob = new Cronjob();
+        switch ($cron_key) {
+            case 'update_warehouses':
+                $classCronjob->job_update_warehouses();
+                break;
+            case 'update_delivery_locs':
+                $classCronjob->job_update_delivery_locs();
+                break;
+            case 'test':
+                $classCronjob->job_test();
+                break;
+        }
     }
 
     private static function build_log_text( $log_data )

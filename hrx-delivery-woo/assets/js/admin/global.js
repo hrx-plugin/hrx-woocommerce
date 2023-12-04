@@ -89,6 +89,23 @@
             }
 
             return true;
+        },
+
+        animate_number: function( element, start, end, delay = 10, step = 1 ) {
+            let current = start;
+            let interval = null;
+
+            element.innerText = start;
+
+            interval = setInterval(() => {
+                current += step;
+                element.innerText = current;
+              
+                if (current === end) {
+                    clearInterval(interval);
+                    interval = null;
+                }
+            }, delay);
         }
     };
 
@@ -177,7 +194,7 @@
     window.hrxAjax = {
         counter: 0,
 
-        execute_button_action: function( button, action, output_to = false ) {
+        execute_button_action: function( button, action, output_to = false, async = false ) {
             var button = $(button);
             button.addClass("hrx-loading").prop("disabled", true);
 
@@ -187,16 +204,16 @@
             }
 
             setTimeout(function (){
-                hrxAjax.send_button_action(action, 1, button, output_to);
+                hrxAjax.send_button_action(action, 0, button, output_to, async);
             }, 100);
         },
 
-        send_button_action: function(action, page, button, output_to = false) {
+        send_button_action: function(action, page, button, output_to = false, async = false) {
             $.ajax({
                 type: "POST",
                 url: hrxGlobalVars.ajax_url,
                 dataType: "json",
-                async: false,
+                async: async,
                 data: {
                     action: "hrx_" + action,
                     page: page

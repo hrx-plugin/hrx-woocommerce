@@ -7,6 +7,7 @@ if ( ! defined('ABSPATH') ) {
 }
 
 use HrxDeliveryWoo\Core;
+use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Warehouse;
 use HrxDeliveryWoo\LocationsDelivery;
 use HrxDeliveryWoo\Debug;
@@ -149,6 +150,7 @@ class Cronjob
 
     public function job_update_delivery_locs()
     {
+        Helper::update_hrx_option('cron_progress_delivery_locs', current_time("Y-m-d H:i:s"));
         $status = LocationsDelivery::update_couriers();
         if ( $status['status'] == 'OK' ) {
             $debug_msg = 'Successfully updated courier delivery locations. Added ' . $status['added'] . ', updated ' . $status['updated'] . ', failed ' . $status['failed'];
@@ -164,6 +166,7 @@ class Cronjob
             $debug_msg = 'Failed to update terminal delivery locations. Error: ' . $status['msg'];
         }
         Debug::to_log($debug_msg, 'cronjob', true);
+        Helper::delete_hrx_option('cron_progress_delivery_locs');
     }
 
     public function job_test()

@@ -37,6 +37,7 @@ class Ajax
         add_action('wp_ajax_hrx_ready_order', $this_class . 'admin_btn_ready_hrx_order');
         add_action('wp_ajax_hrx_table_mass_action', $this_class . 'admin_btn_table_mass_action');
         add_action('wp_ajax_hrx_get_wc_order_data', $this_class . 'admin_hrx_get_wc_order_data');
+        add_action('wp_ajax_hrx_dev_action_cron_delivery_locs', $this_class . 'admin_btn_execute_dev_tool_action');
     }
 
     /**
@@ -83,17 +84,21 @@ class Ajax
      */
     public static function admin_btn_update_delivery_locations()
     {
-        $max_in_page = 250;
+        $max_in_page = 10000;
 
         $page = (int)esc_attr($_POST['page']);
-        if ( $page < 1 ) $page = 1;
-
-        Debug::to_log('Delivery locations update. Page: ' . $page, 'locations');
+        if ( $page < 0 ) $page = 0;
 
         $total_couriers = 0;
-        if ( $page == 1 ) {
+        if ( $page == 0 ) {
             $result = LocationsDelivery::update_couriers();
-            $total_couriers = $result['total'];
+
+            $current_time = current_time("Y-m-d H:i:s");
+            $output = self::get_location_result_output($result, $current_time);
+            $output['repeat'] = true;
+            $output['total'] = $result['total'];
+            echo json_encode($output);
+            wp_die();
         }
         
         $result = LocationsDelivery::update($page);
@@ -101,7 +106,7 @@ class Ajax
         $current_time = current_time("Y-m-d H:i:s");
         $output = self::get_location_result_output($result, $current_time);
         $output['repeat'] = false;
-        $output['total'] = $result['total'] + $total_couriers;
+        $output['total'] = $result['added'] + $result['updated'];
 
         if ( $result['total'] >= $max_in_page ) {
             $output['repeat'] = true;
@@ -161,7 +166,6 @@ class Ajax
             }*/
             $output['status'] = 'OK';
             $output['msg'] = $msg;
-            Debug::to_log('Successful location request. Added: ' . $result['added'] . ' Updated: ' . $result['updated'] . ' Errors: ' . $result['failed'], 'locations');
         }
 
         return $output;
@@ -518,6 +522,19 @@ class Ajax
                 'products' => $products,
             )
         );
+
+        echo json_encode($data);
+        wp_die();
+    }
+
+    public static function admin_btn_execute_dev_tool_action()
+    {
+        $data = array(
+            'status' => 'OK',
+            'msg' => __('Action in progress', 'hrx-delivery')
+        );
+
+        Debug::launch_cron_manualy('update_delivery_locs');
 
         echo json_encode($data);
         wp_die();
