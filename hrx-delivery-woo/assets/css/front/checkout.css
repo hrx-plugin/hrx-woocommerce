@@ -61,6 +61,7 @@
     background-color: var(--main-color);
     color: var(--main-font-color);
     border-radius: var(--border-radius);
+    border: 1px solid var(--main-color);
 }
 .hrx-map .tmjs-open-modal-btn:hover,
 .hrx-map .tmjs-open-modal-btn:focus {
@@ -70,6 +71,16 @@
 .hrx-map .tmjs-close-modal-btn {
     height: 26px;
     top: 30px;
+}
+.hrx-fake .hrx-map .tmjs-selected-terminal {
+    color: var(--main-color);
+}
+.hrx-fake .hrx-map .tmjs-open-modal-btn {
+    width: 100%;
+    background-color: #ddd;
+    border-color: #ddd;
+    color: #fff;
+    margin: 0;
 }
 .hrx-map .tmjs-pt-2 {
     padding: 0;
