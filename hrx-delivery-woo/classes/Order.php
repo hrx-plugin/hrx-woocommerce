@@ -268,8 +268,8 @@ class Order
                 if ( ! empty($hrx_order['data']['tracking_number']) ) {
                     $hrx_order_data['track_number'] = $hrx_order['data']['tracking_number'];
                 }
-                if ( ! empty($hrx_order['data']['tracking_url']) ) {
-                    $hrx_order_data['track_url'] = $hrx_order['data']['tracking_url'];
+                if ( ! empty($hrx_order['data']['partner_tracking_url']) ) {
+                    $hrx_order_data['track_url'] = $hrx_order['data']['partner_tracking_url'];
                 }
                 if ( ! empty($hrx_order['data']['status']) ) {
                     $hrx_order_data['status'] = $hrx_order['data']['status'];
