@@ -1,8 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.5]
 ### Improved
 - Improved for faster loading of terminals on the front, only the nearest terminals within 50 km from the entered address are displayed
+- Changed tracking URL from HRX to partners
 
 ## [1.2.4]
 ### Fixed
