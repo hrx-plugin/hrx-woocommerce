@@ -11,6 +11,7 @@ use HrxDeliveryWoo\Core;
 use HrxDeliveryWoo\Helper;
 use HrxDeliveryWoo\Terminal;
 use HrxDeliveryWoo\ShippingMethodHelper as ShipHelper;
+use HrxDeliveryWoo\LocationsHelper as LocHelper;
 use HrxDeliveryWoo\WcOrder;
 use HrxDeliveryWoo\WcTools;
 
@@ -65,8 +66,26 @@ class Front
         $country = $this->get_customer_shipping_country();
         $terminals_list = LocationsDelivery::get_list($method_key, $country);
 
-        //echo $this->build_terminals_select($terminals_list, $method_key); // Not using
-        echo $this->build_terminals_script($terminals_list, $country, $method_key);
+        /* Search closest terminals in radius */
+        $address = trim($this->get_customer_shipping_address(false, ''));
+        $radius = 50;
+        $show_selection = true;
+        if ( empty($address) ) {
+            $radius = 0.001;
+            $show_selection = false;
+        }
+        $coordinates = LocHelper::get_coordinates_by_address($address, $country);
+        if ( $coordinates ) {
+            $terminals_list = $this->filter_terminals_by_radius($terminals_list, $coordinates['latitude'], $coordinates['longitude'], $radius);
+        }
+
+        /* Echo elements */
+        if ( $show_selection ) {
+            //echo $this->build_terminals_select($terminals_list, $method_key); // Not using
+            echo $this->build_terminals_script($terminals_list, $country, $method_key);
+        } else {
+            echo $this->build_fake_terminals_select(__('Please enter an address', 'hrx-delivery'), $method_key);
+        }
     }
 
     public function save_terminal_to_order( $order_id )
@@ -147,9 +166,63 @@ class Front
         return $country;
     }
 
+    private function get_customer_shipping_address( $with_country = true, $separator = ',' )
+    {
+        $address = '';
+        
+        $address_array = $this->get_customer_shipping_address_shipping_array();
+        if ( empty($address_array['address_1']) && empty($address_array['city']) && empty($address_array['postcode']) ) {
+            $address_array = $this->get_customer_shipping_address_array();
+        }
+
+        $address_array['country'] = ($with_country) ? $separator . ' ' . $address_array['country'] : '';
+
+        return $address_array['address_1'] . $separator . ' ' . $address_array['city'] . ' ' . $address_array['postcode'] . $address_array['country'];
+    }
+
+    private function get_customer_shipping_address_array()
+    {
+        $customer = $this->wc->tools->get_session('customer', false);
+
+        return array(
+            'address_1' => $customer['shipping_address_1'] ?? '',
+            'address_2' => $customer['shipping_address_2'] ?? '',
+            'city' => $customer['shipping_city'] ?? '',
+            'state' => $customer['shipping_state'] ?? '',
+            'postcode' => $customer['shipping_postcode'] ?? '',
+            'country' => $customer['shipping_country'] ?? '',
+        );
+    }
+
+    private function get_customer_shipping_address_shipping_array()
+    {
+        $customer = $this->wc->tools->get_session('customer', false);
+
+        return array(
+            'address_1' => $customer['address_1'] ?? '',
+            'address_2' => $customer['address_2'] ?? '',
+            'city' => $customer['city'] ?? '',
+            'state' => $customer['state'] ?? '',
+            'postcode' => $customer['postcode'] ?? '',
+            'country' => $customer['country'] ?? '',
+        );
+    }
+
     private function remove_id_from_method_name( $method_name )
     {
         return str_replace($this->core->id . '_', '', $method_name);
+    }
+
+    private function build_fake_terminals_select( $text, $method_key )
+    {
+        $output = '<div class="hrx-terminal-container hrx-fake hrx-method-' . $method_key . '">';
+        $output .= '<div class="hrx-map">';
+        $output .= '<div class="tmjs-container">';
+        $output .= '<div class="tmjs-selected-terminal">' . $text . '</div>';
+        $output .= '<button class="tmjs-open-modal-btn disabled" disabled>' . __('Choose terminal', 'hrx-delivery') . '</button>';
+        $output .= '</div></div></div>';
+
+        return $output;
     }
 
     private function build_terminals_select( $terminals_list, $method_key )
@@ -178,5 +251,22 @@ class Front
         $output .= '</div>';
 
         return $output;
+    }
+
+    private function filter_terminals_by_radius( $terminals_list, $center_lat = 0, $center_lon = 0, $radius = false )
+    {
+        if ( ! $radius ) {
+            return $terminals_list;
+        }
+
+        $filtered_list = [];
+        foreach ( $terminals_list as $terminal ) {
+            $distance = LocHelper::calculate_distance_between_points($center_lat, $center_lon, $terminal->latitude, $terminal->longitude);
+            if ( $distance <= $radius ) {
+                $filtered_list[] = $terminal;
+            }
+        }
+
+        return $filtered_list;
     }
 }
