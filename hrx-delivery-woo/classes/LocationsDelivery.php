@@ -70,13 +70,6 @@ class LocationsDelivery
                 'msg' => __('An unexpected error occurred during the operation', 'hrx-delivery'),
             );
         }
-
-        if ( $result['status'] == 'OK' ) {
-            $current_time = current_time("Y-m-d H:i:s");
-            Helper::update_hrx_option(self::get_option_name('last_sync_' . $type), $current_time);
-        }
-
-        Helper::delete_hrx_option('countries');
         
         return $result;
     }
@@ -244,52 +237,12 @@ class LocationsDelivery
         );
     }
 
-    public static function update_active_locations()
+    public static function finish_locations_update( $type )
     {
-        $type = 'terminal';
-        Sql::update_multi_rows('delivery', array('active' => 0), array('type' => $type));
+        $current_time = current_time("Y-m-d H:i:s");
+        Helper::update_hrx_option(self::get_option_name('last_sync_' . $type), $current_time);
 
-        $debug = Debug::is_enabled();
-        $debug_file = 'locations_update_terminals';
-
-        if ($debug) Debug::to_log('Copying locations from temporary table...', $debug_file);
-
-        $temp_locations_total = Sql::get_row('delivery_temp', array('type' => $type), 'COUNT(*) as total');
-        if ( empty($temp_locations_total) || ! $temp_locations_total->total ) {
-            if ($debug) Debug::to_log('Failed to get records from temporary table', $debug_file);
-            return array(
-                'status' => 'error',
-                'msg' => __('Failed to save received locations', 'hrx-delivery')
-            );
-        }
-
-        $per_page = 1000;
-        $count_added = 0;
-        $count_updated = 0;
-
-        for ( $i = 0; $i < $temp_locations_total->total / $per_page; $i++ ) {
-            if ($debug) Debug::to_log('Saving locations (page ' . ($i + 1) . ')...', $debug_file);
-            $result = self::move_locations_to_active($type, $i * $per_page, $per_page);
-            $count_added += $result['added'];
-            $count_updated += $result['updated'];
-        }
-
-        if ( $count_added + $count_updated < $temp_locations_total->total ) {
-            if ($debug) Debug::to_log('Some locations not saved. Received locations: ' . $temp_locations_total->total . '. Total added: ' . $count_added . '. Total updated: ' . $count_updated . '.', $debug_file);
-            return array(
-                'status' => 'error',
-                'msg' => sprintf(__('Only %1$s out of %2$s locations were successfully saved', 'hrx-delivery'), $count_added + $count_updated, $temp_locations_total->total),
-            );
-        }
-
-        if ($debug) Debug::to_log('Locations successfully saved. Added ' . $count_added . ', updated ' . $count_updated . '.', $debug_file);
-
-        return array(
-            'status' => 'OK',
-            'msg' => '',
-            'added' => $count_added,
-            'updated' => $count_updated,
-        );
+        Helper::delete_hrx_option('countries');
     }
 
     private static function move_locations_to_active( $type, $get_from = 0, $get_per_page = false )
@@ -335,12 +288,7 @@ class LocationsDelivery
             );
         }
 
-        if ( $result['status'] == 'OK' ) {
-            $current_time = current_time("Y-m-d H:i:s");
-            Helper::update_hrx_option(self::get_option_name('last_sync_' . $type), $current_time);
-        }
-
-        Helper::delete_hrx_option('countries');
+        self::finish_locations_update($type);
 
         return $result;
     }

@@ -134,6 +134,7 @@ class Ajax
         }
 
         if ( $action_parts[0] == 'couriers' && $action_parts[1] == 'got' ) {
+            LocationsDelivery::finish_locations_update('courier');
             echo json_encode(array(
                 'status' => 'OK',
                 'next_action' => 'couriers_save',
@@ -223,6 +224,7 @@ class Ajax
         }
 
         if ( $action_parts[0] == 'finish' ) {
+            LocationsDelivery::finish_locations_update('terminal');
             echo json_encode(array(
                 'status' => 'OK',
                 'next_action' => 'finish',
