@@ -150,23 +150,47 @@ class Cronjob
 
     public function job_update_delivery_locs()
     {
-        Helper::update_hrx_option('cron_progress_delivery_locs', current_time("Y-m-d H:i:s"));
-        $status = LocationsDelivery::update_couriers();
-        if ( $status['status'] == 'OK' ) {
-            $debug_msg = 'Successfully updated courier delivery locations. Added ' . $status['added'] . ', updated ' . $status['updated'] . ', failed ' . $status['failed'];
-        } else {
-            $debug_msg = 'Failed to update courier delivery locations. Error: ' . $status['msg'];
-        }
-        Debug::to_log($debug_msg, 'cronjob', true);
+        try {
+            Helper::update_hrx_option('cron_progress_delivery_locs', current_time("Y-m-d H:i:s"));
+            $status = LocationsDelivery::update_couriers();
+            if ( $status['status'] == 'OK' ) {
+                $debug_msg = 'Successfully updated courier delivery locations. Added ' . $status['added'] . ', updated ' . $status['updated'] . ', failed ' . $status['failed'];
+            } else {
+                $debug_msg = 'Failed to update courier delivery locations. Error: ' . $status['msg'];
+            }
+            Debug::to_log($debug_msg, 'cronjob', true);
 
-        $status = LocationsDelivery::update(false);
-        if ( $status['status'] == 'OK' ) {
-            $debug_msg = 'Successfully updated terminal delivery locations. Added ' . $status['added'] . ', updated ' . $status['updated'] . ', failed ' . $status['failed'];
-        } else {
-            $debug_msg = 'Failed to update terminal delivery locations. Error: ' . $status['msg'];
+            $status = LocationsDelivery::update(false);
+            if ( $status['status'] == 'OK' ) {
+                $type = 'terminal';
+                $total_downloaded_locations = LocationsDelivery::calc_downloaded_locations($type);
+                $total_pages = ceil((int)$total_downloaded_locations / (int)LocationsDelivery::$save_per_page);
+                $debug_msg = 'Successfully donwloaded terminal delivery locations. Total ' . $total_downloaded_locations . ' in ' . $total_pages . ' pages';
+                Debug::to_log($debug_msg, 'cronjob', true);
+                $total_added = 0;
+                $total_updated = 0;
+                for ( $i = 1; $i <= $total_pages; $i++ ) {
+                    sleep(5);
+                    set_time_limit(30);
+                    $result = LocationsDelivery::save_downloaded_locations($type, $i);
+                    if ( $result['status'] == 'OK' ) {
+                        $total_added += $result['added'];
+                        $total_updated += $result['updated'];
+                    } else {
+                        $debug_msg = 'Error when saving terminal delivery locations: ' . $result['msg'];
+                        Debug::to_log($debug_msg, 'cronjob', true);
+                    }
+                }
+                Helper::delete_hrx_option('countries');
+                $debug_msg = 'Successfully updated terminal delivery locations. Total ' . $status['total'] . ', failed ' . $status['failed'] . ', added ' . $total_added . ', updated ' . $total_updated;
+            } else {
+                $debug_msg = 'Failed to update terminal delivery locations. Error: ' . $status['msg'];
+            }
+            Debug::to_log($debug_msg, 'cronjob', true);
+            Helper::delete_hrx_option('cron_progress_delivery_locs');
+        } catch (\Exception $e) {
+            $debug_msg = 'Exception has occurred. Error: ' . $e->getMessage();
         }
-        Debug::to_log($debug_msg, 'cronjob', true);
-        Helper::delete_hrx_option('cron_progress_delivery_locs');
     }
 
     public function job_test()

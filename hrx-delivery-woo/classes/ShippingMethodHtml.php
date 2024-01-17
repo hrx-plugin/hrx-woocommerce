@@ -113,12 +113,13 @@ class ShippingMethodHtml
                     <button type="button" id="<?php echo esc_html($id); ?>_button" class="button button-primary" value="<?php echo esc_html($action); ?>">
                         <?php echo esc_html($label); ?>
                     </button>
-                    <span class="action-txt-title"><?php echo $message; ?></span>
-                    <?php $span_class = ($need_repeat || $span_class == 'old') ? 'value-old' : ''; ?>
-                    <?php $span_class = (empty($value) || $span_class == 'empty') ? 'value-empty' : $span_class; ?>
-                    <?php $span_id = esc_html($id) . '_span'; ?>
-                    <?php $span_content = (empty($value)) ? $default : $value; ?>
-                    <span id="<?php echo $span_id; ?>" class="action-txt-value <?php echo $span_class; ?>"><?php echo $span_content; ?></span>
+                            <span class="action-txt-title"><?php echo $message; ?></span>
+                            <?php $span_class = ($need_repeat || $span_class == 'old') ? 'value-old' : ''; ?>
+                            <?php $span_class = (empty($value) || $span_class == 'empty') ? 'value-empty' : $span_class; ?>
+                            <?php $span_id = esc_html($id) . '_span'; ?>
+                            <?php $span_content = (empty($value)) ? $default : $value; ?>
+                            <span id="<?php echo $span_id; ?>" class="action-txt-value <?php echo $span_class; ?>"><?php echo $span_content; ?></span>
+                    <div class="action-txt-container"></div>
                     <?php if ( ! empty($params['description']) ) : ?>
                         <p class="description"><?php echo $params['description']; ?></p>
                     <?php endif; ?>

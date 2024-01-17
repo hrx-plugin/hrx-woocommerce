@@ -110,9 +110,11 @@ class PluginUpdate
         update_option($this->option_names['version'], $version);
     }
 
+    /*** Plugin updates ***/
     private function update_1_1_1_0()
     {
         $version = $this->get_version_from_method_name(__FUNCTION__);
+        
         try {
             if ( Sql::if_table_exists('delivery') ) { //Temporary fix to avoid error when installing plugin first time. Need find better solution
                 $result = Sql::add_new_column('delivery', 'type', "VARCHAR(20) COMMENT 'Location type'");
@@ -121,6 +123,22 @@ class PluginUpdate
                 }
             }
         } catch( Exception $e ) {
+            throw new Exception(sprintf(__('Error when executing update %1$s. Error: %2$s.','hrx-delivery'), $version, $e->getMessage()));
+        }
+
+        $this->mark_version_updated($version);
+        return true;
+    }
+
+    private function update_1_2_6_0()
+    {
+        $version = $this->get_version_from_method_name(__FUNCTION__);
+
+        try {
+            if ( ! Sql::if_table_exists('delivery_temp') ) {
+                Sql::create_tables();
+            }
+        }  catch( Exception $e ) {
             throw new Exception(sprintf(__('Error when executing update %1$s. Error: %2$s.','hrx-delivery'), $version, $e->getMessage()));
         }
 

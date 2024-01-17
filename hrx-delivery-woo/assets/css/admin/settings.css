@@ -61,6 +61,17 @@
 .woocommerce table.hrx-settings .button-action .action-txt-value.value-progress {
     color: blue;
 }
+.woocommerce table.hrx-settings .button-action .action-txt-container {
+    max-height: 110px;
+    overflow: auto;
+    margin: 10px 0;
+}
+.woocommerce table.hrx-settings .button-action .action-txt-row span {
+    color: #999;
+}
+.woocommerce table.hrx-settings .button-action .action-txt-row .action-txt-title {
+    margin-right: 5px;
+}
 .woocommerce table.hrx-settings tr textarea.textarea-static {
     width: 400px;
     resize: none;

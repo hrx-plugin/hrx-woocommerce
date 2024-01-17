@@ -84,35 +84,147 @@ class Ajax
      */
     public static function admin_btn_update_delivery_locations()
     {
-        $max_in_page = 10000;
+        $action = (! empty($_POST['command'])) ? esc_attr($_POST['command']) : 'failed';
 
-        $page = (int)esc_attr($_POST['page']);
-        if ( $page < 0 ) $page = 0;
+        $action_parts = explode('_', $action);
 
-        $total_couriers = 0;
-        if ( $page == 0 ) {
-            $result = LocationsDelivery::update_couriers();
-
-            $current_time = current_time("Y-m-d H:i:s");
-            $output = self::get_location_result_output($result, $current_time);
-            $output['repeat'] = true;
-            $output['total'] = $result['total'];
-            echo json_encode($output);
+        if ( $action_parts[0] == 'failed' ) {
+            echo json_encode(array(
+                'status' => 'error',
+                'next_action' => 'failed',
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => __('Failed to get command', 'hrx-delivery'),
+                'repeat' => false,
+            ));
             wp_die();
         }
-        
-        $result = LocationsDelivery::update($page);
 
-        $current_time = current_time("Y-m-d H:i:s");
-        $output = self::get_location_result_output($result, $current_time);
-        $output['repeat'] = false;
-        $output['total'] = $result['added'] + $result['updated'];
-
-        if ( $result['total'] >= $max_in_page ) {
-            $output['repeat'] = true;
+        if ( $action_parts[0] == 'init' ) {
+            echo json_encode(array(
+                'status' => 'OK',
+                'next_action' => 'couriers_get',
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => __('Downloading courier locations...', 'hrx-delivery') . ' 0',
+                'repeat' => true,
+            ));
+            wp_die();
         }
 
-        echo json_encode($output);
+        $total_couriers = 0;
+        if ( $action_parts[0] == 'couriers' && $action_parts[1] == 'get' ) {
+            $result = LocationsDelivery::update_couriers();
+
+            echo json_encode(array(
+                'status' => $result['status'],
+                'next_action' => 'couriers_got',
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => (! empty($result['msg'])) ? $result['msg'] : __('Downloading courier locations...', 'hrx-delivery'),
+                'total' => $result['total'],
+                'repeat' => true,
+            ));
+            wp_die();
+        }
+
+        if ( $action_parts[0] == 'couriers' && $action_parts[1] == 'got' ) {
+            echo json_encode(array(
+                'status' => 'OK',
+                'next_action' => 'couriers_save',
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => __('Saving courier locations...', 'hrx-delivery') . ' 100%',
+                'repeat' => true
+            ));
+            wp_die();
+        }
+
+        if ( $action_parts[0] == 'couriers' && $action_parts[1] == 'save' ) {
+            echo json_encode(array(
+                'status' => 'OK',
+                'next_action' => 'terminals_get',
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => __('Downloading parcel terminal locations...', 'hrx-delivery') . ' 0',
+                'repeat' => true
+            ));
+            wp_die();
+        }
+
+        if ( $action_parts[0] == 'terminals' && $action_parts[1] == 'get' ) {
+            $page = $action_parts[2] ?? 1;
+            $result = LocationsDelivery::update($page);
+
+            $next_action = ($result['total'] < LocationsDelivery::$download_per_page) ? 'terminals_got' : 'terminals_get_' . ($page + 1);
+            echo json_encode(array(
+                'status' => $result['status'],
+                'next_action' => $next_action,
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => (! empty($result['msg'])) ? $result['msg'] : __('Downloading parcel terminal locations...', 'hrx-delivery'),
+                'total' => $result['total'] - $result['failed'],
+                'repeat' => true,
+            ));
+            wp_die();
+        }
+
+        if ( $action_parts[0] == 'terminals' && $action_parts[1] == 'got' ) {
+            $result = LocationsDelivery::prepare_locations_save('terminal');
+
+            echo json_encode(array(
+                'status' => $result['status'],
+                'next_action' => 'terminals_save',
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => (! empty($result['msg'])) ? $result['msg'] : __('Saving parcel terminal locations...', 'hrx-delivery') . ' 0%',
+                'repeat' => true
+            ));
+            wp_die();
+        }
+
+        if ( $action_parts[0] == 'terminals' && $action_parts[1] == 'save' ) {
+            $page = $action_parts[2] ?? 1;
+            $type = 'terminal';
+            $total_locations = LocationsDelivery::calc_downloaded_locations($type);
+            $result = LocationsDelivery::save_downloaded_locations($type, $page);
+            
+            $total_saved = LocationsDelivery::$save_per_page * ($page - 1);
+            $total_saved += $result['added'] + $result['updated'];
+            $percent = $total_saved / $total_locations * 100;
+
+            if ( LocationsDelivery::$save_per_page * $page > $total_locations ) {
+                echo json_encode(array(
+                    'status' => 'OK',
+                    'next_action' => 'finish',
+                    'time' => current_time("Y-m-d H:i:s"),
+                    'msg' => __('Saving parcel terminal locations...', 'hrx-delivery') . ' 100%',
+                    'repeat' => true,
+                ));
+                wp_die();
+            }
+
+            echo json_encode(array(
+                'status' => $result['status'],
+                'next_action' => 'terminals_save_' . ($page + 1),
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => (! empty($result['msg'])) ? $result['msg'] : __('Saving parcel terminal locations...', 'hrx-delivery') . ' ' . number_format((float) $percent, 2, '.', '') . '%',
+                'repeat' => true,
+            ));
+            wp_die();
+        }
+
+        if ( $action_parts[0] == 'finish' ) {
+            echo json_encode(array(
+                'status' => 'OK',
+                'next_action' => 'finish',
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => __('The locations update is complete', 'hrx-delivery'),
+                'repeat' => false,
+            ));
+            wp_die();
+        }
+
+        echo json_encode(array(
+            'status' => 'error',
+            'next_action' => 'failed',
+            'time' => current_time("Y-m-d H:i:s"),
+            'msg' => __('Neither command was suitable', 'hrx-delivery'),
+            'repeat' => false
+        ));
         wp_die();
     }
 
@@ -128,6 +240,8 @@ class Ajax
 
         $current_time = current_time("Y-m-d H:i:s");
         $output = self::get_location_result_output($result, $current_time);
+        $output['action'] = 'finish';
+        $output['msg'] = sprintf(__('The update is complete in %s', 'hrx-delivery'), $current_time);
 
         echo json_encode($output);
         wp_die();
@@ -143,30 +257,23 @@ class Ajax
      */
     private static function get_location_result_output( $result, $current_time )
     {
-        $output = array();
+        $output = array(
+            'status' => 'error',
+            'action' => '',
+            'msg' => '',
+        );
 
         if ( $result['status'] == 'error' ) {
-            $output['status'] = 'error';
             $msg = __('Request error', 'hrx-delivery') . ' - ' . $result['msg'];
             if ( ! empty($result['added']) || ! empty($result['updated']) ) {
                 $msg = $current_time . '. ' . $msg;
             }
-            $output['msg'] = $msg;
             Debug::to_log($result, 'locations');
         } else {
-            $msg = sprintf(__('The update is complete in %s', 'hrx-delivery'), $current_time);
-            /*if ( $result['added'] > 0 ) {
-                $msg .= '. ' . __('Total added', 'hrx-delivery') . ': ' . $result['added'];
-            }
-            if ( $result['updated'] > 0 ) {
-                $msg .= '. ' . __('Total updated', 'hrx-delivery') . ': ' . $result['updated'];
-            }
-            if ( $result['errors'] > 0 ) {
-                $msg .= '. ' . __('Total errors', 'hrx-delivery') . ': ' . $result['errors'];
-            }*/
             $output['status'] = 'OK';
-            $output['msg'] = $msg;
         }
+
+        $output['msg'] = $msg;
 
         return $output;
     }
