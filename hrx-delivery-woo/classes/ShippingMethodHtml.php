@@ -151,7 +151,7 @@ class ShippingMethodHtml
         $fields = array(
             'width' => array('title' => __('Width', 'hrx-delivery'), 'unit' => 'x'),
             'height' => array('title' => __('Height', 'hrx-delivery'), 'unit' => 'x'),
-            'lenght' => array('title' => __('Lenght', 'hrx-delivery'), 'unit' => $units->dimension),
+            'lenght' => array('title' => __('Length', 'hrx-delivery'), 'unit' => $units->dimension),
             'weight' => array('title' => __('Weight', 'hrx-delivery'), 'unit' => $units->weight),
         );
 

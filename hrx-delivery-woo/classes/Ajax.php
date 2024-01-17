@@ -114,14 +114,22 @@ class Ajax
         if ( $action_parts[0] == 'couriers' && $action_parts[1] == 'get' ) {
             $result = LocationsDelivery::update_couriers();
 
-            echo json_encode(array(
+            $output = array(
                 'status' => $result['status'],
-                'next_action' => 'couriers_got',
+                'next_action' => 'error',
                 'time' => current_time("Y-m-d H:i:s"),
                 'msg' => (! empty($result['msg'])) ? $result['msg'] : __('Downloading courier locations...', 'hrx-delivery'),
-                'total' => $result['total'],
-                'repeat' => true,
-            ));
+                'total' => 0,
+                'repeat' => false,
+            );
+
+            if ( $result['status'] == 'OK' ) {
+                $output['next_action'] = 'couriers_got';
+                $output['total'] = $result['total'];
+                $output['repeat'] = true;
+            }
+
+            echo json_encode($output);
             wp_die();
         }
 
@@ -151,15 +159,22 @@ class Ajax
             $page = $action_parts[2] ?? 1;
             $result = LocationsDelivery::update($page);
 
-            $next_action = ($result['total'] < LocationsDelivery::$download_per_page) ? 'terminals_got' : 'terminals_get_' . ($page + 1);
-            echo json_encode(array(
+            $output = array(
                 'status' => $result['status'],
-                'next_action' => $next_action,
+                'next_action' => 'error',
                 'time' => current_time("Y-m-d H:i:s"),
                 'msg' => (! empty($result['msg'])) ? $result['msg'] : __('Downloading parcel terminal locations...', 'hrx-delivery'),
-                'total' => $result['total'] - $result['failed'],
-                'repeat' => true,
-            ));
+                'total' => 0,
+                'repeat' => false,
+            );
+            if ( $result['status'] == 'OK' ) {
+                $next_action = ($result['total'] < LocationsDelivery::$download_per_page) ? 'terminals_got' : 'terminals_get_' . ($page + 1);
+                $output['next_action'] = $next_action;
+                $output['total'] = $result['total'] - $result['failed'];
+                $output['repeat'] = true;
+            }
+
+            echo json_encode($output);
             wp_die();
         }
 

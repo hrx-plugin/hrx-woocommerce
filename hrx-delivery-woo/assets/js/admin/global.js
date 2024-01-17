@@ -251,6 +251,16 @@
                 success: function( response ) {
                     //console.log(response);
                     let output_container = $(output_to).siblings(".action-txt-container");
+                    let output_string = hrxGlobalVars.txt.locations_progress;
+                    let output_time = '';
+                    
+                    if ( response.msg ) {
+                        output_string = response.msg;
+                    }
+                    if ( response.time ) {
+                        output_time = response.time;
+                    }
+
                     if ( response.repeat ) {
                         if ( response.next_action ) {
                             command = response.next_action;
@@ -259,7 +269,6 @@
                             hrxAjax.send_button_action(action, command, button, output_to);
                         }, 100);
                         if ( output_to ) {
-                            let output_string = hrxGlobalVars.txt.locations_progress;
                             if ( response.msg ) {
                                 output_string = response.msg;
                             }
@@ -269,11 +278,12 @@
                             } else {
                                 hrxAjax.counter = 0;
                             }
-                            $(output_to).html(output_string);
-                            hrxHelper.add_action_txt_row(output_container, response.time, output_string);
                         }
                     } else {
                         if ( output_to ) {
+                            if ( ! response.msg ) {
+                                output_string = hrxGlobalVars.txt.error;
+                            }
                             $(output_to).removeClass("value-empty");
                             $(output_to).removeClass("value-old");
                             $(output_to).removeClass("value-progress");
@@ -281,11 +291,14 @@
                             if ( response.status == "error" ) {
                                 $(output_to).addClass("value-empty");
                             }
-                            
-                            $(output_to).html(response.msg);
                         }
                         button.removeClass("hrx-loading").prop("disabled", false);
                         hrxAjax.counter = 0;
+                    }
+
+                    if ( output_to ) {
+                        $(output_to).html(output_string);
+                        hrxHelper.add_action_txt_row(output_container, output_time, output_string);
                     }
                 },
                 error: function( xhr, status, error ) {
