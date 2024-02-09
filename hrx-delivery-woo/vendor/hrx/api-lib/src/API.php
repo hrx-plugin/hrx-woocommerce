@@ -32,8 +32,8 @@ class API
         $this->setDebug($api_debug_mode);
         $this->setTestMode($test_mode);
 
-        $this->setTestUrl("https://woptest.hrx.eu/api/v1/");
-        $this->setLiveUrl("https://wop.hrx.eu/api/v1/");
+        $this->setTestUrl("https://woptest.hrx.eu");
+        $this->setLiveUrl("https://wop.hrx.eu");
     }
 
     /**
@@ -193,7 +193,7 @@ class API
      */
     public function getPickupLocations( $page = 1, $per_page = 100 )
     {
-        return $this->callApi($this->getUrl('pickup_locations'), array(), array(
+        return $this->callApi($this->getUrl('/api/v1/pickup_locations'), array(), array(
             'page' => $page,
             'per_page' => $per_page
         ));
@@ -209,9 +209,25 @@ class API
      */
     public function getDeliveryLocations( $page = 1, $per_page = 100 )
     {
-        return $this->callApi($this->getUrl('delivery_locations'), array(), array(
+        return $this->callApi($this->getUrl('/api/v1/delivery_locations'), array(), array(
             'page' => $page,
             'per_page' => $per_page
+        ));
+    }
+
+    public function getDeliveryLocationsCountries()
+    {
+        return $this->callApi($this->getUrl('/api/v2/delivery_locations'));
+    }
+
+    public function getDeliveryLocationsForCountry( $country, $page = 1, $endpoint = '' )
+    {
+        if ( empty($endpoint) ) {
+            $endpoint = '/api/v2/delivery_locations/' . $country;
+        }
+
+        return $this->callApi($this->getUrl($endpoint), array(), array(
+            'page' => $page,
         ));
     }
 
@@ -223,7 +239,7 @@ class API
      */
     public function getCourierDeliveryLocations()
     {
-        return $this->callApi($this->getUrl('courier_delivery_locations'));
+        return $this->callApi($this->getUrl('/api/v1/courier_delivery_locations'));
     }
 
     /**
@@ -235,7 +251,7 @@ class API
      */
     public function generateOrder( $order_data )
     {
-        return $this->callApi($this->getUrl('orders'), $order_data);
+        return $this->callApi($this->getUrl('/api/v1/orders'), $order_data);
     }
 
     /**
@@ -248,7 +264,7 @@ class API
      */
     public function getOrders( $page = 1, $per_page = 100 )
     {
-        return $this->callApi($this->getUrl('orders'), array(), array(
+        return $this->callApi($this->getUrl('/api/v1/orders'), array(), array(
             'page' => $page,
             'per_page' => $per_page
         ));
@@ -263,7 +279,7 @@ class API
      */
     public function getOrder( $order_id )
     {
-        return $this->callApi($this->getUrl('orders/' . $order_id));
+        return $this->callApi($this->getUrl('/api/v1/orders/' . $order_id));
     }
 
     /**
@@ -276,7 +292,7 @@ class API
      */
     public function changeOrderReadyState( $order_id, $is_ready )
     {
-        return $this->callApi($this->getUrl('orders/' . $order_id . '/update_ready_state'), array('id' => $order_id, 'ready' => $is_ready));
+        return $this->callApi($this->getUrl('/api/v1/orders/' . $order_id . '/update_ready_state'), array('id' => $order_id, 'ready' => $is_ready));
     }
 
     /**
@@ -288,7 +304,7 @@ class API
      */
     public function cancelOrder( $order_id )
     {
-        return $this->callApi($this->getUrl('orders/' . $order_id .  '/cancel'), array('id' => $order_id));
+        return $this->callApi($this->getUrl('/api/v1/orders/' . $order_id .  '/cancel'), array('id' => $order_id));
     }
 
     /**
@@ -300,7 +316,7 @@ class API
      */
     public function getLabel( $order_id )
     {
-        return $this->callApi($this->getUrl('orders/' . $order_id . '/label'));
+        return $this->callApi($this->getUrl('/api/v1/orders/' . $order_id . '/label'));
     }
 
     /**
@@ -312,7 +328,7 @@ class API
      */
     public function getReturnLabel( $order_id )
     {
-        return $this->callApi($this->getUrl('orders/' . $order_id . '/return_label'));
+        return $this->callApi($this->getUrl('/api/v1/orders/' . $order_id . '/return_label'));
     }
 
     /**
@@ -324,7 +340,7 @@ class API
      */
     public function getTrackingEvents( $order_id )
     {
-        return $this->callApi($this->getUrl('orders/' . $order_id . '/tracking'));
+        return $this->callApi($this->getUrl('/api/v1/orders/' . $order_id . '/tracking'));
     }
 
     /**
@@ -336,7 +352,7 @@ class API
      */
     public function getTrackingInformation( $tracking_number )
     {
-        return $this->callApi($this->getUrl('public/orders/' . $tracking_number), array(), array(), false);
+        return $this->callApi($this->getUrl('/api/v1/public/orders/' . $tracking_number), array(), array(), false);
     }
 
     /**
@@ -391,7 +407,7 @@ class API
             'Response error' => $errorMsg,
         ));
 
-        if ( $retry < 5 && $errorNo == 56 ) {
+        if ( $retry < 5 && ($errorNo == 56 || ($httpCode != 200 && $httpCode != 201)) ) {
             return $this->callApi($url, $data, $url_params, $use_token, $retry + 1);
         }
 

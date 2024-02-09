@@ -22,6 +22,7 @@ class LocationsDelivery
         $all_options = array(
             'last_sync_terminal' => 'last_sync_delivery_loc_terminal',
             'last_sync_courier' => 'last_sync_delivery_loc_courier',
+            'terminals_countries' => 'terminal_countries_endpoints',
         );
 
         return $all_options[$option_key] ?? $option_key;
@@ -54,16 +55,59 @@ class LocationsDelivery
         return Sql::get_multi_rows('delivery', $params);
     }
 
-    public static function update( $page )
+    public static function get_delivery_locations_countries()
+    {
+        $debug = Debug::is_enabled();
+        $debug_file = 'locations_update_terminals';
+
+        $api = new Api();
+        $response = $api->get_delivery_locations_countries();
+
+        $status = array(
+            'status' => 'OK',
+            'msg' => '',
+        );
+
+        if ( $response['status'] != 'error' ) {
+            Helper::update_hrx_option(self::get_option_name('terminals_countries'), $response['data']);
+            $status['countries'] = $response['data'];
+
+            return $status;
+        }
+
+        if ($debug) {
+            Debug::to_log('Failed. Error: ' . $response['msg'] . PHP_EOL . 'Response: ' . PHP_EOL . print_r($response['debug'], true), $debug_file);
+        }
+
+        return array(
+            'status' => 'error',
+            'msg' => $response['msg']
+        );
+    }
+
+    public static function update( $page, $country )
     {
         $type = 'terminal';
-        if ( $page === false || $page === 1 ) {
+
+        $all_countries = Helper::get_hrx_option(self::get_option_name('terminals_countries'));
+        if ( empty($all_countries) ) {
+            return array(
+                'status' => 'error',
+                'msg' => __('Failed to get parcel terminals countries', 'hrx-delivery'),
+            );
+        }
+        if ( empty($country) ) {
+            $country = array_key_first($all_countries);
+        }
+        $endpoint = $all_countries[$country] ?? '';
+
+        if ( ($page === false || $page === 1) && $country == array_key_first($all_countries) ) {
             Sql::clear_table('delivery_temp');
         }
 
         try {
             $start_page = ($page === false ) ? 1 : $page;
-            $result = self::save_delivery_locations($type, $start_page, ($page === false));
+            $result = self::save_delivery_locations($type, $start_page, $country, $endpoint, ($page === false));
         } catch (\Exception $e) {
             $result = array(
                 'status' => 'error',
@@ -74,14 +118,14 @@ class LocationsDelivery
         return $result;
     }
 
-    private static function save_delivery_locations( $type, $page, $self_repeat = false, $protector = 1 )
+    private static function save_delivery_locations( $type, $page, $country, $endpoint, $self_repeat = false, $protector = 1 )
     {
         $max_cycles = 1000;
 
         $debug = Debug::is_enabled();
         $debug_file = 'locations_update_terminals';
 
-        if ($debug) Debug::to_log('Executing update (page ' . $page . ')...', $debug_file);
+        if ($debug) Debug::to_log('Executing update (' . $country . '-' . $page . ')...', $debug_file);
 
         if ( $protector > $max_cycles ) {
             if ($debug) Debug::to_log('Max number of cycles (' . $protector . ' > ' . $max_cycles . ')', $debug_file);
@@ -92,7 +136,7 @@ class LocationsDelivery
         }
 
         $api = new Api();
-        $response = $api->get_delivery_locations($page, self::$download_per_page);
+        $response = $api->get_delivery_locations_for_country($country, $page, $endpoint);
         $status = array(
             'status' => 'OK',
             'total' => 0,
@@ -145,7 +189,7 @@ class LocationsDelivery
             if ( $self_repeat && count($response['data']) >= self::$download_per_page ) {
                 $response = NULL; // Frees up memory as this variable will no longer be needed (fixed memory leak)
                 sleep(1);
-                $next_page = self::save_delivery_locations($type, $page + 1, $self_repeat, $protector + 1);
+                $next_page = self::save_delivery_locations($type, $page + 1, $country, $endpoint, $self_repeat, $protector + 1);
                 if ( $next_page['status'] == 'error' ) {
                     $status['status'] = 'error';
                     $status['msg'] = $next_page['msg'];

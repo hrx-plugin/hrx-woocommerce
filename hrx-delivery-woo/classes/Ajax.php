@@ -148,17 +148,16 @@ class Ajax
         if ( $action_parts[0] == 'couriers' && $action_parts[1] == 'save' ) {
             echo json_encode(array(
                 'status' => 'OK',
-                'next_action' => 'terminals_get',
+                'next_action' => 'terminals_countries',
                 'time' => current_time("Y-m-d H:i:s"),
-                'msg' => __('Downloading parcel terminal locations...', 'hrx-delivery') . ' 0',
+                'msg' => __('Getting available countries of parcel terminals...', 'hrx-delivery'),
                 'repeat' => true
             ));
             wp_die();
         }
 
-        if ( $action_parts[0] == 'terminals' && $action_parts[1] == 'get' ) {
-            $page = $action_parts[2] ?? 1;
-            $result = LocationsDelivery::update($page);
+        if ( $action_parts[0] == 'terminals' && $action_parts[1] == 'countries' ) {
+            $result = LocationsDelivery::get_delivery_locations_countries();
 
             $output = array(
                 'status' => $result['status'],
@@ -166,10 +165,59 @@ class Ajax
                 'time' => current_time("Y-m-d H:i:s"),
                 'msg' => (! empty($result['msg'])) ? $result['msg'] : __('Downloading parcel terminal locations...', 'hrx-delivery'),
                 'total' => 0,
+                'repeat' => false
+            );
+
+            if ( $result['status'] == 'OK' ) {
+                $output['next_action'] = 'terminals_get';
+                $output['repeat'] = true;
+            }
+
+            echo json_encode($output);
+            wp_die();
+        }
+
+        if ( $action_parts[0] == 'terminals' && $action_parts[1] == 'get' ) {
+            $country = $action_parts[2] ?? '';
+            $page = $action_parts[3] ?? 1;
+            
+            $all_countries = Helper::get_hrx_option(LocationsDelivery::get_option_name('terminals_countries'));
+            if ( empty($all_countries) ) {
+                echo json_encode(array(
+                    'status' => 'error',
+                    'next_action' => 'error',
+                    'time' => current_time("Y-m-d H:i:s"),
+                    'msg' => __('Failed to get parcel terminals countries', 'hrx-delivery'),
+                    'repeat' => false
+                ));
+                wp_die();
+            }
+
+            if ( empty($country) ) {
+                $country = array_key_first($all_countries);
+            }
+
+            $result = LocationsDelivery::update($page, $country);
+
+            $output = array(
+                'status' => $result['status'],
+                'next_action' => 'error',
+                'time' => current_time("Y-m-d H:i:s"),
+                'msg' => (! empty($result['msg'])) ? $result['msg'] : sprintf(__('Downloading parcel terminal locations for country %s...', 'hrx-delivery'), $country),
+                'total' => 0,
                 'repeat' => false,
             );
             if ( $result['status'] == 'OK' ) {
-                $next_action = ($result['total'] < LocationsDelivery::$download_per_page) ? 'terminals_got' : 'terminals_get_' . ($page + 1);
+                $next_action = 'terminals_get_' . $country . '_' . ($page + 1);
+                if ( $result['total'] < LocationsDelivery::$download_per_page ) {
+                    $next_country = Helper::get_next_key_in_array($all_countries, $country);
+                    if ( ! empty($next_country) ) {
+                        $next_action = 'terminals_get_' . $next_country;
+                    } else {
+                        $next_action = 'terminals_got';
+                    }
+                }
+
                 $output['next_action'] = $next_action;
                 $output['total'] = $result['total'] - $result['failed'];
                 $output['repeat'] = true;

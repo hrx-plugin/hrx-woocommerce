@@ -272,9 +272,14 @@
                             if ( response.msg ) {
                                 output_string = response.msg;
                             }
-                            if ( response.total ) {
-                                hrxAjax.counter = hrxAjax.counter + response.total;
+                            if ( 'total' in response ) {
+                                if ( response.total > 0 ) {
+                                    hrxAjax.counter = hrxAjax.counter + response.total;
+                                }
                                 output_string += " " + hrxAjax.counter;
+                                if ( response.total < 10000 ) {
+                                    hrxAjax.counter = 0;
+                                }
                             } else {
                                 hrxAjax.counter = 0;
                             }
