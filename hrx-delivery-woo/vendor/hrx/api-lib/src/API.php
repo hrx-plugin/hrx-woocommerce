@@ -215,11 +215,26 @@ class API
         ));
     }
 
+    /**
+     * Get countries of terminal delivery locations
+     * @since 1.0.6
+     * 
+     * @return (array) - List of countries to which terminal shipping is available
+     */
     public function getDeliveryLocationsCountries()
     {
         return $this->callApi($this->getUrl('/api/v2/delivery_locations'));
     }
 
+    /**
+     * Get delivery locations of the country terminals
+     * @since 1.0.6
+     * 
+     * @param (string) $country - Country code (e.g. DE)
+     * @param (integer) $page - Locations page number
+     * @param (string) $endpoint - If want to use the API request endpoint received with the list of countries
+     * @return (array) - One page of locations
+     */
     public function getDeliveryLocationsForCountry( $country, $page = 1, $endpoint = '' )
     {
         if ( empty($endpoint) ) {
