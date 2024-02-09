@@ -53,6 +53,50 @@ class Api
         return $output;
     }
 
+    public function get_delivery_locations_countries()
+    {
+        $output = $this->prepare_output();
+        $countries = array();
+
+        try {
+            $api = $this->load_api();
+            $api_countries = $api->getDeliveryLocationsCountries();
+            if ( ! is_array($api_countries) ) {
+                throw new Exception(__('Failed to get list of countries', 'hrx-delivery'));
+            }
+            foreach ( $api_countries as $country ) {
+                $countries[$country['country']] = $country['links']['locations'];
+            }
+            $output['data'] = $countries;
+        } catch (\Exception $e) {
+            $output['status'] = 'error';
+            $output['msg'] = $this->convert_error_msg($e->getMessage());
+            if ( isset($api) && $this->config->debug ) {
+                $output['debug'] = $api->getDebugData();
+            }
+        }
+
+        return $output;
+    }
+
+    public function get_delivery_locations_for_country( $country, $page = 1, $endpoint = '' )
+    {
+        $output = $this->prepare_output();
+
+        try {
+            $api = $this->load_api();
+            $output['data'] = $api->getDeliveryLocationsForCountry($country, $page, $endpoint);
+        } catch (\Exception $e) {
+            $output['status'] = 'error';
+            $output['msg'] = $this->convert_error_msg($e->getMessage());
+            if ( isset($api) && $this->config->debug ) {
+                $output['debug'] = $api->getDebugData();
+            }
+        }
+
+        return $output;
+    }
+
     public function get_courier_delivery_locations()
     {
         $output = $this->prepare_output();

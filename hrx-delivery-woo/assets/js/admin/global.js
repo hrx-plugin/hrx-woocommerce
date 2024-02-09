@@ -106,6 +106,36 @@
                     interval = null;
                 }
             }, delay);
+        },
+
+        add_action_txt_row: function( container, title, text ) {
+            let all_rows = $(container).find(".action-txt-row");
+
+            let new_row = $("<div/>");
+            new_row.addClass("action-txt-row");
+
+            let new_title = $("<span/>");
+            new_title.addClass("action-txt-title");
+            new_title.html(title);
+            new_row.append(new_title);
+
+            let new_text = $("<span/>");
+            new_text.addClass("action-txt-value");
+            new_text.html(text);
+            new_row.append(new_text);
+
+            $(container).append(new_row);
+
+            let height = container[0].scrollHeight;
+            $(container).scrollTop(height);
+        },
+
+        reset_action_txt_row: function( container ) {
+            let all_rows = $(container).find(".action-txt-row");
+
+            for ( let i = 0; i < all_rows.length; i++ ) {
+                $(all_rows[i]).remove();
+            }
         }
     };
 
@@ -204,11 +234,11 @@
             }
 
             setTimeout(function (){
-                hrxAjax.send_button_action(action, 0, button, output_to, async);
+                hrxAjax.send_button_action(action, "init", button, output_to, async);
             }, 100);
         },
 
-        send_button_action: function(action, page, button, output_to = false, async = false) {
+        send_button_action: function(action, command, button, output_to = false, async = false) {
             $.ajax({
                 type: "POST",
                 url: hrxGlobalVars.ajax_url,
@@ -216,20 +246,49 @@
                 async: async,
                 data: {
                     action: "hrx_" + action,
-                    page: page
+                    command: command
                 },
                 success: function( response ) {
                     //console.log(response);
+                    let output_container = $(output_to).siblings(".action-txt-container");
+                    let output_string = hrxGlobalVars.txt.locations_progress;
+                    let output_time = '';
+                    
+                    if ( response.msg ) {
+                        output_string = response.msg;
+                    }
+                    if ( response.time ) {
+                        output_time = response.time;
+                    }
+
                     if ( response.repeat ) {
+                        if ( response.next_action ) {
+                            command = response.next_action;
+                        }
                         setTimeout(function (){
-                            hrxAjax.send_button_action(action, page + 1, button, output_to);
+                            hrxAjax.send_button_action(action, command, button, output_to);
                         }, 100);
                         if ( output_to ) {
-                            hrxAjax.counter = hrxAjax.counter + response.total;
-                            $(output_to).html(hrxGlobalVars.txt.locations_progress + "... " + hrxAjax.counter);
+                            if ( response.msg ) {
+                                output_string = response.msg;
+                            }
+                            if ( 'total' in response ) {
+                                if ( response.total > 0 ) {
+                                    hrxAjax.counter = hrxAjax.counter + response.total;
+                                }
+                                output_string += " " + hrxAjax.counter;
+                                if ( response.total < 10000 ) {
+                                    hrxAjax.counter = 0;
+                                }
+                            } else {
+                                hrxAjax.counter = 0;
+                            }
                         }
                     } else {
                         if ( output_to ) {
+                            if ( ! response.msg ) {
+                                output_string = hrxGlobalVars.txt.error;
+                            }
                             $(output_to).removeClass("value-empty");
                             $(output_to).removeClass("value-old");
                             $(output_to).removeClass("value-progress");
@@ -237,11 +296,14 @@
                             if ( response.status == "error" ) {
                                 $(output_to).addClass("value-empty");
                             }
-                            
-                            $(output_to).html(response.msg);
                         }
                         button.removeClass("hrx-loading").prop("disabled", false);
                         hrxAjax.counter = 0;
+                    }
+
+                    if ( output_to ) {
+                        $(output_to).html(output_string);
+                        hrxHelper.add_action_txt_row(output_container, output_time, output_string);
                     }
                 },
                 error: function( xhr, status, error ) {

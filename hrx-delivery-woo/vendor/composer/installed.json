@@ -1,24 +1,24 @@
 [
     {
         "name": "hrx/api-lib",
-        "version": "1.0.5",
-        "version_normalized": "1.0.5.0",
+        "version": "1.0.6",
+        "version_normalized": "1.0.6.0",
         "source": {
             "type": "git",
             "url": "https://github.com/hrx-plugin/hrx-api.git",
-            "reference": "6c505b75b3b07c56718a17eb4462638f34511ce1"
+            "reference": "622262c7d2892ddbaa878c4b26296765be9541e9"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/hrx-plugin/hrx-api/zipball/6c505b75b3b07c56718a17eb4462638f34511ce1",
-            "reference": "6c505b75b3b07c56718a17eb4462638f34511ce1",
+            "url": "https://api.github.com/repos/hrx-plugin/hrx-api/zipball/622262c7d2892ddbaa878c4b26296765be9541e9",
+            "reference": "622262c7d2892ddbaa878c4b26296765be9541e9",
             "shasum": ""
         },
         "require": {
             "ext-curl": "*",
             "ext-json": "*"
         },
-        "time": "2023-10-18T10:48:51+00:00",
+        "time": "2024-02-09T14:57:18+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -37,7 +37,7 @@
         ],
         "description": "Library for HRX Api",
         "support": {
-            "source": "https://github.com/hrx-plugin/hrx-api/tree/v1.0.5",
+            "source": "https://github.com/hrx-plugin/hrx-api/tree/v1.0.6",
             "issues": "https://github.com/hrx-plugin/hrx-api/issues"
         }
     },
@@ -88,17 +88,17 @@
     },
     {
         "name": "setasign/fpdi",
-        "version": "v2.5.0",
-        "version_normalized": "2.5.0.0",
+        "version": "v2.6.0",
+        "version_normalized": "2.6.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Setasign/FPDI.git",
-            "reference": "ecf0459643ec963febfb9a5d529dcd93656006a4"
+            "reference": "a6db878129ec6c7e141316ee71872923e7f1b7ad"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Setasign/FPDI/zipball/ecf0459643ec963febfb9a5d529dcd93656006a4",
-            "reference": "ecf0459643ec963febfb9a5d529dcd93656006a4",
+            "url": "https://api.github.com/repos/Setasign/FPDI/zipball/a6db878129ec6c7e141316ee71872923e7f1b7ad",
+            "reference": "a6db878129ec6c7e141316ee71872923e7f1b7ad",
             "shasum": ""
         },
         "require": {
@@ -110,15 +110,15 @@
         },
         "require-dev": {
             "phpunit/phpunit": "~5.7",
-            "setasign/fpdf": "~1.8",
-            "setasign/tfpdf": "~1.31",
+            "setasign/fpdf": "~1.8.6",
+            "setasign/tfpdf": "~1.33",
             "squizlabs/php_codesniffer": "^3.5",
             "tecnickcom/tcpdf": "~6.2"
         },
         "suggest": {
             "setasign/fpdf": "FPDI will extend this class but as it is also possible to use TCPDF or tFPDF as an alternative. There's no fixed dependency configured."
         },
-        "time": "2023-09-28T10:46:27+00:00",
+        "time": "2023-12-11T16:03:32+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

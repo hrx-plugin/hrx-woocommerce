@@ -126,6 +126,13 @@ class Helper
         return $array;
     }
 
+    public static function get_next_key_in_array( $array, $key )
+    {
+        $all_keys = array_keys($array);
+
+        return $all_keys[array_search($key, $all_keys) + 1];
+    }
+
     public static function method_has_terminals( $method_key )
     {
         $core = Core::get_instance();

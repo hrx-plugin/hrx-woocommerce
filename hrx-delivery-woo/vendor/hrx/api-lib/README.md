@@ -47,11 +47,24 @@ $api
     ->setLiveUrl($url_live); // If want change live endpoint
 ```
 
-## Getting locations
+## Getting locations (v1) - Deprecated
 
 ```php
 $pickup_locations = $api->getPickupLocations(1, 100); // Get pickup locations. First param - page number, second param - elements per page
 $delivery_locations = $api->getDeliveryLocations(1, 100); // Get delivery locations for terminals. First param - page number, second param - elements per page
+$courier_$delivery_locations = $api->getCourierDeliveryLocations(); // Get delivery locations for courier.
+```
+
+## Getting locations (v2)
+
+```php
+$pickup_locations = $api->getPickupLocations(1, 100); // Get pickup locations. First param - page number, second param - elements per page
+$delivery_locations_countries = $api->getDeliveryLocationsCountries(); // Get countries list of terminal delivery locations.
+foreach ( $delivery_locations_countries as $country ) {
+  $country_code = $country['country'];
+  $endpoint = $country['links']['locations'];
+  $delivery_locations = $api->get_delivery_locations_for_country($country_code, 1, $endpoint); // Get delivery locations of country terminals. First param - country code (eg LT), second page number, third endpoint from which to get country terminals (if want to use the endpoint received with the list of countries)
+}
 $courier_$delivery_locations = $api->getCourierDeliveryLocations(); // Get delivery locations for courier.
 ```
 
@@ -139,7 +152,7 @@ $api = new API();
 $api->setToken($token);
 
 $pickup_locations = $api->getPickupLocations(1, 10);
-$delivery_locations = $api->getDeliveryLocations(1, 10); // Required when shipping to delivery location
+$delivery_locations = $api->get_delivery_locations_for_country('LT', 1); // Required when shipping to delivery location
 
 $receiver = new Receiver();
 
