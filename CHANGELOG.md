@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.0]
+### Improved
+- Reworked location retrieval method by first downloading locations to a temporary DB table and only after successful download, copying them to the main DB table
+- Created detailed display of steps for updating delivery locations
+- Added part of translations into Lithuanian language
+
+### Updated
+- API library to v1.0.6
+
 ## [1.2.5]
 ### Improved
 - Improved for faster loading of terminals on the front, only the nearest terminals within 50 km from the entered address are displayed

@@ -103,6 +103,7 @@ class Main
         wp_localize_script($this->core->id . '_admin_global', 'hrxGlobalVars', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'txt' => array(
+                'error' => __('Error', 'hrx-delivery'),
                 'locations_progress' => __('Downloading locations', 'hrx-delivery'),
                 'request_error' => __('Request error', 'hrx-delivery'),
                 'warehouse_change_error' => __('An error occurred while changing default warehouse', 'hrx-delivery'),
