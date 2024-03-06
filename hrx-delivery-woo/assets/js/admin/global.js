@@ -37,6 +37,10 @@
             }
         },
 
+        update_placeholder: function( selector, value ) {
+            $(selector).attr("placeholder", value);
+        },
+
         is_url: function( string ) {
             let url;
   
