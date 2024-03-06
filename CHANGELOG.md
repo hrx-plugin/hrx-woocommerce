@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Improved
 - Added the possibility to specify the custom title of the delivery method for each country
+- Added some more Lithuanian translations
 
 ## [1.3.0]
 ### Improved
