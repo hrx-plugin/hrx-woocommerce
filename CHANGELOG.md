@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Improved
+- Added the possibility to specify the custom title of the delivery method for each country
+
 ## [1.3.0]
 ### Improved
 - Reworked location retrieval method by first downloading locations to a temporary DB table and only after successful download, copying them to the main DB table
