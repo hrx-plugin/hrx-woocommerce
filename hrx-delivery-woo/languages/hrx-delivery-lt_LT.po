@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: HRX delivery\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-30 13:25+0000\n"
-"PO-Revision-Date: 2024-01-17 09:17+0000\n"
+"PO-Revision-Date: 2024-03-06 12:45+0000\n"
 "Last-Translator: \n"
 "Language-Team: Lithuanian\n"
 "Language: lt_LT\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.6.6; wp-6.4.2\n"
+"X-Loco-Version: 2.6.6; wp-6.4.3\n"
 "X-Domain: hrx-delivery"
 
 #: classes/Terminal.php:162
@@ -25,7 +25,7 @@ msgstr "nebenaudojama"
 msgid "A newer version of the plugin (%s) has been released."
 msgstr "Buvo išleista nauja įskiepio versija (%s)."
 
-#: classes/Ajax.php:641
+#: classes/Ajax.php:706
 msgid "Action in progress"
 msgstr "Vykdomas veiksmas"
 
@@ -38,7 +38,7 @@ msgstr "Vykdomas veiksmas. Pradėtas %s"
 msgid "Actions"
 msgstr "Veiksmai"
 
-#: classes/ShippingMethodHtml.php:677
+#: classes/ShippingMethodHtml.php:764
 msgid "Add extra rule"
 msgstr "Pridėti naują taisyklę"
 
@@ -50,15 +50,15 @@ msgstr "Adresas"
 msgid "All shipments"
 msgstr "Visos siuntos"
 
-#: classes/Main.php:108
+#: classes/Main.php:109
 msgid "An error occurred while changing default warehouse"
 msgstr "Įvyko klaida keičiant numatytąjį sandėlį"
 
-#: classes/Main.php:109
+#: classes/Main.php:110
 msgid "An error occurred while executing action"
 msgstr "Įvyko klaida vykdant veiksmą"
 
-#: classes/LocationsDelivery.php:70 classes/LocationsDelivery.php:334
+#: classes/LocationsDelivery.php:114 classes/LocationsDelivery.php:331
 #: classes/Warehouse.php:97
 msgid "An unexpected error occurred during the operation"
 msgstr "Įvyko nenumatyta klaida vykdant veiksmą"
@@ -79,17 +79,21 @@ msgstr "API raktas testiniame serveryje"
 msgid "Billing details"
 msgstr "Atsiskaitymo informacija"
 
-#: classes/ShippingMethodHtml.php:623
+#: classes/ShippingMethodHtml.php:710
 msgid "Block error"
 msgstr "Bloko klaida"
 
-#: classes/ShippingMethodHtml.php:576
+#: classes/ShippingMethodHtml.php:618 classes/ShippingMethodHtml.php:668
 msgid "Block row error"
 msgstr "Bloko eilutės klaida"
 
 #: classes/Pages.php:82
 msgid "Cancelled shipments"
 msgstr "Atšauktos siuntos"
+
+#: classes/ShippingMethod.php:411
+msgid "Carrier"
+msgstr "Vežėjas"
 
 #: classes/ShippingMethod.php:222
 msgid "Cart amount from which this shipping becomes free"
@@ -151,15 +155,15 @@ msgstr ""
 "Nepavyksta gauti šalių sąrašo, kuriose gali būti naudojamas šis pristatymo "
 "būdas"
 
-#: classes/Ajax.php:472
+#: classes/Ajax.php:537
 msgid "Could not ready any orders"
 msgstr "Negalima paruošti nei vieno užsakymo"
 
-#: classes/Ajax.php:454
+#: classes/Ajax.php:519
 msgid "Could not regenerate any orders"
 msgstr "Negalime pergeneruoti nei vieno užsakymo"
 
-#: classes/Ajax.php:435
+#: classes/Ajax.php:500
 msgid "Could not register any orders"
 msgstr "Negalime užregistruoti nei vieno užsakymo"
 
@@ -171,7 +175,7 @@ msgstr "Šalis"
 msgid "Courier"
 msgstr "Kurjeris"
 
-#: classes/ShippingMethodHtml.php:371
+#: classes/ShippingMethodHtml.php:382
 msgid "Custom changes"
 msgstr "Pasirinktiniai pakeitimai"
 
@@ -191,7 +195,7 @@ msgstr "Numatytieji siuntos matmenys, jeigu jie nenurodyti užsakyme"
 msgid "Default warehouse"
 msgstr "Numatytasis sandėlis"
 
-#: classes/ShippingMethodHtml.php:414 classes/Pages.php:321
+#: classes/ShippingMethodHtml.php:425 classes/Pages.php:321
 msgid "Delivery"
 msgstr "Pristatymas"
 
@@ -212,15 +216,15 @@ msgstr "Distancija apskaičiuota nuo šio taško"
 msgid "Do not change"
 msgstr "Nekeisti"
 
-#: classes/Main.php:111
+#: classes/Main.php:112
 msgid "Do you want reload page?"
 msgstr "Ar norite perkrauti puslapį?"
 
-#: classes/Main.php:114
+#: classes/Main.php:115
 msgid "Do you want to reload the page to update the displayed data?"
 msgstr "Ar norite perkrauti puslapį, kad atnaujintumėte rodomus duomenis?"
 
-#: classes/Main.php:110
+#: classes/Main.php:111
 msgid "Do you want to try again?"
 msgstr "Ar norite bandyti dar kartą?"
 
@@ -228,11 +232,16 @@ msgstr "Ar norite bandyti dar kartą?"
 msgid "Downloading courier locations..."
 msgstr "Parsiunčiamos kurjerių lokacijos..."
 
-#: classes/Main.php:106
+#: classes/Main.php:107
 msgid "Downloading locations"
 msgstr "Parsiunčiamos lokacijos"
 
-#: classes/Ajax.php:144 classes/Ajax.php:159
+#: classes/Ajax.php:206
+#, php-format
+msgid "Downloading parcel terminal locations for country %s..."
+msgstr "Parsiunčiama paštomatų lokacijos šaliai %s..."
+
+#: classes/Ajax.php:166
 msgid "Downloading parcel terminal locations..."
 msgstr "Parsiunčiamos paštomatų lokacijos..."
 
@@ -262,7 +271,14 @@ msgstr ""
 msgid "Enable this method for %s"
 msgstr "Aktyvuoti šį metodą būdui %s"
 
-#: classes/Core.php:116 classes/Shipment.php:145 classes/Pages.php:453
+#: classes/ShippingMethodHtml.php:328
+msgid ""
+"Enter the value if you want to use your own custom title. The entered value "
+"will not be translated."
+msgstr ""
+
+#: classes/Core.php:116 classes/Main.php:106 classes/Shipment.php:145
+#: classes/Pages.php:453
 msgid "Error"
 msgstr "Klaida"
 
@@ -280,7 +296,7 @@ msgstr "Vykdyti cronjob: %s"
 msgid "Failed to add SQL table column"
 msgstr "Nepavyko pridėti SQL lentelės stulpelį"
 
-#: classes/Ajax.php:296
+#: classes/Ajax.php:361
 msgid "Failed to change default warehouse"
 msgstr "Nepavyko pakeisti numatytąjį sandėlį"
 
@@ -312,13 +328,21 @@ msgstr "Iš užsakymo nepavyko gauti HRX paštomato"
 msgid "Failed to get label"
 msgstr "Nepavyko gauti lipduko"
 
-#: classes/Ajax.php:387
+#: classes/Api.php:65
+msgid "Failed to get list of countries"
+msgstr "Nepavyko gauti šalių sąrašo"
+
+#: classes/Ajax.php:452
 msgid "Failed to get list of selected orders"
 msgstr "Nepavyko gauti pasirinktų užsakymų sąrašo"
 
 #: classes/Shipment.php:39 classes/Shipment.php:437 classes/Shipment.php:487
 msgid "Failed to get order"
 msgstr "Nepavyko gauti užsakymo"
+
+#: classes/Ajax.php:190 classes/LocationsDelivery.php:96
+msgid "Failed to get parcel terminals countries"
+msgstr "Nepavyko gauti paštomatų šalių"
 
 #: classes/Shipment.php:79
 msgid "Failed to get selected shipping method"
@@ -333,7 +357,7 @@ msgid "Failed to get the selected warehouse. Please check warehouse settings."
 msgstr ""
 "Nepavyko gauti pasirinkto sandėlio. Prašome patikrinti sandėlio nustatymus."
 
-#: classes/Ajax.php:382
+#: classes/Ajax.php:447
 msgid "Failed to get what action to perform"
 msgstr "Nepavyko gauti kurį veiksmą vykdyti"
 
@@ -341,22 +365,22 @@ msgstr "Nepavyko gauti kurį veiksmą vykdyti"
 msgid "Failed to print labels"
 msgstr "Nepavyko atspausdinti lipdukų"
 
-#: classes/Ajax.php:465
+#: classes/Ajax.php:530
 #, php-format
 msgid "Failed to ready order #%1$s. Error: %2$s"
 msgstr "Nepavyko paruošti užsakymo #%1$s. Klaida: %2$s"
 
-#: classes/Ajax.php:447
+#: classes/Ajax.php:512
 #, php-format
 msgid "Failed to regenerate order #%1$s. Error: %2$s"
 msgstr "Nepavyko pergeneruoti užsakymo #%1$s. Klaida: %2$s"
 
-#: classes/Ajax.php:428
+#: classes/Ajax.php:493
 #, php-format
 msgid "Failed to register order #%1$s. Error: %2$s"
 msgstr "Nepavyko užregistruoti užsakymo #%1$s. Klaida: %2$s"
 
-#: classes/Ajax.php:483
+#: classes/Ajax.php:548
 #, php-format
 msgid "Failed to remove ready status from order #%1$s. Error: %2$s"
 msgstr "Užsakymui #%1$s nepavyko nuimti būsenos \"Paruošta\". Klaida: %2$s"
@@ -370,8 +394,7 @@ msgstr ""
 "sugeneruoti. Galite pakartoti šį veiksmą, kad pabandyti gauti lipdukus dar "
 "kartą."
 
-#: classes/LocationsDelivery.php:201 classes/LocationsDelivery.php:231
-#: classes/LocationsDelivery.php:262
+#: classes/LocationsDelivery.php:238 classes/LocationsDelivery.php:268
 msgid "Failed to save received locations"
 msgstr "Nepavyko išsaugoti gautų lokacijų"
 
@@ -390,7 +413,7 @@ msgstr ""
 msgid "Free delivery from price"
 msgstr "Nemokamas pristatymas nuo kainos"
 
-#: classes/ShippingMethodHtml.php:336 classes/ShippingMethod.php:222
+#: classes/ShippingMethodHtml.php:347 classes/ShippingMethod.php:222
 msgid "Free from"
 msgstr "Nemokama nuo"
 
@@ -421,6 +444,10 @@ msgstr "Generuoti manifestą"
 #: classes/Main.php:71
 msgid "Geolocation is not supported"
 msgstr "Geolokacija nepalaikoma"
+
+#: classes/Ajax.php:153
+msgid "Getting available countries of parcel terminals..."
+msgstr "Gaunamos galimos paštomatų šalys..."
 
 #: classes/OrderHtml.php:172 classes/ShippingMethodHtml.php:153
 msgid "Height"
@@ -487,7 +514,7 @@ msgstr "https://www.mijora.dev/"
 msgid "ID"
 msgstr "ID"
 
-#: classes/ShippingMethodHtml.php:375
+#: classes/ShippingMethodHtml.php:386
 msgid "Images"
 msgstr "Paveikslėliai"
 
@@ -507,7 +534,7 @@ msgstr "Palikite tuščią norint išjungti"
 msgid "Length"
 msgstr "Ilgis"
 
-#: classes/ShippingMethodHtml.php:343
+#: classes/ShippingMethodHtml.php:354
 msgid ""
 "Make this shipping free if the cart amount is equal or more than this value. "
 "Leave blank if dont want use this."
@@ -537,15 +564,15 @@ msgstr "Metodo pavadinimas"
 msgid "Mijora"
 msgstr "Mijora"
 
-#: classes/Ajax.php:692
+#: classes/Ajax.php:757
 msgid "Need a programmer to check this problem"
 msgstr "Reikalingas programuotojas, kad patikrintu šią problemą"
 
-#: classes/Ajax.php:225
+#: classes/Ajax.php:290
 msgid "Neither command was suitable"
 msgstr "Nei viena komanda nėra tinkama"
 
-#: classes/Ajax.php:416
+#: classes/Ajax.php:481
 msgid "Neither order is suitable for performing the desired action"
 msgstr "Nei vienas užsakymas nėra tinkamas norint įvykdyti šią komandą"
 
@@ -565,32 +592,27 @@ msgstr "Nėra informacijos"
 msgid "No terminal to select"
 msgstr "Nėra tarminalo pasirinkimui"
 
-#: classes/Ajax.php:490
+#: classes/Ajax.php:555
 msgid "None of the orders could be removed the ready status"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:576
+#: classes/ShippingMethodHtml.php:618 classes/ShippingMethodHtml.php:668
 msgid "Not received field key"
-msgstr ""
+msgstr "Negautas laukelio raktas"
 
-#: classes/ShippingMethodHtml.php:623
+#: classes/ShippingMethodHtml.php:710
 msgid "Not received fields key"
-msgstr ""
+msgstr "Negautas laukelių raktas"
 
 #: classes/Pages.php:376
 msgid "Not the HRX delivery method"
-msgstr ""
+msgstr "Ne HRX pristatymo būdas"
 
 #: classes/Main.php:69
 msgid "Nothing found"
 msgstr "Nieko nerasta"
 
-#: classes/LocationsDelivery.php:281
-#, php-format
-msgid "Only %1$s out of %2$s locations were successfully saved"
-msgstr "Tik %1$s iš %2$s lokacijų buvo sėkmingai išsaugota"
-
-#: classes/Api.php:130
+#: classes/Api.php:174
 #, php-format
 msgid "Order \"%s\" successfully created"
 msgstr "Užsakymas \"%s\" sėkmingai sukurtas"
@@ -607,7 +629,7 @@ msgstr "Užsakymo data"
 msgid "Order ID"
 msgstr "Užsakymo ID"
 
-#: classes/Ajax.php:311 classes/Ajax.php:329 classes/Ajax.php:353
+#: classes/Ajax.php:376 classes/Ajax.php:394 classes/Ajax.php:418
 msgid "Order ID not received"
 msgstr "Negautas užsakymo ID"
 
@@ -651,7 +673,7 @@ msgstr "Siuntų terminalas"
 
 #: classes/OrderHtml.php:149
 msgid "Parcel warehouse"
-msgstr ""
+msgstr "Siuntos sandėlys"
 
 #: classes/PagesHtml.php:214
 msgid "Payment method"
@@ -659,11 +681,11 @@ msgstr "Apmokėjimo būdas"
 
 #: classes/ShippingMethod.php:151
 msgid "Pickup locations (Warehouses)"
-msgstr ""
+msgstr "Paėmimo vietos (sandėliai)"
 
 #: classes/OrderHtml.php:89
 msgid "Pickup warehouse"
-msgstr ""
+msgstr "Paėmimo sandėlys"
 
 #: classes/Front.php:145
 #, php-format
@@ -672,11 +694,11 @@ msgstr "Prašome pasirinkti %s"
 
 #: classes/Front.php:87
 msgid "Please enter an address"
-msgstr ""
+msgstr "Prašome įvesti adresą"
 
 #: classes/ShippingMethod.php:289
 msgid "Plugin functionality checking"
-msgstr ""
+msgstr "Įskiepio funkcionalumo tikrinimas"
 
 #: classes/Pages.php:351 classes/Pages.php:353
 msgid "Post code"
@@ -691,7 +713,7 @@ msgstr "čia"
 msgid "Preview"
 msgstr "Peržiūrėti"
 
-#: classes/ShippingMethodHtml.php:634 classes/PagesHtml.php:264
+#: classes/ShippingMethodHtml.php:721 classes/PagesHtml.php:264
 msgid "Price"
 msgstr "Kaina"
 
@@ -717,9 +739,9 @@ msgstr "Produktai"
 
 #: classes/PagesHtml.php:265
 msgid "Quantity"
-msgstr ""
+msgstr "Kiekis"
 
-#: classes/LocationsDelivery.php:97 classes/LocationsDelivery.php:361
+#: classes/LocationsDelivery.php:134 classes/LocationsDelivery.php:353
 #: classes/Warehouse.php:126
 msgid "Reached maximum number of cycles"
 msgstr ""
@@ -730,20 +752,20 @@ msgstr ""
 
 #: classes/PagesHtml.php:111 classes/PagesHtml.php:451
 msgid "Regenerate order"
-msgstr ""
+msgstr "Pergeneruoti užsakymą"
 
 #: classes/PagesHtml.php:108 classes/PagesHtml.php:449
 msgid "Register order"
-msgstr ""
+msgstr "Registruoti užsakymą"
 
 #: classes/ShippingMethod.php:231
 msgid "Reload now"
-msgstr ""
+msgstr "Perkrauti dabar"
 
-#: classes/Ajax.php:69 classes/Ajax.php:267 classes/LocationsDelivery.php:447
-#: classes/Main.php:107 classes/Warehouse.php:184
+#: classes/Ajax.php:69 classes/Ajax.php:332 classes/LocationsDelivery.php:439
+#: classes/Main.php:108 classes/Warehouse.php:184
 msgid "Request error"
-msgstr ""
+msgstr "Užklausos klaida"
 
 #: classes/Main.php:78
 msgid "Reset search"
@@ -753,11 +775,11 @@ msgstr ""
 msgid "Return label"
 msgstr ""
 
-#: classes/Ajax.php:133
+#: classes/Ajax.php:142
 msgid "Saving courier locations..."
 msgstr ""
 
-#: classes/Ajax.php:173 classes/Ajax.php:194 classes/Ajax.php:204
+#: classes/Ajax.php:237 classes/Ajax.php:258 classes/Ajax.php:268
 msgid "Saving parcel terminal locations..."
 msgstr ""
 
@@ -782,7 +804,7 @@ msgstr ""
 #: classes/Order.php:310
 #, php-format
 msgid "Selected %s"
-msgstr ""
+msgstr "Pasirinkta %s"
 
 #: classes/Shipment.php:124
 msgid "Selected terminal not found"
@@ -826,7 +848,7 @@ msgctxt "Shipping method title in checkout"
 msgid "HRX parcel terminal"
 msgstr "HRX paštomatas"
 
-#: classes/ShippingMethodHtml.php:377
+#: classes/ShippingMethodHtml.php:388
 msgid "Shipping methods"
 msgstr ""
 
@@ -860,26 +882,26 @@ msgstr ""
 msgid "Status"
 msgstr "Būsena"
 
-#: classes/ShippingMethodHtml.php:372
+#: classes/ShippingMethodHtml.php:383
 msgid "Structure"
 msgstr "Struktūra"
 
-#: classes/Ajax.php:470
+#: classes/Ajax.php:535
 #, php-format
 msgid "Successfully marked as ready orders: %s."
 msgstr ""
 
-#: classes/Ajax.php:452
+#: classes/Ajax.php:517
 #, php-format
 msgid "Successfully regenerated orders: %s."
 msgstr ""
 
-#: classes/Ajax.php:433
+#: classes/Ajax.php:498
 #, php-format
 msgid "Successfully registered orders: %s."
 msgstr ""
 
-#: classes/Ajax.php:488
+#: classes/Ajax.php:553
 #, php-format
 msgid "Successfully removed ready status from orders: %s."
 msgstr ""
@@ -888,7 +910,7 @@ msgstr ""
 msgid "Tax"
 msgstr "Mokesčiai"
 
-#: classes/ShippingMethodHtml.php:376
+#: classes/ShippingMethodHtml.php:387
 msgid "Temporary files"
 msgstr "Laikini failai"
 
@@ -919,11 +941,11 @@ msgstr ""
 msgid "The %1$s of the order (%2$s) is not equal to required (%3$s)"
 msgstr ""
 
-#: classes/Ajax.php:294
+#: classes/Ajax.php:359
 msgid "The default warehouse has been successfully changed"
 msgstr ""
 
-#: classes/Main.php:113
+#: classes/Main.php:114
 msgid "The file was received but could not be opened"
 msgstr ""
 
@@ -931,7 +953,7 @@ msgstr ""
 msgid "The key, which you received from HRX"
 msgstr "Raktas, kurį gavote iš HRX"
 
-#: classes/Main.php:112
+#: classes/Main.php:113
 msgid "The label was received but could not be opened"
 msgstr ""
 
@@ -943,7 +965,7 @@ msgid ""
 "(%3$s)."
 msgstr ""
 
-#: classes/Ajax.php:215
+#: classes/Ajax.php:280
 msgid "The locations update is complete"
 msgstr ""
 
@@ -977,7 +999,7 @@ msgstr ""
 msgid "The terminal specified in the order was not found"
 msgstr ""
 
-#: classes/Ajax.php:244
+#: classes/Ajax.php:309
 #, php-format
 msgid "The update is complete in %s"
 msgstr ""
@@ -1002,9 +1024,15 @@ msgid ""
 "\"%s\" value"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:369 classes/Pages.php:325
+#: classes/ShippingMethodHtml.php:323 classes/ShippingMethodHtml.php:380
+#: classes/Pages.php:325
 msgid "Title"
 msgstr "Pavadinimas"
+
+#: classes/ShippingMethodHtml.php:328
+#, php-format
+msgid "To add translatable text, use WP filter \"%s\" in your theme"
+msgstr ""
 
 #: classes/Pages.php:381
 msgctxt "To somewhere"
@@ -1013,32 +1041,32 @@ msgstr ""
 
 #: classes/PagesHtml.php:230 classes/PagesHtml.php:266
 msgid "Total"
-msgstr ""
+msgstr "Viso"
 
-#: classes/ShippingMethodHtml.php:378
+#: classes/ShippingMethodHtml.php:389
 msgid "Total locations"
-msgstr ""
+msgstr "Viso lokacijų"
 
 #: classes/PagesHtml.php:216
 msgid "Total order amount"
-msgstr ""
+msgstr "Viso užsakymo suma"
 
 #: includes/page-management.php:57 classes/OrderHtml.php:93
 #: classes/Pages.php:314 classes/Pages.php:448 classes/PagesHtml.php:255
 msgid "Tracking number"
 msgstr "Sekimo numeris"
 
-#: classes/ShippingMethodHtml.php:546
+#: classes/ShippingMethodHtml.php:588
 msgid "Turned off"
 msgstr "Išjungta"
 
-#: classes/ShippingMethodHtml.php:545
+#: classes/ShippingMethodHtml.php:587
 msgid "Turned on"
 msgstr "Įjungta"
 
-#: classes/ShippingMethodHtml.php:418
+#: classes/ShippingMethodHtml.php:429
 msgid "Type"
-msgstr ""
+msgstr "Tipas"
 
 #: classes/Main.php:73
 msgid "Type address"
@@ -1073,7 +1101,7 @@ msgstr "Naudoti mano vietą"
 msgid "Use this price when the cart does not fit any range"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:370
+#: classes/ShippingMethodHtml.php:381
 msgid "Version"
 msgstr "Versija"
 
@@ -1105,7 +1133,7 @@ msgstr ""
 msgid "Warehouse post code"
 msgstr ""
 
-#: classes/ShippingMethodHtml.php:405 classes/Pages.php:85
+#: classes/ShippingMethodHtml.php:416 classes/Pages.php:85
 msgid "Warehouses"
 msgstr ""
 
@@ -1140,9 +1168,13 @@ msgstr ""
 msgid "Weight"
 msgstr "Svoris"
 
-#: classes/ShippingMethodHtml.php:647
+#: classes/ShippingMethodHtml.php:734
 msgid "Weight range"
-msgstr ""
+msgstr "Svorio intervalas"
+
+#: classes/ShippingMethod.php:412
+msgid "Weigth"
+msgstr "Svoris"
 
 #: classes/OrderHtml.php:171 classes/ShippingMethodHtml.php:152
 msgid "Width"
@@ -1156,7 +1188,7 @@ msgstr "Woocommerce užsakymo būsena"
 msgid "Workhours"
 msgstr "Darbo laikas"
 
-#: classes/Api.php:284
+#: classes/Api.php:328
 msgid "Wrong key"
 msgstr "Blogas raktas"
 
@@ -1174,6 +1206,6 @@ msgstr "Galite gauti daugiau informacijos apie klaidas tinklapyje \"%s\""
 msgid "You can track your shipment with this number"
 msgstr "Galite sekti savo siuntą su šiuo numeriu"
 
-#: classes/Main.php:115
+#: classes/Main.php:116
 msgid "You must choose at least one order"
 msgstr "Turite pasirinkti bent vieną užsakymą"

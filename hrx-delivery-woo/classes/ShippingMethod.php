@@ -406,6 +406,12 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                     continue;
                 }
 
+                /* Meta data */
+                $meta_data = array(
+                    __('Carrier', 'hrx-delivery') => 'HRX',
+                    __('Weigth', 'hrx-delivery') => $this->wc->tools->convert_weight($cart_weigth, 'kg') . ' kg',
+                );
+
                 /* Get shipping price */
                 $current_price = ShipHelper::get_price_by_weight($prices['prices'], $cart_weigth);
                 if ( $current_price === false ) {
@@ -422,10 +428,13 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 /* Build rate */
                 $title_key = (! empty($this->settings[$method_key . '_title'])) ? $this->settings[$method_key . '_title'] : 'sort';
                 $rate_title = $this->get_shipping_method_title($method_params, $title_key);
+                if ( ! empty($prices['display']['title']) ) $rate_title = $prices['display']['title'];
+
                 $rate = array(
                     'id' => ShipHelper::get_rate_id($method_key),
-                    'label' => $rate_title,
-                    'cost' => $current_price,
+                    'label' => apply_filters($this->core->id . '_checkout_method_title', $rate_title, $method_key, $country),
+                    'cost' => apply_filters($this->core->id . '_checkout_method_price', $current_price, $method_key, $country),
+                    'meta_data' => $meta_data,
                 );
 
                 $this->add_rate($rate);
@@ -443,6 +452,7 @@ if ( ! class_exists('\HrxDeliveryWoo\ShippingMethod') ) {
                 return false;
             }
 
+            if ( ! isset($prices[$country]['display']) ) $prices[$country]['display'] = array();
             if ( ! isset($prices[$country]['prices']) ) $prices[$country]['prices'] = array();
             if ( ! isset($prices[$country]['other']) ) $prices[$country]['other'] = array();
 

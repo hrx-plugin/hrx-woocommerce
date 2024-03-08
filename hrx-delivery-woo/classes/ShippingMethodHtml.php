@@ -318,6 +318,17 @@ class ShippingMethodHtml
                                 )); ?>
                             </div>
                             <div class="box-content">
+                                <div class="section-display">
+                                    <?php echo self::build_sample_text_row(array(
+                                        'title' => __('Title', 'hrx-delivery'),
+                                        'key' => $country_key . '_display_title',
+                                        'name' => $country_name . '[display][title]',
+                                        'value' => $country_values['display']['title'] ?? '',
+                                        'class' => 'add-placeholder-title',
+                                        'tip' => __('Enter the value if you want to use your own custom title. The entered value will not be translated.', 'hrx-delivery') . ' ' . sprintf(__('To add translatable text, use WP filter "%s" in your theme', 'hrx-delivery'), '<i>test</i>') . '.'
+                                    ));
+                                    ?>
+                                </div>
                                 <div class="section-price_by_weight">
                                     <?php $country_prices = $country_values['prices'] ?? array(array()); ?>
                                     <?php $country_prices = array_values($country_prices); //Fix array keys ?>
@@ -523,6 +534,37 @@ class ShippingMethodHtml
         return $html;
     }
 
+    private static function field_input( $params )
+    {
+        $type = $params['type'] ?? 'text';
+        $class = $params['class'] ?? '';
+        $name = $params['name'] ?? '';
+        $id = $params['id'] ?? '';
+        $value = $params['value'] ?? '';
+        $placeholder = $params['placeholder'] ?? '';
+        $disabled = $params['disabled'] ?? false;
+        $readonly = $params['readonly'] ?? false;
+        $custom = $params['custom'] ?? array();
+
+        $custom_html = '';
+        foreach ( $custom as $custom_key => $custom_value ) {
+            $custom_html .= ' ' . esc_html($custom_key) . '="' . esc_html($custom_value) . '"';
+        }
+
+        ob_start();
+        ?>
+        <input class="input-text regular-input <?php echo esc_html($class); ?>" type="<?php echo esc_html($type); ?>"
+            name="<?php echo esc_html($name); ?>" id="<?php echo esc_html($id); ?>"
+            value="<?php echo esc_html($value); ?>" placeholder="<?php echo esc_html($placeholder); ?>"
+            <?php echo ($disabled) ? 'disabled' : ''; ?> <?php echo ($readonly) ? 'readonly' : ''; ?>
+            <?php echo $custom_html; ?>/>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+
+        return $html;
+    }
+
     private static function build_switcher( $params )
     {
         $id = $params['id'] ?? '';
@@ -599,6 +641,51 @@ class ShippingMethodHtml
                 <?php if ( ! empty($unit) ) : ?>
                     <span class="unit_value"><?php echo $unit; ?></span>
                 <?php endif; ?>
+                <?php if ( ! empty($description) ) : ?>
+                    <p class="description"><?php echo $description; ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+        $html = ob_get_contents();
+        ob_end_clean();
+
+        return $html;
+    }
+
+    private static function build_sample_text_row( $params )
+    {
+        $key = $params['key'] ??  '';
+        $name = $params['name'] ??  '';
+        $title = $params['title'] ??  '';
+        $value = $params['value'] ?? '';
+        $class = $params['class'] ?? '';
+        $placeholder = $params['placeholder'] ?? '';
+        $description = $params['desc'] ?? '';
+        $tip = $params['tip'] ?? '';
+
+        if ( empty(esc_html($key)) ) {
+            return '<b>' . __('Block row error', 'hrx-delivery') . '!</b> ' . __('Not received field key', 'hrx-delivery') . '.';
+        }
+
+        $wcTools = new WcTools();
+
+        ob_start();
+        ?>
+        <div class="section-row row-sample row_key-<?php echo esc_attr($key); ?> <?php echo $class; ?>">
+            <div class="row_item-title <?php echo (!empty($tip)) ? 'has_tip' : ''; ?>">
+                <label for="<?php echo esc_attr($key); ?>"><?php echo esc_html($title); ?></label>
+                <?php if ( ! empty($tip) ) : ?>
+                    <?php echo $wcTools->add_help_tip($tip); ?>
+                <?php endif; ?>
+            </div>
+            <div class="row_item-value">
+                <?php echo self::field_input(array(
+                    'name' => esc_attr($name),
+                    'id' => esc_attr($key),
+                    'value' => $value,
+                    'placeholder' => $placeholder,
+                )); ?>
                 <?php if ( ! empty($description) ) : ?>
                     <p class="description"><?php echo $description; ?></p>
                 <?php endif; ?>

@@ -201,6 +201,16 @@
             hrxHelper.toggle_class_by_cb(this, $(this).closest("tr").siblings("tr"), "row-disabled", false);
         });
 
+        $(document).on("change", "#woocommerce_hrx_delivery_courier_title", function() {
+            hrxHelper.update_placeholder(".hrx-method-courier .field-countries_prices .country_box .add-placeholder-title .input-text", $(this).find("option:selected").text());
+        });
+        $("#woocommerce_hrx_delivery_courier_title").trigger("change");
+
+        $(document).on("change", "#woocommerce_hrx_delivery_terminal_title", function() {
+            hrxHelper.update_placeholder(".hrx-method-terminal .field-countries_prices .country_box .add-placeholder-title .input-text", $(this).find("option:selected").text());
+        });
+        $("#woocommerce_hrx_delivery_terminal_title").trigger("change");
+
         /* Last load functions */
         hrxHelper.toggle_class_by_cb(".global-enable", $(".global-enable").closest("tr").siblings("tr"), "row-disabled", false);
 
