@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Added hook name in shipping method custom title tip text
+
 ## [1.3.1]
 ### Improved
 - Added the possibility to specify the custom title of the delivery method for each country

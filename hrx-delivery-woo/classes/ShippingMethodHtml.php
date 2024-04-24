@@ -325,7 +325,7 @@ class ShippingMethodHtml
                                         'name' => $country_name . '[display][title]',
                                         'value' => $country_values['display']['title'] ?? '',
                                         'class' => 'add-placeholder-title',
-                                        'tip' => __('Enter the value if you want to use your own custom title. The entered value will not be translated.', 'hrx-delivery') . ' ' . sprintf(__('To add translatable text, use WP filter "%s" in your theme', 'hrx-delivery'), '<i>test</i>') . '.'
+                                        'tip' => __('Enter the value if you want to use your own custom title. The entered value will not be translated.', 'hrx-delivery') . ' ' . sprintf(__('To add translatable text, use WP filter "%s" in your theme', 'hrx-delivery'), '<i>hrx_delivery_checkout_method_title</i>') . '.'
                                     ));
                                     ?>
                                 </div>
