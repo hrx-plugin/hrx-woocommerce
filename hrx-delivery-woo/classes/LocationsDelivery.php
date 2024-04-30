@@ -40,7 +40,7 @@ class LocationsDelivery
         return $methods;
     }
 
-    public static function get_list( $type, $country )
+    public static function get_list( $type, $country, $get_only_active = true )
     {
         if ( empty($country) ) {
             $country = 'LT';
@@ -50,6 +50,9 @@ class LocationsDelivery
         
         if ( ! empty($type) ) {
             $params['type'] = $type;
+        }
+        if ( $get_only_active ) {
+            $params['active'] = '1';
         }
         
         return Sql::get_multi_rows('delivery', $params);
