@@ -5,7 +5,7 @@
  * Author: Mijora
  * Author URI: https://www.mijora.dev/
  * Plugin URI: https://www.hrx.eu
- * Version: 1.3.1
+ * Version: 1.3.2
  * 
  * Domain Path: /languages
  * Text Domain: hrx-delivery
@@ -29,7 +29,7 @@ use HrxDeliveryWoo\Helper;
 
 /* Version */
 $hrx_params = array(
-    'version' => '1.3.1',
+    'version' => '1.3.2',
     'custom_changes' => array(), // If plugin have custom changes, add changes descriptions to this array
 );
 

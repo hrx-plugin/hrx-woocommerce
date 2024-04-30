@@ -1,9 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## [1.3.2]
 ### Fixed
 - Added hook name in shipping method custom title tip text
-- Fixed int the Checkout page to show only active terminals
+- Fixed in the Checkout page to show only active terminals
 
 ## [1.3.1]
 ### Improved
