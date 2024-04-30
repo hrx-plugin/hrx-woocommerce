@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.2]
+### Fixed
+- Added hook name in shipping method custom title tip text
+- Fixed in the Checkout page to show only active terminals
+
 ## [1.3.1]
 ### Improved
 - Added the possibility to specify the custom title of the delivery method for each country
