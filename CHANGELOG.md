@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Fixed error when trying print PDF invoices
+
 ## [1.3.2]
 ### Fixed
 - Added hook name in shipping method custom title tip text
