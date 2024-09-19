@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Fixed an error received when an order contains a product that has been deleted
+
 ## [1.3.3]
 ### Fixed
 - Fixed error when trying print PDF invoices
