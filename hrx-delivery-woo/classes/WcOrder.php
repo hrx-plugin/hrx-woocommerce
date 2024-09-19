@@ -85,19 +85,28 @@ class WcOrder
         }
 
         foreach ( $wc_order->get_items() as $item_id => $item ) {
-            $product = $item->get_product();
-            $all_items[$item_id] = (object)array(
-                'product_id' => (int)$item->get_product_id(),
-                'quantity' => (int)$item->get_quantity(),
-                'weight' => (!empty($product->get_weight())) ? (float)$product->get_weight() : 0,
-                'length' => (!empty($product->get_length())) ? (float)$product->get_length() : 0,
-                'width' => (!empty($product->get_width())) ? (float)$product->get_width() : 0,
-                'height' => (!empty($product->get_height())) ? (float)$product->get_height() : 0,
+            $item_data = array(
+                'product_id' => (int) $item->get_product_id(),
+                'quantity' => (int) $item->get_quantity(),
+                'weight' => 0,
+                'length' => 0,
+                'width' => 0,
+                'height' => 0,
                 'title' => $item->get_name(),
-                'sku' => $product->get_sku(),
-                'price_product' => $product->get_price(),
+                'sku' => '',
+                'price_product' => 0,
                 'price_total' => $item->get_total(),
             );
+            $product = $item->get_product();
+            if ( $product ) {
+                if ( ! empty($product->get_weight()) ) $item_data['weight'] = (float) $product->get_weight();
+                if ( ! empty($product->get_length()) ) $item_data['length'] = (float) $product->get_length();
+                if ( ! empty($product->get_width()) ) $item_data['width'] = (float) $product->get_width();
+                if ( ! empty($product->get_height()) ) $item_data['height'] = (float) $product->get_height();
+                $item_data['sku'] = $product->get_sku();
+                $item_data['price_product'] = $product->get_price();
+            }
+            $all_items[$item_id] = (object) $item_data;
         }
 
         return $all_items;
