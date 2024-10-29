@@ -110,7 +110,7 @@ class Terminal
 
         $terminals_script_data = self::prepare_script_data($terminals_list, $country);
 
-        $output = '<script>';
+        $output = '<script id="hrx-script-' . $method_key . '">';
         $output .= 'var hrx_' . $method_key . '_terminals = ' . json_encode($terminals_script_data) . ';';
         $output .= '</script>';
 
