@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.4]
+### Fixed
+- Fixed an error received when an order contains a product that has been deleted
+
+### Improved
+- Added the possibility to recreate script via Javascript function
+
 ## [1.3.3]
 ### Fixed
 - Fixed error when trying print PDF invoices

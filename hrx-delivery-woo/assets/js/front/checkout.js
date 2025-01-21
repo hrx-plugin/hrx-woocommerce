@@ -12,15 +12,15 @@
         hrx_init_map();
     });
 
-    function hrx_init_map() {
-        var container_parcel_terminal = document.getElementById("hrx-method-terminal-map");
-        if ( typeof(container_parcel_terminal) != "undefined" && container_parcel_terminal != null ) {
-            if ( container_parcel_terminal.innerHTML === "" ) {
-                hrxMap.init(container_parcel_terminal, hrx_terminal_terminals);
-            } else {
-                hrxMap.update_list();
-            }
+})(jQuery);
+
+function hrx_init_map() {
+    var container_parcel_terminal = document.getElementById("hrx-method-terminal-map");
+    if ( typeof(container_parcel_terminal) != "undefined" && container_parcel_terminal != null ) {
+        if ( container_parcel_terminal.innerHTML === "" ) {
+            hrxMap.init(container_parcel_terminal, hrx_terminal_terminals);
+        } else {
+            hrxMap.update_list();
         }
     }
-
-})(jQuery);
+}
